@@ -66,30 +66,47 @@ public class PresupuestoController {
 			@ApiResponse(responseCode = "405", description = "Invalid input")
 	})
 	@PostMapping("/Presupuesto")
-	//public ResponseEntity<String> createPresupuesto(
 	public ResponseEntity<Object> createPresupuesto(
 			@Parameter(description = "Objeto de Presupuesto a crear en el Sistema") @RequestBody Presupuesto presupuesto, 
-			@Parameter(description = "Comentarios del registro de presupuesto.", required = false) @RequestParam(name = "movim", required = false, defaultValue = "false") String comentario) {
+			 @Parameter(description = "Comentarios del registro de presupuesto.", required = false) @RequestParam(name = "comentarios", required = false, defaultValue = "false") String comentario) {
 
 		DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
+		int idPresup;
 
 		try {
 
-			if(presupuestoRepository.existe_presupuesto(presupuesto)>0) {
-				//return new ResponseEntity<>("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR);
-				return ResponseHandler.generateResponse("Existe un registro de presupuesto en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			if( presupuesto.getCentroTrabajo() == null ) {
+				if(presupuestoRepository.existe_presupuesto(presupuesto)>0) {
+					return ResponseHandler.generateResponse("Existe un registro de presupuesto en este mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				}
+			} else {
+				if(presupuestoRepository.existe_presupuesto_ct(presupuesto)>0) {
+					return ResponseHandler.generateResponse("Existe un registro de presupuesto en este mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				}
+				List<Presupuesto> presupuestos= presupuestoRepository.get_dynamic_regs(presupuesto.getDelegacion().getId_div_geografica(), 
+						presupuesto.getTipoPresup().getId(), presupuesto.getAnio(), null, true);
+				if (presupuestos == null || presupuestos.size() == 0)
+					return ResponseHandler.generateResponse("No exixte presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+				double suma_dist_ct = presupuestoRepository.validaSumaPresupuestal(presupuesto);
+				if( suma_dist_ct > presupuestos.get(0).getSaldo() ) {
+					return ResponseHandler.generateResponse("No exixte presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				}
 			}
 
-			int idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
-					presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+			if( presupuesto.getCentroTrabajo() == null ) {
+				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
+						presupuesto.getTipoPresup(), presupuesto.getSaldo()));				
+			} else {				
+				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
+						presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+			}
 			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentario, 1));
 			platformTransactionManager.commit(status);
-			//return new ResponseEntity<>("El Presupuesto con ID " + idPresup + " ha sido creado de manera exitosa. Con número de movimiento: " + idMovPresup, HttpStatus.CREATED);
 			return ResponseHandler.generateResponse("El Presupuesto con ID " + idPresup + " ha sido creado de manera exitosa. Con número de movimiento: " + idMovPresup, HttpStatus.CREATED, null);
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al realizar el registro de presupuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
@@ -98,14 +115,17 @@ public class PresupuestoController {
 	@GetMapping("/Presupuesto")
 	//public ResponseEntity<List<Presupuesto>> getPresupuesto(
 	public ResponseEntity<Object> getPresupuesto(
-			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = false) @RequestParam(name = "movim", required = false, defaultValue = "false") boolean movim, 
+			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "movim", required = true, defaultValue = "false") boolean movim,
+			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "solo_deleg", required = true, defaultValue = "true") boolean solo_deleg,
+			@Parameter(description = "Parámetro opcional para indicar el anio del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer anio,
 			@Parameter(description = "Parámetro opcional para indicar el ID de la delegación del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idDelegacion,
-			@Parameter(description = "Parámetro opcional para indicar el ID del tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idTipoPresup) {
+			@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
+			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer idTipoPresup) {
 		try {
 			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
 
-			if ( (idDelegacion != null) || (idTipoPresup != null) ) {
-				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, idTipoPresup);
+			if ( (idDelegacion != null) || (idTipoPresup != null) || (anio != null) || (idCentTrab != null) ) {
+				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, idTipoPresup, anio, idCentTrab, solo_deleg);
 			} else {
 				presupuestos = presupuestoRepository.findAll();
 			}

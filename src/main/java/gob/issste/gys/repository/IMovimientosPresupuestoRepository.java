@@ -1,5 +1,6 @@
 package gob.issste.gys.repository;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import gob.issste.gys.model.MovimientosPresupuesto;
@@ -7,7 +8,7 @@ import gob.issste.gys.model.MovimientosPresupuesto;
 public interface IMovimientosPresupuestoRepository {
 
 	public String QUERY_ADD_NEW_MOV_PRES          = "INSERT INTO gys_presupuesto_movs ( idPresupuesto, importe, comentarios, idTipoMovPresup ) VALUES( ?, ?, ?, ? )";
-	int save(MovimientosPresupuesto movimPresup);
+	int save(MovimientosPresupuesto movimPresup) throws SQLException;
 
 	public String QUERY_UPDATE_MOV_PRES           = "UPDATE gys_presupuesto_movs Set comentarios=? Where id=?";
 	int update(MovimientosPresupuesto movimPresup);

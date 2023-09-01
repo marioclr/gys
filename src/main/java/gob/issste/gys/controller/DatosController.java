@@ -24,7 +24,9 @@ import gob.issste.gys.model.Delegacion;
 import gob.issste.gys.model.Horario;
 import gob.issste.gys.model.Incidencia;
 import gob.issste.gys.model.Paga;
+import gob.issste.gys.model.Usuario;
 import gob.issste.gys.repository.IDatosRepository;
+import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,6 +42,8 @@ public class DatosController {
 
 	@Autowired
 	IDatosRepository datosRepository;
+	@Autowired
+	UsuarioRepository usuarioRepository;
 
 	@Operation(summary = "Obtener el catálogo de adscripciones", description = "Obtener el catálogo de adscripciones", tags = { "Datos" })
 	@GetMapping("/datos/adsc")
@@ -48,12 +52,17 @@ public class DatosController {
 			@Parameter(description = "ID del usuario obtener las adscripciones que coincidan con su clave", required = false) @RequestParam(required = false) Integer idUsuario ) {
 
 		try {
+			Usuario _usuario = usuarioRepository.findById(idUsuario);
 			List<DatosAdscripcion> adscripciones = new ArrayList<DatosAdscripcion>();
 
 			if (idUsuario==null) {
 				adscripciones = datosRepository.getDatosAdscripciones();
 			} else {
-				adscripciones = datosRepository.getDatosAdscripciones(idUsuario);
+				if (_usuario.getNivelVisibilidad().getIdNivelVisibilidad()==3) {
+					adscripciones = datosRepository.getDatosAdscripciones_ct(idUsuario);
+				} else {
+					adscripciones = datosRepository.getDatosAdscripciones(idUsuario);
+				}
 			}
 			if (adscripciones.isEmpty()) {
 				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);

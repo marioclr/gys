@@ -23,6 +23,13 @@ public interface IDatosRepository {
 													+ "And id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)";
 	List<DatosAdscripcion> getDatosAdscripciones(int idUsuario);
 
+	public String QUERY_GET_ADSCRIPCIONES_BY_USER_CT = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona\r\n"
+													+ "From m4t_centros_trab\r\n"
+													+ "Where id_delegacion IN (Select IdDelegacion From gys_Usuarios Where IdUsuario = ?)\r\n"
+													+ "And id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)"
+													+ "And id_centro_trabajo IN (Select IdCentroTrab From gys_Usuarios_Centros_Trab Where IdUsuario=?)";
+	List<DatosAdscripcion> getDatosAdscripciones_ct(int idUsuario);
+
 	public String QUERY_GET_PUESTOS_GUARDIA         = "Select Distinct TRIM(P.id_puesto_plaza) Clave , n_puesto Descripcion, id_tipo_tabulador tipotabulador\r\n"
 													+ "From m4t_puestos_plaza P, m4t_gys_matriz_puestos M\r\n"
 													+ "Where TRIM(P.id_puesto_plaza)=TRIM(M.id_puesto_plaza)\r\n"

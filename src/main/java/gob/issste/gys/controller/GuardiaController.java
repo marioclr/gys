@@ -30,6 +30,7 @@ import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.DatosGuardia;
 import gob.issste.gys.model.Presupuesto;
 import gob.issste.gys.repository.GuardiaRepository;
+import gob.issste.gys.repository.IPagaRepository;
 import gob.issste.gys.repository.IPresupuestoRepository;
 import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
@@ -57,7 +58,10 @@ public class GuardiaController {
 
 	@Autowired
 	UsuarioRepository usuarioRepository;
-	
+
+	@Autowired
+	IPagaRepository pagaRepository;
+
 	@Operation(summary = "Obtener el importe de una guardia conforme a los criterios establecidos", description = "Agrega un nuevo presupuesto al Sistema", tags = { "Guardia" })
 	@GetMapping("/guardias/importe")
 	//public ResponseEntity<BigDecimal> getImporteGuardia(
@@ -147,27 +151,28 @@ public class GuardiaController {
 
 	@Operation(summary = "Obtener el saldo utilizado por registro de guardias para una delegación en un año determinado", description = "Obtener el saldo utilizado por registro de guardias para una delegación en un año determinado", tags = { "Guardia" })
 	@GetMapping("/guardias/saldo")
-	//public ResponseEntity<Double> getSaldoGuardia(
 	public ResponseEntity<Object> getSaldoGuardia(
-			@Parameter(description = "ID de la Delegación que se consulta el presupuesto", required = true) @RequestParam(required = true) String idDelegacion,
-			@Parameter(description = "ID de la Delegación que se consulta el presupuesto", required = true) @RequestParam(required = true) Integer anio_ejercicio,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = false) @RequestParam(required = false) String tipoGuardia) {
+			@Parameter(description = "ID de la Delegación que se consulta el saldo utilizado", required = true) @RequestParam(required = true) String idDelegacion,
+			@Parameter(description = "Año del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer anio_ejercicio,
+			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String tipoGuardia,
+			@Parameter(description = "ID del Centro de Trabajo del que se consulta el saldo utilizado", required = false) @RequestParam(required = false) String idCentroTrab) {
 
 		double saldo=0;
 
-		if (tipoGuardia != null) {
-			if (tipoGuardia.equals(String.valueOf("I")))
+		if (tipoGuardia.equals(String.valueOf("GI"))) {
+			if (idCentroTrab == null) {
 				saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio);
-			else
-				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio);
+			} else {
+				saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(idCentroTrab, anio_ejercicio);
+			}
 		} else {
-			saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio) + guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio); 
+			if (idCentroTrab == null) {					
+				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio);
+			} else {
+				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(idCentroTrab, anio_ejercicio);
+			}
 		}
-
-
-		//return new ResponseEntity<>(saldo, HttpStatus.OK);
 		return ResponseHandler.generateResponse("Se obtuvo el saldo utilizado para guardias para las condiciones indicadas", HttpStatus.OK, saldo);
-
 	}
 
 	@Operation(summary = "Agrega un nuevo registro de guardia al Sistema", description = "Agrega un nuevo registro de guardia al Sistema", tags = { "Guardia" })
@@ -177,34 +182,47 @@ public class GuardiaController {
 			@Parameter(description = "Objeto de la guardia a crearse en el Sistema") @RequestBody DatosGuardia guardia) {
 		try {
 
-			int id = 0;
+			int id = 0, idTipoPresup, anio;
 			double saldo_utilizado=0, saldo=0;
 			Presupuesto presup;
 
-			String idDeleg = usuarioRepository.findByName(guardia.getId_usuario()).getDelegacion().getId_div_geografica();
-			try {			
-				presup = presupuestoRepository.getElementByType(idDeleg, 1);
+			//String idDeleg = usuarioRepository.findByName(guardia.getId_usuario()).getDelegacion().getId_div_geografica();
+			String idCentroTrab = guardia.getId_centro_trabajo();
+			String fec_pago = guardia.getFec_paga();
+
+			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
+				idTipoPresup = 1;
+			} else {
+				idTipoPresup = 2;
+			}
+
+			try {
+				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
 			} catch (EmptyResultDataAccessException e) {
-				//return new ResponseEntity<>("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR);
+				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+			try {			
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, idTipoPresup, anio);
+			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			saldo = (presup != null) ? presup.getSaldo(): 0; 
 
-//			if (guardia.getTipo_guardia().equals(String.valueOf("I"))) {
-//				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado(idDeleg, presup.getAnio());
-//			} else {
-//				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt(idDeleg, presup.getAnio());
-//			}
+			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(idCentroTrab, presup.getAnio());
+			} else {
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(idCentroTrab, presup.getAnio());
+			}
 
-			saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado(idDeleg, presup.getAnio()) + guardiaRepository.ObtenerSaldoUtilizadoExt(idDeleg, presup.getAnio());
+			//saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado(idDeleg, presup.getAnio()) + guardiaRepository.ObtenerSaldoUtilizadoExt(idDeleg, presup.getAnio());
 
 			double importe = guardiaInternaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(), 
 					guardia.getId_nivel(), guardia.getId_sub_nivel(), guardia.getId_tipo_jornada(), guardia.getRiesgos(), 
 					guardia.getTipo_guardia(), guardia.getHoras(), guardia.getFec_paga());
 
 			if (importe + saldo_utilizado <= saldo) {
-			
+
 				id = guardiaInternaService.guardarGuardia(guardia, importe);
 			} else {
 				//return new ResponseEntity<>("No existe presupuesto suficiente para realizar este tipo de registro", HttpStatus.INTERNAL_SERVER_ERROR);

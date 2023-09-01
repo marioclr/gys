@@ -27,17 +27,20 @@ public class PresupuestoMapper implements RowMapper<Presupuesto> {
 		delegacion.setN_div_geografica(rs.getString("n_div_geografica"));
 
 		presupuesto.setDelegacion(delegacion);
-		
+
 		DatosAdscripcion centroTrab = new DatosAdscripcion();
 		centroTrab.setClave(rs.getString("id_centro_trabajo"));
+		centroTrab.setDescripcion(rs.getString("Descripcion"));
+		centroTrab.setTipo(rs.getString("Tipo"));
+		centroTrab.setZona(rs.getString("Zona"));
 
 		if (centroTrab.getClave().compareTo("00000") != 0)
 			presupuesto.setCentroTrabajo(centroTrab);
 
 		TiposPresupuesto tipoPresupuesto = new TiposPresupuesto();
 		tipoPresupuesto.setId(rs.getInt("idTipoPresup"));
-		tipoPresupuesto.setClave(rs.getString("clave"));
-		tipoPresupuesto.setDescripcion(rs.getString("descripcion"));
+		tipoPresupuesto.setClave(rs.getString("clave_tipo_presup"));
+		tipoPresupuesto.setDescripcion(rs.getString("descripcion_tipo_presup"));
 
 		presupuesto.setTipoPresup(tipoPresupuesto);
 

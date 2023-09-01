@@ -81,6 +81,9 @@ public interface UsuarioRepository {
 											+ "Where U.IdCentroTrab = C.id_centro_trabajo And U.IdUsuario = ?\r\n";
     List<DatosAdscripcion> getCentTrabForUsu(int IdUsuario);
 
+    public String QUERY_DEL_USU_CTS         = "Delete gys_Usuarios_Centros_Trab Where IdUsuario=?";
+    int removeCentTrabForUsu(int IdUsuario);
+
     public String QUERY_GET_NIVEL_VIS_USU	= "SELECT IdNivelVisibilidad, Descripcion\r\n"
 											+ "FROM gys_NivelVisibilidad";
     List<NivelVisibilidad> getNivelVisibilidadUsuarios();

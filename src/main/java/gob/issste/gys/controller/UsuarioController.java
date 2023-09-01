@@ -97,7 +97,6 @@ public class UsuarioController {
 
 	@Operation(summary = "Actualiza un usuario del Sistema", description = "Actualiza un usuario del Sistema", tags = { "Usuario" })
 	@PutMapping("/usuarios/{id}")
-	//public ResponseEntity<String> updateUsuario(
 	public ResponseEntity<Object> updateUsuario(
 			@Parameter(description = "El ID del usuario a modificar.", required = true) @PathVariable("id") int id, 
 			@Parameter(description = "Actualizar un Usuario existente del Sistema") @RequestBody Usuario usuario) {
@@ -116,11 +115,14 @@ public class UsuarioController {
 				_usuario.setEmpleado(usuario.getEmpleado());
 				_usuario.setDelegacion(usuario.getDelegacion());
 				_usuario.setId_usuario(usuario.getId_usuario());
-	
+				_usuario.setNivelVisibilidad(usuario.getNivelVisibilidad());
+				_usuario.setIdTipoUsuario(usuario.getIdTipoUsuario());
+
 				usuarioRepository.update(_usuario);
 				// Delete Permissions
 				usuarioRepository.removePermissions(id);
 				perfilRepository.removePerfilesToUser(id);
+				usuarioRepository.removeCentTrabForUsu(id);
 				// Add Permissions
 				for(Perfil p:usuario.getPerfiles()) {
 					perfilRepository.addPerfilToUser(id, p.getIdPerfil());
@@ -128,20 +130,18 @@ public class UsuarioController {
 						usuarioRepository.savePermissions(id, p.getIdPerfil(), o.getIdOpcion(), o.getIdNivelAcceso());
 					}
 				}
+				for(DatosAdscripcion ct:usuario.getCentrosTrabajo()) {
+					usuarioRepository.saveCentTrabForUsu(id, ct.getClave(), usuario.getId_usuario());
+				}
 				platformTransactionManager.commit(status);
-				//return new ResponseEntity<>("El Usuario ha sido modificado de manera exitosa", HttpStatus.OK);
 				return ResponseHandler.generateResponse("El Usuario ha sido modificado de manera exitosa", HttpStatus.OK, null);
 				
 			} else {
-				//return new ResponseEntity<>("No se pudo encontrar el usuario con ID = " + id, HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se pudo encontrar el usuario con ID = " + id, HttpStatus.NOT_FOUND, null);
-				
 			}
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-			return ResponseHandler.generateResponse("Error al actualizar un usuario del Sistema de manera exitosa", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			
+			return ResponseHandler.generateResponse("Error al actualizar un usuario del Sistema de manera exitosa", HttpStatus.INTERNAL_SERVER_ERROR, null);			
 		}
 	}
 

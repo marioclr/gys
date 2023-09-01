@@ -67,6 +67,12 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
+	public Paga findByFecha(String fecha_pago) {
+		logger.info(QUERY_FIND_PAGAS_BY_DESC);
+		return jdbcTemplate.queryForObject(QUERY_FIND_PAGAS_BY_DESC, BeanPropertyRowMapper.newInstance(Paga.class), fecha_pago);
+	}
+
+	@Override
 	public int activate(Paga paga) {
 		logger.info(QUERY_ACTIVATE_PAGAS);
 		return jdbcTemplate.update(QUERY_ACTIVATE_PAGAS,

@@ -53,6 +53,12 @@ public class JdbcDatosRepository implements IDatosRepository {
 	}
 
 	@Override
+	public List<DatosAdscripcion> getDatosAdscripciones_ct(int idUsuario) {
+		logger.info(QUERY_GET_ADSCRIPCIONES_BY_USER_CT);
+		return jdbcTemplate.query(QUERY_GET_ADSCRIPCIONES_BY_USER_CT, BeanPropertyRowMapper.newInstance(DatosAdscripcion.class), idUsuario, idUsuario);
+	}
+
+	@Override
 	public List<DatosPuesto> getDatosPuestosGuardia() {
 
 		logger.info(QUERY_GET_PUESTOS_GUARDIA);

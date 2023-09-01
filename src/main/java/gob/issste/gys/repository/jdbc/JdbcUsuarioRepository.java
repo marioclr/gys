@@ -73,7 +73,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 
 		return jdbcTemplate.update(QUERY_UPDATE_USU,
 				new Object[] { usuario.getClave(), usuario.getPassword(), usuario.getEmpleado().getId_empleado(), usuario.getDelegacion().getId_div_geografica(), 
-						usuario.getNivelVisibilidad().getIdNivelVisibilidad(), usuario.getId_usuario(), usuario.getIdUsuario() });
+						usuario.getNivelVisibilidad().getIdNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getId_usuario(), usuario.getIdUsuario() });
 	}
 
 	@Override
@@ -255,6 +255,12 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 		return centrosTrabList;
 	}
 
+	@Override
+	public int removeCentTrabForUsu(int IdUsuario) {
+		logger.info(QUERY_DEL_USU_CTS);
+		return jdbcTemplate.update(QUERY_DEL_USU_CTS, IdUsuario);
+	}
+	
 	@Override
 	public List<NivelVisibilidad> getNivelVisibilidadUsuarios() {
 		logger.info(QUERY_GET_NIVEL_VIS_USU);

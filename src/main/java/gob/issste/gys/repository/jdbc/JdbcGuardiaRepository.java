@@ -111,9 +111,21 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	}
 
 	@Override
+	public double ObtenerSaldoUtilizado_ct(String id_centro_trabajo, int anio_ejercicio) {
+		logger.info(QUERY_GET_SALDO_GUARDIA_INT_CT);
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT_CT, Double.class, id_centro_trabajo, anio_ejercicio );
+	}
+
+	@Override
 	public double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_EXT);
 		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT, Double.class, idDelegacion, anio_ejercicio );
+	}
+
+	@Override
+	public double ObtenerSaldoUtilizadoExt_ct(String id_centro_trabajo, int anio_ejercicio) {
+		logger.info(QUERY_GET_SALDO_GUARDIA_EXT_CT);
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT_CT, Double.class, id_centro_trabajo, anio_ejercicio );
 	}
 
 	@Override

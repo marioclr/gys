@@ -24,6 +24,9 @@ public interface IPagaRepository {
 	public String QUERY_FIND_PAGAS_BY_DESC = "SELECT * from gys_fechas_control WHERE Descripcion like ?";
 	List<Paga> findByDesc(String desc);
 
+	public String QUERY_FIND_PAGAS_BY_FEC  = "SELECT * from gys_fechas_control WHERE fec_pago = ?";
+	Paga findByFecha(String fecha_pago);
+
 	public String QUERY_ACTIVATE_PAGAS     = "UPDATE gys_fechas_control Set estatus = ? Where id = ?";
 	int activate(Paga tipMovPresup);	
 

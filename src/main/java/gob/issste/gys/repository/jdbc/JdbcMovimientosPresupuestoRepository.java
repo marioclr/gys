@@ -1,5 +1,9 @@
 package gob.issste.gys.repository.jdbc;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -7,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
@@ -23,10 +30,27 @@ public class JdbcMovimientosPresupuestoRepository implements IMovimientosPresupu
 	JdbcTemplate  jdbcTemplate;
 
 	@Override
-	public int save(MovimientosPresupuesto movimPresup) {
+	public int save(MovimientosPresupuesto movimPresup) throws SQLException {
 		logger.info(QUERY_ADD_NEW_MOV_PRES);
-	    return jdbcTemplate.update(QUERY_ADD_NEW_MOV_PRES,
-	            new Object[] { movimPresup.getIdPresup(), movimPresup.getImporte(), movimPresup.getComentarios(), movimPresup.getTipMovPresup().getId() });
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        PreparedStatementCreator statementCreator = (Connection connection) -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_NEW_MOV_PRES, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setInt(1, movimPresup.getIdPresup());
+            preparedStatement.setDouble(2, movimPresup.getImporte());
+            preparedStatement.setString(3, movimPresup.getComentarios());
+            preparedStatement.setInt(4, movimPresup.getTipMovPresup().getId());
+            return preparedStatement;
+        };
+        int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
+        if (updatesCount == 1) {
+            Number generatedKey = keyHolder.getKey();
+            if (generatedKey == null) {
+                throw new SQLException("Getting user id error.");
+            }
+            return generatedKey.intValue();
+        }
+        throw new SQLException("Expected one row insert.");
 	}
 
 	@Override
