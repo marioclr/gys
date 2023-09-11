@@ -38,12 +38,10 @@ public interface IEmpleadoRepository {
 													+ "  And (fec_fin >= ? Or fec_fin IS NULL)";
 	int ConsultaRiesgosEmp(String id_empleado, String fec_pago);
 
-	//int save(Empleado empleado);
-	//int update(Empleado empleado);
 	Empleado findById(String id);
-	//int deleteById(int id);
+
 	List<Empleado> findAll();
+
 	List<Empleado> findByNombre(String nombre);
-	//int deleteAll();
 
 }

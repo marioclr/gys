@@ -126,4 +126,15 @@ public class Usuario {
 				+ empleado + ", perfiles=" + perfiles + "]";
 	}
 
+	public boolean contieneCT(String centroTrab) {
+		boolean encontrado = false;
+		for (int x = 0; x < centrosTrabajo.size(); x++) {
+		  DatosAdscripcion adsc = centrosTrabajo.get(x);
+		  if (adsc.getClave().equals(centroTrab)) {
+		    encontrado = true;
+		    break;
+		  }
+		}
+		return encontrado;
+	}
 }

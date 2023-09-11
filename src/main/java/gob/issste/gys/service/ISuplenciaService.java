@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.DatosSuplencia;
 
-public interface ISuplenciaInternaService {
+public interface ISuplenciaService {
 	double CalculaImporteSuplencia(String quincena, String clave_empleado, int dias, String tipo);
 	double CalculaImporteSuplencia(String quincena, DatosEmpleado empleado, int dias, String tipo);
 	int GuardarSuplencia(DatosSuplencia suplencia, double importe) throws SQLException;

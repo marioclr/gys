@@ -45,16 +45,6 @@ public class JdbcEmpleadoRepository implements IEmpleadoRepository {
 		return porcentaje;
 	}
 
-//	@Override
-//	public int save(Empleado empleado) {
-//	    return jdbcTemplate.update("INSERT INTO m4t_empleados (id_sociedad, id_empleado,nombre,apellido_1,apellido_2, id_legal) VALUES(?,?,?,?,?,?)",
-//	            new Object[] { empleado.getId_sociedad(), empleado.getId_empleado(), empleado.getNombre(), empleado.getApellido_1(), empleado.getApellido_2(), empleado.getId_legal() });
-//	}
-//	@Override
-//	public int update(Empleado empleado) {
-//	    return jdbcTemplate.update("UPDATE m4t_empleados SET nombre=?, apellido_1=?, apellido_2=?, id_legal=? WHERE id_empleado=?",
-//	            new Object[] { empleado.getNombre(), empleado.getApellido_1(), empleado.getApellido_2(), empleado.getId_legal(), empleado.getId_empleado() });
-//	}
 	@Override
 	public Empleado findById(String id) {
 		try {
@@ -66,10 +56,7 @@ public class JdbcEmpleadoRepository implements IEmpleadoRepository {
 	      return null;
 	    }
 	}
-//	@Override
-//	public int deleteById(int id) {
-//	    return jdbcTemplate.update("DELETE FROM m4t_empleados WHERE id_empleado=?", id);
-//	}
+
 	@Override
 	public List<Empleado> findAll() {
 	    return jdbcTemplate.query("SELECT First 1000 * from m4t_empleados", BeanPropertyRowMapper.newInstance(Empleado.class));
@@ -81,8 +68,5 @@ public class JdbcEmpleadoRepository implements IEmpleadoRepository {
 
 	    return jdbcTemplate.query(q, BeanPropertyRowMapper.newInstance(Empleado.class));
 	}
-//	@Override
-//	public int deleteAll() {
-//	    return jdbcTemplate.update("DELETE from tutorials");
-//	}
+
 }

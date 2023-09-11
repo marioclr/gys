@@ -23,14 +23,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
+import gob.issste.gys.model.DatosAdscripcion;
+import gob.issste.gys.model.Delegacion;
 import gob.issste.gys.model.MovimientosPresupuesto;
 import gob.issste.gys.model.Presupuesto;
+import gob.issste.gys.model.PresupuestoUtilizado;
 import gob.issste.gys.model.TipoMovPresupuesto;
 import gob.issste.gys.model.TiposPresupuesto;
+import gob.issste.gys.model.Usuario;
+import gob.issste.gys.repository.GuardiaRepository;
+import gob.issste.gys.repository.IDatosRepository;
 import gob.issste.gys.repository.IMovimientosPresupuestoRepository;
 import gob.issste.gys.repository.IPresupuestoRepository;
+import gob.issste.gys.repository.ISuplenciaRepository;
 import gob.issste.gys.repository.ITipoMovPresupuestoRepository;
 import gob.issste.gys.repository.ITiposPresupuestoRepository;
+import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -54,6 +62,14 @@ public class PresupuestoController {
 	ITiposPresupuestoRepository tiposPresupuestoRepository;
 	@Autowired
 	IPresupuestoRepository presupuestoRepository;
+	@Autowired
+	GuardiaRepository guardiaRepository;
+	@Autowired
+	ISuplenciaRepository suplenciaRepository;
+	@Autowired
+	IDatosRepository datosRepository;
+	@Autowired
+	UsuarioRepository usuarioRepository;
 
 	@Autowired
 	private PlatformTransactionManager platformTransactionManager;
@@ -68,7 +84,7 @@ public class PresupuestoController {
 	@PostMapping("/Presupuesto")
 	public ResponseEntity<Object> createPresupuesto(
 			@Parameter(description = "Objeto de Presupuesto a crear en el Sistema") @RequestBody Presupuesto presupuesto, 
-			 @Parameter(description = "Comentarios del registro de presupuesto.", required = false) @RequestParam(name = "comentarios", required = false, defaultValue = "false") String comentario) {
+			@Parameter(description = "Comentarios del registro de presupuesto.", required = false) @RequestParam(name = "comentarios", required = false, defaultValue = "false") String comentarios) {
 
 		DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
@@ -87,11 +103,11 @@ public class PresupuestoController {
 				List<Presupuesto> presupuestos= presupuestoRepository.get_dynamic_regs(presupuesto.getDelegacion().getId_div_geografica(), 
 						presupuesto.getTipoPresup().getId(), presupuesto.getAnio(), null, true);
 				if (presupuestos == null || presupuestos.size() == 0)
-					return ResponseHandler.generateResponse("No exixte presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No existe presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 				double suma_dist_ct = presupuestoRepository.validaSumaPresupuestal(presupuesto);
 				if( suma_dist_ct > presupuestos.get(0).getSaldo() ) {
-					return ResponseHandler.generateResponse("No exixte presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("La suma del importe asignado al centro de trabajo indicado excede el presupuesto asignado a la Delegación", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 			}
 
@@ -102,7 +118,7 @@ public class PresupuestoController {
 				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
 						presupuesto.getTipoPresup(), presupuesto.getSaldo()));
 			}
-			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentario, 1));
+			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));
 			platformTransactionManager.commit(status);
 			return ResponseHandler.generateResponse("El Presupuesto con ID " + idPresup + " ha sido creado de manera exitosa. Con número de movimiento: " + idMovPresup, HttpStatus.CREATED, null);
 		} catch (Exception e) {
@@ -116,7 +132,7 @@ public class PresupuestoController {
 	//public ResponseEntity<List<Presupuesto>> getPresupuesto(
 	public ResponseEntity<Object> getPresupuesto(
 			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "movim", required = true, defaultValue = "false") boolean movim,
-			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "solo_deleg", required = true, defaultValue = "true") boolean solo_deleg,
+			@Parameter(description = "Bandera para indicar si se requiere incluir los centros de trabajo de la delegación", required = true) @RequestParam(name = "solo_deleg", required = true, defaultValue = "true") boolean solo_deleg,
 			@Parameter(description = "Parámetro opcional para indicar el anio del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer anio,
 			@Parameter(description = "Parámetro opcional para indicar el ID de la delegación del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idDelegacion,
 			@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
@@ -134,8 +150,8 @@ public class PresupuestoController {
 					p.setMovimientos(movPresupuestoRepository.findByPresupuesto(p.getId()));
 			}
 			if (presupuestos.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NOT_FOUND, presupuestos);
 			}
 
 			//return new ResponseEntity<>(presupuestos, HttpStatus.OK);
@@ -147,17 +163,89 @@ public class PresupuestoController {
 	}
 
 	@Operation(summary = "Consulta elementos de presupuesto del Sistema", description = "Consulta elementos de presupuesto del Sistema", tags = { "Presupuesto" })
-	@GetMapping("/Presupuesto/user")
+	@GetMapping("/Presupuesto/ct")
 	//public ResponseEntity<List<Presupuesto>> getPresupuesto(
-	public ResponseEntity<Object> getPresupuestoByUser(
-			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = false) @RequestParam(name = "movim", required = false, defaultValue = "false") boolean movim, 
-			@Parameter(description = "ID del usuario para consultar el presupuesto asignado a su delegación y centros de trabajo", required = false) @RequestParam(required = false) int id,
-			@Parameter(description = "ID de la delegación para obtener el presupuesto asignado", required = false) @RequestParam(required = false) String idDeleg ) {
+	public ResponseEntity<Object> getPresupuestoCt(
+			@Parameter(description = "Parámetro para indicar el ID del Usuario del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer idUsuario,
+			@Parameter(description = "Parámetro para indicar el anio del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el ID de la delegación del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) String idDelegacion,
+			//@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
+			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer idTipoPresup) {
+		try {
+
+			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
+			List<DatosAdscripcion> adsc; // = datosRepository.getDatosAdscripciones(idUsuario);
+			TiposPresupuesto tipoPresup = tiposPresupuestoRepository.findById(idTipoPresup);
+			Usuario usuario = usuarioRepository.findById(idUsuario);
+			Delegacion delegacion = datosRepository.getDatosDelegacionById(idDelegacion);
+			Presupuesto presupuesto;
+			double saldoDelegCt;
+
+			// String idDelegacion, Integer idTipoPresup, Integer anio, String idCentTrab
+			
+			if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()== 1 ) {
+				//List<Delegacion> delegaciones = datosRepository.getDatosDelegaciones();
+				//for(Delegacion del:delegaciones) {
+				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), idTipoPresup, anio, null);
+				presupuesto = new Presupuesto(anio, delegacion, null, tipoPresup, saldoDelegCt);
+				presupuestos.add(presupuesto);
+				adsc = datosRepository.getDatosAdscForDeleg(delegacion.getId_div_geografica());
+				for(DatosAdscripcion ct:adsc) {
+					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), idTipoPresup, anio, ct.getClave());
+					presupuesto = new Presupuesto(anio, delegacion, ct, tipoPresup, saldoDelegCt);
+					presupuestos.add(presupuesto);
+				}
+				//}
+			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==2 ) {
+				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), idTipoPresup, anio, null);
+				presupuesto = new Presupuesto(anio, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
+				presupuestos.add(presupuesto);
+				adsc = datosRepository.getDatosAdscForDeleg(usuario.getDelegacion().getId_div_geografica());
+				for(DatosAdscripcion ct:adsc) {
+					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), idTipoPresup, anio, ct.getClave());
+					presupuesto = new Presupuesto(anio, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
+					presupuestos.add(presupuesto);
+				}
+			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==3 ) {
+				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), idTipoPresup, anio, null);
+				presupuesto = new Presupuesto(anio, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
+				presupuestos.add(presupuesto);
+				adsc = datosRepository.getDatosAdscripciones_ct(idUsuario);
+				for(DatosAdscripcion ct:adsc) {
+					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), idTipoPresup, anio, ct.getClave());
+					presupuesto = new Presupuesto(anio, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
+					presupuestos.add(presupuesto);
+				}				
+			}
+
+//			if (presupuesto == null) {
+//				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NOT_FOUND, null);
+//			}
+
+			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del Sistema", HttpStatus.OK, presupuestos);
+
+		} catch (Exception e) {
+			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Consulta elementos de presupuesto del Sistema junto con el saldo utilizado", description = "Consulta elementos de presupuesto del Sistema junto con el saldo utilizado", tags = { "Presupuesto" })
+	@GetMapping("/Presupuesto/utilizado")
+	//public ResponseEntity<List<Presupuesto>> getPresupuesto(
+	public ResponseEntity<Object> getPresupuestoUtilizado(
+			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "movim", required = true, defaultValue = "false") boolean movim,
+			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "solo_deleg", required = true, defaultValue = "true") boolean solo_deleg,
+			@Parameter(description = "Parámetro opcional para indicar el anio del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer anio,
+			@Parameter(description = "Parámetro opcional para indicar el ID de la delegación del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idDelegacion,
+			@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
+			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer idTipoPresup) {
 		try {
 			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
+			List<PresupuestoUtilizado> presupuestosUtilizado = new ArrayList<PresupuestoUtilizado>();
+			double saldo_utilizado=0;
 
-			if ( idDeleg == null ) {
-				presupuestos = presupuestoRepository.findAllByUser(id);
+			if ( (idDelegacion != null) || (idTipoPresup != null) || (anio != null) || (idCentTrab != null) ) {
+				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, idTipoPresup, anio, idCentTrab, solo_deleg);
 			} else {
 				presupuestos = presupuestoRepository.findAll();
 			}
@@ -166,17 +254,88 @@ public class PresupuestoController {
 					p.setMovimientos(movPresupuestoRepository.findByPresupuesto(p.getId()));
 			}
 			if (presupuestos.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NO_CONTENT, null);
+				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
+			logger.info(presupuestos.toString());
 
-			//return new ResponseEntity<>(presupuestos, HttpStatus.OK);
-			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del Sistema", HttpStatus.OK, presupuestos);
+			for(Presupuesto p:presupuestos) {
+				saldo_utilizado=0;
+				PresupuestoUtilizado pu = new PresupuestoUtilizado();
+				pu.setPresupuesto(p);
+				if (p.getTipoPresup().getClave().equals(String.valueOf("GI"))) {
+					if (p.getCentroTrabajo() != null)
+						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio());
+				} else if (p.getTipoPresup().getClave().equals(String.valueOf("GE"))) {
+					if (p.getCentroTrabajo() != null)
+						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio());
+				} else if (p.getTipoPresup().getClave().equals(String.valueOf("SI"))) {
+					if (p.getCentroTrabajo() != null)
+						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio());
+				} else if (p.getTipoPresup().getClave().equals(String.valueOf("SE"))) {
+					if (p.getCentroTrabajo() != null)
+						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio());
+				}
+				pu.setSaldo(saldo_utilizado);
+				presupuestosUtilizado.add(pu);
+			}
+			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del Sistema", HttpStatus.OK, presupuestosUtilizado);
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
+
+	@Operation(summary = "Obtener el saldo utilizado por registro de guardias para una delegación en un año determinado", description = "Obtener el saldo utilizado por registro de guardias para una delegación en un año determinado", tags = { "Presupuesto" })
+	@GetMapping("/Presupuesto/saldo")
+	public ResponseEntity<Object> getSaldoPresupuesto(
+			@Parameter(description = "Año del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer anio_ejercicio,
+			@Parameter(description = "ID de la Delegación que se consulta el saldo utilizado", required = true) @RequestParam(required = true) String idDelegacion,
+			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) Integer tipoPresupuesto) {
+
+		double saldo=0;
+
+		try {
+
+			saldo = presupuestoRepository.getSaldoDistribuido(anio_ejercicio, idDelegacion, tipoPresupuesto);
+
+			return ResponseHandler.generateResponse("Se obtuvo el saldo presupuestal distribuido para las condiciones indicadas", HttpStatus.OK, saldo);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+//	@Operation(summary = "Consulta elementos de presupuesto del Sistema", description = "Consulta elementos de presupuesto del Sistema", tags = { "Presupuesto" })
+//	@GetMapping("/Presupuesto/user")
+//	//public ResponseEntity<List<Presupuesto>> getPresupuesto(
+//	public ResponseEntity<Object> getPresupuestoByUser(
+//			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = false) @RequestParam(name = "movim", required = false, defaultValue = "false") boolean movim, 
+//			@Parameter(description = "ID del usuario para consultar el presupuesto asignado a su delegación y centros de trabajo", required = false) @RequestParam(required = false) int id,
+//			@Parameter(description = "ID de la delegación para obtener el presupuesto asignado", required = false) @RequestParam(required = false) String idDeleg ) {
+//		try {
+//			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
+//
+//			if ( idDeleg == null ) {
+//				presupuestos = presupuestoRepository.findAllByUser(id);
+//			} else {
+//				presupuestos = presupuestoRepository.findAll();
+//			}
+//			if (movim) {
+//				for (Presupuesto p:presupuestos)
+//					p.setMovimientos(movPresupuestoRepository.findByPresupuesto(p.getId()));
+//			}
+//			if (presupuestos.isEmpty()) {
+//				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NOT_FOUND, null);
+//			}
+//
+//			//return new ResponseEntity<>(presupuestos, HttpStatus.OK);
+//			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del Sistema", HttpStatus.OK, presupuestos);
+//		} catch (Exception e) {
+//			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+//			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//		}
+//	}
 
 	/* Tipos de Movimientos Presupuestales */
 
@@ -227,8 +386,8 @@ public class PresupuestoController {
 				tipMovPresupRepository.findByDesc(desc).forEach(opciones::add);
 
 			if (opciones.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No existen elementos del tipo de movimiento del que se desea obtener la información", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen elementos del tipo de movimiento del que se desea obtener la información", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(opciones, HttpStatus.OK);
@@ -264,7 +423,7 @@ public class PresupuestoController {
 			int result = tipMovPresupRepository.deleteById(id);
 			if (result == 0) {
 				//return new ResponseEntity<>("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NOT_FOUND);
-				return ResponseHandler.generateResponse("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NO_CONTENT, null);
+				return ResponseHandler.generateResponse("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>("El el tipo de movimiento fué eliminado exitósamente.", HttpStatus.OK);
 			return ResponseHandler.generateResponse("Existe el elemento de tipo de movimiento de presupuesto del Sistema", HttpStatus.OK, null);
@@ -291,7 +450,7 @@ public class PresupuestoController {
 			}
 
 			if (movimientos.isEmpty()) {
-				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
 
 			//return new ResponseEntity<>(movimientos, HttpStatus.OK);
@@ -409,8 +568,8 @@ public class PresupuestoController {
 				tiposPresupuestoRepository.findByDesc(desc).forEach(tiposPresup::add);
 
 			if (tiposPresup.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No se pudo obtener la información del tipo de presupuesto en el Sistema", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No se pudo obtener la información del tipo de presupuesto en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(opciones, HttpStatus.OK);
@@ -448,8 +607,8 @@ public class PresupuestoController {
 		try {
 			int result = tiposPresupuestoRepository.deleteById(id);
 			if (result == 0) {
-				//return new ResponseEntity<>("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>("El el tipo de movimiento fué eliminado exitósamente.", HttpStatus.OK);
 			return ResponseHandler.generateResponse("El el tipo de movimiento fué eliminado exitósamente.", HttpStatus.OK, null);

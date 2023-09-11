@@ -45,7 +45,7 @@ public interface GuardiaRepository {
 												+ "Where id = ?";
 	int updateImporteGuardiaExt(DatosGuardia guardia);
 
-	public String QUERY_GET_GUARDIA_INTERNA     = "Select G.id, G.id_empleado As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'I' tipo_guardia,\r\n"
+	public String QUERY_GET_GUARDIA_INTERNA     = "Select G.id, G.id_empleado As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'GI' tipo_guardia,\r\n"
 												+ "G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, G.horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment,\r\n"
 												+ "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, P.estatus, G.id_ordinal, NVL(riesgos,0) riesgos, NVL(G.id_usuario, '') id_usuario, G.id_empresa\r\n"
 												+ "From gys_guardias_emp G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU \r\n"
@@ -58,7 +58,7 @@ public interface GuardiaRepository {
 												+ "Order by G.fec_paga desc, G.fec_inicio";
 	List<DatosGuardia> ConsultaGuardiasInternas(String id_empleado);
 
-	public String QUERY_GET_GUARDIAS_X_FECHA    = "Select G.id, G.id_empleado As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'I' tipo_guardia,\r\n"
+	public String QUERY_GET_GUARDIAS_X_FECHA    = "Select G.id, G.id_empleado As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'GI' tipo_guardia,\r\n"
 												+ "G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, G.horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment,\r\n"
 												+ "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, P.estatus, G.id_ordinal, NVL(riesgos,0) riesgos, NVL(G.id_usuario, '') id_usuario, G.id_empresa\r\n"
 												+ ", empleado1\r\n"
@@ -72,7 +72,7 @@ public interface GuardiaRepository {
 												+ "Order by G.fec_paga desc, G.fec_inicio";
 	List<DatosGuardia> ConsultaGuardiasInternasXFecha(String fechaPago);
 
-	public String QUERY_GET_GUARDIAS_BY_ID    	= "Select G.id, G.id_empleado As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'I' tipo_guardia,\r\n"
+	public String QUERY_GET_GUARDIAS_BY_ID    	= "Select G.id, G.id_empleado As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'GI' tipo_guardia,\r\n"
 												+ "G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, G.horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment,\r\n"
 												+ "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, P.estatus, G.id_ordinal, NVL(riesgos,0) riesgos, NVL(G.id_usuario, '') id_usuario, G.id_empresa\r\n"
 												+ "From gys_guardias_emp G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU\r\n"
@@ -93,9 +93,9 @@ public interface GuardiaRepository {
 
 	public String QUERY_GET_SALDO_GUARDIA_INT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_guardias_emp\r\n"
-												+ "Where id_centro_trabajo = ?\r\n"
+												+ "Where id<>? And id_centro_trabajo = ?\r\n"
 												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ?)";
-	double ObtenerSaldoUtilizado_ct(String id_centro_trabajo, int anio_ejercicio);
+	double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio);
 
 	public String QUERY_GET_SALDO_GUARDIA_EXT   = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_guardias_ext\r\n"
@@ -105,11 +105,11 @@ public interface GuardiaRepository {
 
 	public String QUERY_GET_SALDO_GUARDIA_EXT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_guardias_ext\r\n"
-												+ "Where id_centro_trabajo = ?\r\n"
+												+ "Where id<>? And id_centro_trabajo = ?\r\n"
 												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ?)";
-	double ObtenerSaldoUtilizadoExt_ct(String id_centro_trabajo, int anio_ejercicio);
+	double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio);
 
-	public String QUERY_GET_GUARDIA_EXTERNA     = "Select G.id, rfc As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'E' tipo_guardia,\r\n"
+	public String QUERY_GET_GUARDIA_EXTERNA     = "Select G.id, rfc As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'GE' tipo_guardia,\r\n"
 												+ "G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, G.horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment,\r\n"
 												+ "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, P.estatus, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario\r\n"
 												+ "From gys_guardias_ext G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU \r\n"
@@ -121,7 +121,7 @@ public interface GuardiaRepository {
 												+ "Order by G.fec_paga desc, G.fec_inicio";
 	List<DatosGuardia> ConsultaGuardiasExternas(String rfcEmpleado);
 
-	public String QUERY_GET_GUARDIAS_EXT_X_FECHA = "Select G.id, rfc clave_empleado, G.id_centro_trabajo, id_clave_servicio, G.id_puesto_plaza, 'E' tipo_guardia,\r\n"
+	public String QUERY_GET_GUARDIAS_EXT_X_FECHA = "Select G.id, rfc clave_empleado, G.id_centro_trabajo, id_clave_servicio, G.id_puesto_plaza, 'GE' tipo_guardia,\r\n"
 												+ "id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment,\r\n"
 												+ "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, P.estatus, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
 												+ ", empleado1 \r\n"
@@ -134,7 +134,7 @@ public interface GuardiaRepository {
 												+ "Order by G.fec_paga desc, G.fec_inicio";
 	List<DatosGuardia> ConsultaGuardiasExternasXFecha(String fechaPago);
 
-	public String QUERY_GET_GUARDIAS_EXT_BY_ID  = "Select G.id, rfc clave_empleado, G.id_centro_trabajo, id_clave_servicio, G.id_puesto_plaza, 'E' tipo_guardia,\r\n"
+	public String QUERY_GET_GUARDIAS_EXT_BY_ID  = "Select G.id, rfc clave_empleado, G.id_centro_trabajo, id_clave_servicio, G.id_puesto_plaza, 'GE' tipo_guardia,\r\n"
 												+ "id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment,\r\n"
 												+ "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, P.estatus, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
 												+ "From gys_guardias_ext G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU \r\n"

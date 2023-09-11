@@ -29,17 +29,6 @@ public class DatosGuardia {
 	private String coment;
 	private String id_empresa;
 
-	// Para Validaciones
-	private String id_centro_trabajo1;
-	private String id_clave_servicio1;
-	private String id_puesto_plaza1;
-	private String id_nivel1;
-	private String id_sub_nivel1;
-	private String id_tipo_jornada1;
-	private Integer riesgos1;
-	private String empleado1;
-	private DatosEmpleado datos_empleado1;
-
 	public Integer getId() {
 		return id;
 	}
@@ -192,67 +181,6 @@ public class DatosGuardia {
 	public void setId_empresa(String id_empresa) {
 		this.id_empresa = id_empresa;
 	}
-
-
-
-
-
-	public String getId_centro_trabajo1() {
-		return id_centro_trabajo1;
-	}
-	public void setId_centro_trabajo1(String id_centro_trabajo1) {
-		this.id_centro_trabajo1 = id_centro_trabajo1;
-	}
-	public String getId_clave_servicio1() {
-		return id_clave_servicio1;
-	}
-	public void setId_clave_servicio1(String id_clave_servicio1) {
-		this.id_clave_servicio1 = id_clave_servicio1;
-	}
-	public String getId_puesto_plaza1() {
-		return id_puesto_plaza1;
-	}
-	public void setId_puesto_plaza1(String id_puesto_plaza1) {
-		this.id_puesto_plaza1 = id_puesto_plaza1;
-	}
-	public String getId_nivel1() {
-		return id_nivel1;
-	}
-	public void setId_nivel1(String id_nivel1) {
-		this.id_nivel1 = id_nivel1;
-	}
-	public String getId_sub_nivel1() {
-		return id_sub_nivel1;
-	}
-	public void setId_sub_nivel1(String id_sub_nivel1) {
-		this.id_sub_nivel1 = id_sub_nivel1;
-	}
-	public String getId_tipo_jornada1() {
-		return id_tipo_jornada1;
-	}
-	public void setId_tipo_jornada1(String id_tipo_jornada1) {
-		this.id_tipo_jornada1 = id_tipo_jornada1;
-	}
-	public Integer getRiesgos1() {
-		return riesgos1;
-	}
-	public void setRiesgos1(Integer riesgos1) {
-		this.riesgos1 = riesgos1;
-	}
-	public String getEmpleado1() {
-		return empleado1;
-	}
-	public void setEmpleado1(String empleado1) {
-		this.empleado1 = empleado1;
-	}
-	public DatosEmpleado getDatos_empleado1() {
-		return datos_empleado1;
-	}
-	public void setDatos_empleado1(DatosEmpleado datos_empleado1) {
-		this.datos_empleado1 = datos_empleado1;
-	}
-
-
 
 	@Override
 	public String toString() {

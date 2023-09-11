@@ -85,7 +85,7 @@ public class OpcionController {
 				opcionRepository.findByDesc(desc).forEach(opciones::add);
 
 			if (opciones.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se obtuvieron las Opciones del Sistema", HttpStatus.NOT_FOUND, null);
 			}
 

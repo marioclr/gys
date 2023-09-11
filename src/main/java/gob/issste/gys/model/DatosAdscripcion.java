@@ -1,5 +1,7 @@
 package gob.issste.gys.model;
 
+import java.util.Objects;
+
 public class DatosAdscripcion {
 
 	private String clave;
@@ -30,6 +32,18 @@ public class DatosAdscripcion {
 	}
 	public void setZona(String zona) {
 		this.zona = zona;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(clave);
+	}
+	@Override
+	public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        DatosAdscripcion adsc = (DatosAdscripcion) obj;
+		return clave.equals(adsc.clave);
 	}
 
 }

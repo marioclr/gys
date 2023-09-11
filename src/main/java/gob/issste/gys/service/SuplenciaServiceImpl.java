@@ -18,7 +18,7 @@ import gob.issste.gys.repository.ISuplenciaRepository;
 import gob.issste.gys.repository.ITabuladorRepository;
 
 @Service
-public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
+public class SuplenciaServiceImpl implements ISuplenciaService {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
 
@@ -51,7 +51,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 	        default: importe = valores.getSueldo(); break;
         }
 
-        if (tipo.equals(String.valueOf("I"))) {
+        if (tipo.equals(String.valueOf("SI"))) {
             switch (empleado.getId_tipo_tabulador())
             {
                 case "M": importe = importe + valores.getAsignacion(); break;
@@ -126,7 +126,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 	@Override
 	public int GuardarSuplencia(DatosSuplencia suplencia, double importe) throws SQLException {
 		suplencia.setImporte(importe);
-		if( suplencia.getTipo_suplencia().equals(String.valueOf("I"))) {
+		if( suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
 			return suplenciaRepository.save(suplencia);
 		} else {
 			return suplenciaRepository.saveExt(suplencia);
@@ -137,7 +137,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 	public void ActualizaImportesSuplencias(String fechaPago, String tipo) {
 		List<DatosSuplencia> suplencias = null;
 
-		if (tipo.equals(String.valueOf("I"))) 
+		if (tipo.equals(String.valueOf("SI"))) 
 			suplencias = suplenciaRepository.ConsultaSuplenciasInternasXFecha(fechaPago);
 		else
 			suplencias = suplenciaRepository.ConsultaSuplenciasExternasXFecha(fechaPago);
@@ -153,7 +153,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 			} catch(Exception ex) {
 				s.setImporte((double) 0);
 			}
-			if (tipo.equals(String.valueOf("I"))) {
+			if (tipo.equals(String.valueOf("SI"))) {
 				suplenciaRepository.updateImporteSuplencia(s);
 			} else {
 				suplenciaRepository.updateImporteSuplenciaExt(s);
@@ -164,7 +164,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 	@Override
 	public void actualizaSuplencia(DatosSuplencia suplencia, double importe) {
 		suplencia.setImporte(importe);
-		if (suplencia.getTipo_suplencia().equals(String.valueOf("I")))
+		if (suplencia.getTipo_suplencia().equals(String.valueOf("SI")))
 			suplenciaRepository.updateSuplencia(suplencia);
 		else
 			suplenciaRepository.updateSuplenciaExt(suplencia);
@@ -172,7 +172,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 
 	@Override
 	public void eliminarSuplencia(Integer id, String tipo) {
-		if (tipo.equals(String.valueOf("I")))
+		if (tipo.equals(String.valueOf("SI")))
 			suplenciaRepository.deleteSuplencia(id);
 		else
 			suplenciaRepository.deleteSuplenciaExt(id);
@@ -207,7 +207,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 	        default: importe = valores.getSueldo(); break;
         }
 
-        if (tipo.equals(String.valueOf("I"))) {
+        if (tipo.equals(String.valueOf("SI"))) {
             switch (empleado.getId_tipo_tabulador())
             {
                 case "M": importe = importe + valores.getAsignacion(); break;
@@ -290,7 +290,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 	public void ActualizaImportesSuplencias2(String fechaPago, String tipo) {
 		List<DatosSuplencia> suplencias = null;
 
-		if (tipo.equals(String.valueOf("I"))) 
+		if (tipo.equals(String.valueOf("SI"))) 
 			suplencias = suplenciaRepository.ConsultaSuplenciasInternasXFecha(fechaPago);
 		else
 			suplencias = suplenciaRepository.ConsultaSuplenciasExternasXFecha(fechaPago);
@@ -323,7 +323,7 @@ public class SuplenciaInternaServiceImpl implements ISuplenciaInternaService {
 			} catch(Exception ex) {
 				s.setSueldo((double) 0);
 			}
-			if (tipo.equals(String.valueOf("I"))) {
+			if (tipo.equals(String.valueOf("SI"))) {
 				//suplenciaRepository.updateImporteSuplencia(s);
 				suplenciaRepository.updateSuplenciaIntVars(s);
 			} else {

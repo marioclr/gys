@@ -25,7 +25,7 @@ public interface IMovimientosPresupuestoRepository {
 
 	public String QUERY_FIND_MOV_PRES_BY_PRESUP   = "SELECT PM.id, idpresupuesto, PM.importe, PM.idtipomovpresup, PM.comentarios, PM.id_usuario, PM.fec_ult_actualizacion, TMP.clave, TMP.descripcion\r\n"
 												  + "FROM gys_presupuesto_movs PM, gys_presupuesto_tip_movs TMP\r\n"
-												  + "Where PM.idTipoMovPresup=TMP.id And PM.idPresupuesto=?"
+												  + "Where PM.idTipoMovPresup=TMP.id And PM.idPresupuesto=?\r\n"
 												  + "Order By PM.id";
 	List<MovimientosPresupuesto> findByPresupuesto(int tipo);
 

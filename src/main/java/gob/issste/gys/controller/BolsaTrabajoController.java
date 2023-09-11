@@ -42,8 +42,8 @@ public class BolsaTrabajoController {
 		bolsa = bolsaTrabajoRepository.findAll();
 
 		if (bolsa.isEmpty()) {
-			//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			return ResponseHandler.generateResponse("No existen elementos de Bolsa de Trabajo", HttpStatus.NO_CONTENT, null);
+			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return ResponseHandler.generateResponse("No existen elementos de Bolsa de Trabajo", HttpStatus.NOT_FOUND, null);
 		}
 
 		//return new ResponseEntity<>(bolsa, HttpStatus.OK);
@@ -63,7 +63,7 @@ public class BolsaTrabajoController {
 			return ResponseHandler.generateResponse("Se ha obtiene un elemento de Bolsa de Trabajo del Sistema", HttpStatus.OK, BolsasDeTrabajo);
 		} else {
 			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			return ResponseHandler.generateResponse("No se pudo encontrar el elemento de Bolsa de Trabajo con el ID =" + id, HttpStatus.NO_CONTENT, null);
+			return ResponseHandler.generateResponse("No se pudo encontrar el elemento de Bolsa de Trabajo con el ID =" + id, HttpStatus.NOT_FOUND, null);
 		}
 	}
 
@@ -97,12 +97,14 @@ public class BolsaTrabajoController {
 			_elemento.setApellidoMat(elemento.getApellidoMat());
 			_elemento.setDelegacion(elemento.getDelegacion());
 			_elemento.setCodigoPostal(elemento.getCodigoPostal());
+			_elemento.setCurp(elemento.getCurp());
+			_elemento.setId_beneficiario(elemento.getId_beneficiario());
 			bolsaTrabajoRepository.update(_elemento);
 			//return new ResponseEntity<>("El elemento de la bolsa de trabajo ha sido modificado de manera exitosa", HttpStatus.OK);
 			return ResponseHandler.generateResponse("El elemento de la bolsa de trabajo ha sido modificado de manera exitosa", HttpStatus.OK, null);
 		} else {
 			//return new ResponseEntity<>("No se pudo encontrar el elemento de la bolsa de trabajo con Id=" + id, HttpStatus.NOT_FOUND);
-			return ResponseHandler.generateResponse("No se pudo encontrar el elemento de la bolsa de trabajo con el ID =" + id, HttpStatus.NO_CONTENT, null);
+			return ResponseHandler.generateResponse("No se pudo encontrar el elemento de la bolsa de trabajo con el ID =" + id, HttpStatus.NOT_FOUND, null);
 		}
 	}
 
@@ -114,7 +116,7 @@ public class BolsaTrabajoController {
 			int result = bolsaTrabajoRepository.deleteById(id);
 			if (result == 0) {
 				//return new ResponseEntity<>("No se pudo encontrar el elemento de la bolsa de trabajo con el ID =" + id, HttpStatus.OK);
-				return ResponseHandler.generateResponse("No se pudo encontrar el elemento de la bolsa de trabajo con el ID =" + id, HttpStatus.NO_CONTENT, null);
+				return ResponseHandler.generateResponse("No se pudo encontrar el elemento de la bolsa de trabajo con el ID =" + id, HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>("El elemento de la bolsa de trabajo fué eliminado exitosamente", HttpStatus.OK);
 			return ResponseHandler.generateResponse("El elemento de la bolsa de trabajo fué eliminado exitosamente.", HttpStatus.OK, null);
@@ -133,8 +135,8 @@ public class BolsaTrabajoController {
 		try {
 			BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(rfc);
 			if (bolsa == null) {			
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No existen elementos a la bolsa de trabajo en el Sistema", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen elementos a la bolsa de trabajo en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>(bolsa, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Existen elementos a la bolsa de trabajo en el Sistema", HttpStatus.OK, bolsa);

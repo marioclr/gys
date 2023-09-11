@@ -111,9 +111,9 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizado_ct(String id_centro_trabajo, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_INT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT_CT, Double.class, id_centro_trabajo, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio );
 	}
 
 	@Override
@@ -123,9 +123,9 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizadoExt_ct(String id_centro_trabajo, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_EXT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT_CT, Double.class, id_centro_trabajo, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio );
 	}
 
 	@Override
@@ -243,12 +243,13 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 	@Override
 	public int updateGuardiaExtVars(DatosGuardia guardia) {
-		return jdbcTemplate.update(QUERY_UPD_GUARDIAS_EXT_VARS, 
-				new Object[] { guardia.getImporte(), guardia.getRiesgos(),
-						guardia.getDatos_empleado1().getId_puesto_plaza(), guardia.getDatos_empleado1().getId_clave_servicio(),
-						guardia.getDatos_empleado1().getId_nivel(), guardia.getDatos_empleado1().getId_sub_nivel(), 
-						guardia.getDatos_empleado1().getId_tipo_jornada(), guardia.getDatos_empleado1().getId_centro_trabajo(),
-						guardia.getClave_empleado(), guardia.getFec_paga(), guardia.getFec_inicio(), guardia.getId_ordinal() });
+//		return jdbcTemplate.update(QUERY_UPD_GUARDIAS_EXT_VARS, 
+//				new Object[] { guardia.getImporte(), guardia.getRiesgos(),
+//						guardia.getDatos_empleado1().getId_puesto_plaza(), guardia.getDatos_empleado1().getId_clave_servicio(),
+//						guardia.getDatos_empleado1().getId_nivel(), guardia.getDatos_empleado1().getId_sub_nivel(), 
+//						guardia.getDatos_empleado1().getId_tipo_jornada(), guardia.getDatos_empleado1().getId_centro_trabajo(),
+//						guardia.getClave_empleado(), guardia.getFec_paga(), guardia.getFec_inicio(), guardia.getId_ordinal() });
+		return 0;
 	}
 
 	@Override
@@ -260,7 +261,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		String QUERY_TABLE_BASE = "";
 		List<Object> objects = new ArrayList<Object>();
 
-		if (tipo.equals(String.valueOf("I"))) {
+		if (tipo.equals(String.valueOf("GI"))) {
 			QUERY_TABLE_BASE = "gys_guardias_emp";
 			EMPLOYEE_FIELD   = "id_empleado";
 		} else {
@@ -274,7 +275,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		}
 
 		if (clave_empleado != null) {
-			if (tipo.equals(String.valueOf("I"))) {
+			if (tipo.equals(String.valueOf("GI"))) {
 				QUERY_CONDITION += "And id_empleado = ?\r\n";
 				objects.add(clave_empleado);
 			} else {

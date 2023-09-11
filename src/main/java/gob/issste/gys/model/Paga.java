@@ -9,13 +9,15 @@ public class Paga {
 	private String fec_inicio;
 	private String fec_fin;
 	private int anio_ejercicio;
+	private int mes_ejercicio;
+	private int id_tipo_paga;
 	private String id_usuario;
 
 	public Paga() {
 		super();
 	}
 
-	public Paga(String fec_pago, String descripcion, int estatus, String fec_inicio, String fec_fin, int anio_ejercicio) {
+	public Paga(String fec_pago, String descripcion, int estatus, String fec_inicio, String fec_fin, int anio_ejercicio, int mes_ejercicio, int id_tipo_paga) {
 		super();
 		this.fec_pago = fec_pago;
 		this.descripcion = descripcion;
@@ -23,6 +25,8 @@ public class Paga {
 		this.fec_inicio = fec_inicio;
 		this.fec_fin = fec_fin;
 		this.anio_ejercicio = anio_ejercicio;
+		this.mes_ejercicio = mes_ejercicio;
+		this.id_tipo_paga = id_tipo_paga;
 	}
 
 	public int getId() {
@@ -66,6 +70,18 @@ public class Paga {
 	}
 	public void setAnio_ejercicio(int anio_ejercicio) {
 		this.anio_ejercicio = anio_ejercicio;
+	}
+	public int getMes_ejercicio() {
+		return mes_ejercicio;
+	}
+	public void setMes_ejercicio(int mes_ejercicio) {
+		this.mes_ejercicio = mes_ejercicio;
+	}
+	public int getId_tipo_paga() {
+		return id_tipo_paga;
+	}
+	public void setId_tipo_paga(int id_tipo_paga) {
+		this.id_tipo_paga = id_tipo_paga;
 	}
 	public String getId_usuario() {
 		return id_usuario;

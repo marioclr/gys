@@ -17,7 +17,7 @@ import gob.issste.gys.repository.IEmpleadoRepository;
 import gob.issste.gys.repository.ITabuladorRepository;
 
 @Service
-public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
+public class GuardiaServiceImpl implements IGuardiaService {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
 
@@ -53,7 +53,7 @@ public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
 	        default: importe = valores.getSueldo(); break;
         }
 
-		if (tipo.equals(String.valueOf("I"))) {
+		if (tipo.equals(String.valueOf("GI"))) {
 	        switch (tipo_tabulador)
 	        {
 	            case "M": importe = importe + valores.getAsignacion(); break;
@@ -61,7 +61,7 @@ public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
 	        }
 		}
 
-		importe = (tipo.equals(String.valueOf("I"))) ? importe = (importe / 30) * 2 : (importe / 30);
+		importe = (tipo.equals(String.valueOf("GI"))) ? importe = (importe / 30) * 2 : (importe / 30);
 
         importe = importe / Double.valueOf(tipo_jornada) * horas;
 
@@ -71,7 +71,7 @@ public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
 	@Override
 	public int guardarGuardia(DatosGuardia guardia, double importe) throws SQLException {
 		guardia.setImporte(importe);
-		if (guardia.getTipo_guardia().equals(String.valueOf("I"))) {
+		if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
 			return guardiaRepository.save(guardia);
 		} else {
 			return guardiaRepository.saveExt(guardia);
@@ -80,13 +80,13 @@ public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
 
 	@Override
 	public void actualizaImportesGuardias(String fechaPago, String tipo) {
-		if (tipo.equals(String.valueOf("I"))) {
+		if (tipo.equals(String.valueOf("GI"))) {
 			List<DatosGuardia> guardias = guardiaRepository.ConsultaGuardiasInternasXFecha(fechaPago);
 			for(DatosGuardia g:guardias) {
 				try {
 					g.setRiesgos(empleadoRepository.ConsultaRiesgosEmp(g.getClave_empleado(), g.getFec_paga()));
 					g.setImporte(this.CalculaImporteGuardia(g.getId_tipo_tabulador(), g.getId_zona(), g.getId_nivel(), g.getId_sub_nivel(), g.getId_tipo_jornada(), 
-							g.getRiesgos(), "I", g.getHoras(), fechaPago));
+							g.getRiesgos(), "GI", g.getHoras(), fechaPago));
 					guardiaRepository.updateImporteGuardia(g);
 				} catch (Exception Ex) {
 					logger.info(g.toString());
@@ -97,7 +97,7 @@ public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
 			for(DatosGuardia g:guardias) {
 				try {
 					g.setImporte(this.CalculaImporteGuardia(g.getId_tipo_tabulador(), g.getId_zona(), g.getId_nivel(), g.getId_sub_nivel(), g.getId_tipo_jornada(), 
-							g.getRiesgos(), "E", g.getHoras(), fechaPago));
+							g.getRiesgos(), "GE", g.getHoras(), fechaPago));
 					guardiaRepository.updateImporteGuardiaExt(g);
 				} catch (Exception Ex) {
 					logger.info(g.toString());
@@ -109,7 +109,7 @@ public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
 	@Override
 	public void actualizaGuardia(DatosGuardia guardia, double importe) {
 		guardia.setImporte(importe);
-		if (guardia.getTipo_guardia().equals(String.valueOf("I")))
+		if (guardia.getTipo_guardia().equals(String.valueOf("GI")))
 			guardiaRepository.updateGuardia(guardia);
 		else
 			guardiaRepository.updateGuardiaExt(guardia);
@@ -117,7 +117,7 @@ public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
 
 	@Override
 	public void eliminarGuardia(Integer id, String tipo) {
-		if (tipo.equals(String.valueOf("I")))
+		if (tipo.equals(String.valueOf("GI")))
 			guardiaRepository.deleteGuardia(id);
 		else
 			guardiaRepository.deleteGuardiaExt(id);
@@ -127,31 +127,31 @@ public class GuardiaInternaServiceImpl implements IGuardiaInternaService {
 	public void actualizaImportesGuardias2(String fechaPago, String tipo) {
 		List<DatosGuardia> guardias = null;
 
-		if (tipo.equals(String.valueOf("I"))) 
+		if (tipo.equals(String.valueOf("GI"))) 
 			guardias = guardiaRepository.ConsultaGuardiasInternasXFecha(fechaPago);
 		else
 			guardias = guardiaRepository.ConsultaGuardiasExternasXFecha(fechaPago);
 
 		for(DatosGuardia g:guardias) {
-			try {
-				g.setRiesgos(empleadoRepository.ConsultaRiesgosEmp(g.getEmpleado1(), g.getFec_paga()));
-			} catch(Exception ex) {
-				g.setRiesgos(0);
-			}
-			try {
-				DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(fechaPago, g.getEmpleado1());
-				g.setDatos_empleado1(empleado);
-				g.setImporte(this.CalculaImporteGuardia(g.getId_tipo_tabulador(), g.getId_zona(), g.getId_nivel(), g.getId_sub_nivel(), g.getId_tipo_jornada(), 
-						g.getRiesgos(), "E", g.getHoras(), fechaPago));
-			} catch(Exception ex) {
-				g.setImporte((double) 0);
-				continue;
-			}
-			if (tipo.equals(String.valueOf("I"))) {
-				guardiaRepository.updateGuardiaIntVars(g);
-			} else {
-				guardiaRepository.updateGuardiaExtVars(g);
-			}
+//			try {
+//				g.setRiesgos(empleadoRepository.ConsultaRiesgosEmp(g.getEmpleado1(), g.getFec_paga()));
+//			} catch(Exception ex) {
+//				g.setRiesgos(0);
+//			}
+//			try {
+//				DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(fechaPago, g.getEmpleado1());
+//				g.setDatos_empleado1(empleado);
+//				g.setImporte(this.CalculaImporteGuardia(g.getId_tipo_tabulador(), g.getId_zona(), g.getId_nivel(), g.getId_sub_nivel(), g.getId_tipo_jornada(), 
+//						g.getRiesgos(), "GE", g.getHoras(), fechaPago));
+//			} catch(Exception ex) {
+//				g.setImporte((double) 0);
+//				continue;
+//			}
+//			if (tipo.equals(String.valueOf("GI"))) {
+//				guardiaRepository.updateGuardiaIntVars(g);
+//			} else {
+//				guardiaRepository.updateGuardiaExtVars(g);
+//			}
 		}
 	}
 

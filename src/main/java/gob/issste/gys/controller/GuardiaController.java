@@ -34,7 +34,7 @@ import gob.issste.gys.repository.IPagaRepository;
 import gob.issste.gys.repository.IPresupuestoRepository;
 import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
-import gob.issste.gys.service.IGuardiaInternaService;
+import gob.issste.gys.service.IGuardiaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,7 +51,7 @@ public class GuardiaController {
 	GuardiaRepository guardiaRepository;
 
 	@Autowired
-	IGuardiaInternaService guardiaInternaService;
+	IGuardiaService guardiaService;
 
 	@Autowired
 	IPresupuestoRepository presupuestoRepository;
@@ -81,13 +81,13 @@ public class GuardiaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strDate = dateFormat.format(quincena);
-			importe = guardiaInternaService.CalculaImporteGuardia( tipo_tabulador, zona, nivel, subnivel, tipo_jornada, riesgos, tipo, horas, strDate );
+			importe = guardiaService.CalculaImporteGuardia( tipo_tabulador, zona, nivel, subnivel, tipo_jornada, riesgos, tipo, horas, strDate );
 			BigDecimal importe2 = new BigDecimal(importe).setScale(2, RoundingMode.HALF_UP);
 			//return new ResponseEntity<>(importe2, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el importe de la guardia conforme a los criterios establecidos", HttpStatus.OK, importe2);
 		} catch (SQLException e) {
 			logger.info(e.toString());
-			return ResponseHandler.generateResponse(e.toString(), HttpStatus.NO_CONTENT, null);
+			return ResponseHandler.generateResponse(e.toString(), HttpStatus.NOT_FOUND, null);
 		} catch (Exception e) {
 			logger.info(e.toString());
 			return ResponseHandler.generateResponse("Error al consultar el importe de la guardia conforme a los criterios establecidos", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -104,15 +104,15 @@ public class GuardiaController {
 		try {
 			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
 
-			if (tipoGuardia.equals(String.valueOf("I"))) {
+			if (tipoGuardia.equals(String.valueOf("GI"))) {
 				guardias = guardiaRepository.ConsultaGuardiasInternas(claveEmpleado);
 			} else {
 				guardias = guardiaRepository.ConsultaGuardiasExternas(claveEmpleado);
 			}
 
 			if (guardias.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten guardias para la clave y el tipo asignado", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen guardias para la clave y el tipo asignado", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(guardias, HttpStatus.OK);
@@ -134,7 +134,7 @@ public class GuardiaController {
 
 		DatosGuardia guardia = null;
 
-		if (tipoGuardia.equals(String.valueOf("I")))
+		if (tipoGuardia.equals(String.valueOf("GI")))
 			guardia = guardiaRepository.findById(idGuardia);
 		else
 			guardia = guardiaRepository.findByIdExterno(idGuardia);
@@ -163,13 +163,13 @@ public class GuardiaController {
 			if (idCentroTrab == null) {
 				saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio);
 			} else {
-				saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(idCentroTrab, anio_ejercicio);
+				saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio);
 			}
 		} else {
 			if (idCentroTrab == null) {					
 				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio);
 			} else {
-				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(idCentroTrab, anio_ejercicio);
+				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio);
 			}
 		}
 		return ResponseHandler.generateResponse("Se obtuvo el saldo utilizado para guardias para las condiciones indicadas", HttpStatus.OK, saldo);
@@ -177,7 +177,6 @@ public class GuardiaController {
 
 	@Operation(summary = "Agrega un nuevo registro de guardia al Sistema", description = "Agrega un nuevo registro de guardia al Sistema", tags = { "Guardia" })
 	@PostMapping("/guardias")
-	//public ResponseEntity<String> agregarGuardia(
 	public ResponseEntity<Object> agregarGuardia(	
 			@Parameter(description = "Objeto de la guardia a crearse en el Sistema") @RequestBody DatosGuardia guardia) {
 		try {
@@ -210,30 +209,82 @@ public class GuardiaController {
 			saldo = (presup != null) ? presup.getSaldo(): 0; 
 
 			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(idCentroTrab, presup.getAnio());
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio());
 			} else {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(idCentroTrab, presup.getAnio());
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio());
 			}
 
-			//saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado(idDeleg, presup.getAnio()) + guardiaRepository.ObtenerSaldoUtilizadoExt(idDeleg, presup.getAnio());
-
-			double importe = guardiaInternaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(), 
+			double importe = guardiaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(), 
 					guardia.getId_nivel(), guardia.getId_sub_nivel(), guardia.getId_tipo_jornada(), guardia.getRiesgos(), 
 					guardia.getTipo_guardia(), guardia.getHoras(), guardia.getFec_paga());
 
 			if (importe + saldo_utilizado <= saldo) {
 
-				id = guardiaInternaService.guardarGuardia(guardia, importe);
+				id = guardiaService.guardarGuardia(guardia, importe);
 			} else {
-				//return new ResponseEntity<>("No existe presupuesto suficiente para realizar este tipo de registro", HttpStatus.INTERNAL_SERVER_ERROR);
+
 				return ResponseHandler.generateResponse("No existe presupuesto suficiente para realizar este tipo de registro", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			//return new ResponseEntity<>("El registro de guardia ha sido guardado de manera exitosa, con ID = " + id, HttpStatus.CREATED);
 			return ResponseHandler.generateResponse("El registro de guardia ha sido guardado de manera exitosa, con ID = " + id, HttpStatus.CREATED, null);
 		} catch (Exception e) {
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al realizar el registro de guardia indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Actualiza un registro de guardia en el Sistema", description = "Actualiza un registro de guardia en el Sistema", tags = { "Guardia" })
+	@PutMapping("/guardias")
+	public ResponseEntity<Object> actualizarGuardia(
+			@Parameter(description = "Objeto de la guardia a actualizarse en el Sistema") @RequestBody DatosGuardia guardia) {
+		try {
+
+			int idTipoPresup, anio;
+			double saldo_utilizado=0, saldo=0;
+			Presupuesto presup;
+
+			String idCentroTrab = guardia.getId_centro_trabajo();
+			String fec_pago = guardia.getFec_paga();
+
+			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
+				idTipoPresup = 1;
+			} else {
+				idTipoPresup = 2;
+			}
+
+			try {
+				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
+			} catch (EmptyResultDataAccessException e) {
+				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+			try {			
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, idTipoPresup, anio);
+			} catch (EmptyResultDataAccessException e) {
+				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+
+			saldo = (presup != null) ? presup.getSaldo(): 0;
+
+			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(guardia.getId(), idCentroTrab, presup.getAnio());
+			} else {
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(guardia.getId(), idCentroTrab, presup.getAnio());
+			}
+
+			double importe = guardiaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(), 
+					guardia.getId_nivel(), guardia.getId_sub_nivel(), guardia.getId_tipo_jornada(), guardia.getRiesgos(), 
+					guardia.getTipo_guardia(), guardia.getHoras(), guardia.getFec_paga());
+
+			if (importe + saldo_utilizado <= saldo) {
+				guardiaService.actualizaGuardia(guardia, importe);
+			} else {
+				return ResponseHandler.generateResponse("No existe presupuesto suficiente para realizar la actualización del registro", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+
+			return ResponseHandler.generateResponse("El registro de guardia ha sido actualizado de manera exitosa.", HttpStatus.CREATED, null);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al realizar la actualización del registro de guardia indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -246,7 +297,7 @@ public class GuardiaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
-			guardiaInternaService.actualizaImportesGuardias(strQuincena, tipoGuardia);
+			guardiaService.actualizaImportesGuardias(strQuincena, tipoGuardia);
 			//return new ResponseEntity<>("Los importes de las guardias se actualizaron de manera exitósa.", HttpStatus.CREATED);
 			return ResponseHandler.generateResponse("Los importes de las guardias se actualizaron de manera exitósa.", HttpStatus.CREATED, null);
 		} catch (Exception e) {
@@ -264,33 +315,12 @@ public class GuardiaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
-			guardiaInternaService.actualizaImportesGuardias2(strQuincena, tipoSuplencia);
+			guardiaService.actualizaImportesGuardias2(strQuincena, tipoSuplencia);
 			//return new ResponseEntity<>("Los importes de las guardidas se actualizaron de manera exitósa", HttpStatus.CREATED);
 			return ResponseHandler.generateResponse("Los importes de las guardidas se actualizaron de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al actualizar importes de guardias en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
-		}
-	}
-
-	@Operation(summary = "Actualiza un registro de guardia en el Sistema", description = "Actualiza un registro de guardia en el Sistema", tags = { "Guardia" })
-	@PutMapping("/guardias")
-	//public ResponseEntity<String> actualizarGuardia(
-	public ResponseEntity<Object> actualizarGuardia(
-			@Parameter(description = "Objeto de la guardia a actualizarse en el Sistema") @RequestBody DatosGuardia guardia) {
-		try {
-
-			double importe = guardiaInternaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(), 
-					guardia.getId_nivel(), guardia.getId_sub_nivel(), guardia.getId_tipo_jornada(), guardia.getRiesgos(), 
-					guardia.getTipo_guardia(), guardia.getHoras(), guardia.getFec_paga());
-
-			guardiaInternaService.actualizaGuardia(guardia, importe);
-
-			//return new ResponseEntity<>("El registro de guardia ha sido actualizado de manera exitosa", HttpStatus.CREATED);
-			return ResponseHandler.generateResponse("Los importes de las guardias se actualizaron de manera exitósa.", HttpStatus.CREATED, null);
-		} catch (Exception e) {
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-			return ResponseHandler.generateResponse("Error al realizar la actualización del registro de guardia indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -301,7 +331,7 @@ public class GuardiaController {
 			@Parameter(description = "Número de ID para obtener la guardia del empleado", required = true) @RequestParam(required = true) Integer idGuardia,
 			@Parameter(description = "Tipo para obtener la guardia del empleado (I-Interna o E-Externa)", required = true) @RequestParam(required = true) String tipoGuardia) {
 		try {
-			guardiaInternaService.eliminarGuardia(idGuardia, tipoGuardia);
+			guardiaService.eliminarGuardia(idGuardia, tipoGuardia);
 			//return new ResponseEntity<>("El un registro de guardia fué eliminado exitosamente.", HttpStatus.OK);
 			return ResponseHandler.generateResponse("El un registro de guardia fué eliminado exitosamente.", HttpStatus.OK, null);
 		} catch (Exception e) {
@@ -337,7 +367,7 @@ public class GuardiaController {
 																idDelegacion, idCentroTrab, claveServicio, puesto);
 
 			if (guardias.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.NOT_FOUND, null);
 			}
 

@@ -9,6 +9,8 @@ public class BolsaTrabajo {
 	private String apellidoMat;
 	private Delegacion delegacion;
 	private String codigoPostal;
+	private String curp;
+	private String id_beneficiario;
 
 	public int getId() {
 		return id;
@@ -52,5 +54,16 @@ public class BolsaTrabajo {
 	public void setCodigoPostal(String codigoPostal) {
 		this.codigoPostal = codigoPostal;
 	}
-	
+	public String getCurp() {
+		return curp;
+	}
+	public void setCurp(String curp) {
+		this.curp = curp;
+	}
+	public String getId_beneficiario() {
+		return id_beneficiario;
+	}
+	public void setId_beneficiario(String id_beneficiario) {
+		this.id_beneficiario = id_beneficiario;
+	}	
 }

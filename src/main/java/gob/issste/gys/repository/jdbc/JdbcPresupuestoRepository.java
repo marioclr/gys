@@ -208,4 +208,45 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 		return presupuestos;
 	}
 
+	@Override
+	public double getSaldoDelegCt(String idDelegacion, Integer idTipoPresup, Integer anio, String idCentTrab) {
+
+		String QUERY_CONDITION = "";
+		List<Object> objects = new ArrayList<Object>();
+
+		if (idDelegacion != null) {
+			QUERY_CONDITION += "And P.idDelegacion = ?\r\n";
+			objects.add(idDelegacion);
+		}
+		if (idTipoPresup != null) {
+			QUERY_CONDITION += "And P.idTipoPresup = ?\r\n";
+			objects.add(idTipoPresup);
+		}
+		if (anio != null) {
+			QUERY_CONDITION += "And P.anio = ?\r\n";
+			objects.add(anio);
+		}
+		if (idCentTrab != null) {
+			QUERY_CONDITION += "And P.id_centro_trabajo = ?\r\n";
+			objects.add(idCentTrab);
+		}
+
+		String QUERY_GET_PRESUPUESTO_DEL_CT = "Select NVL( SUM(P.saldo), 0.0) saldo \r\n"
+											+ "From gys_presupuesto P, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
+											+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
+											+ QUERY_CONDITION;
+
+		logger.info(QUERY_GET_PRESUPUESTO_DEL_CT);
+		double saldo = jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_DEL_CT, Double.class, objects.toArray() );
+
+		return saldo;
+	}
+
+	@Override
+	public double getSaldoDistribuido(Integer anio, String idDelegacion, Integer idTipoPresup) {
+		logger.info(QUERY_GET_SALDO_DISTRIBUIDO);
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_DISTRIBUIDO, Double.class,
+				new Object[] { anio, idDelegacion, idTipoPresup } );
+	}
+
 }

@@ -1,15 +1,18 @@
 package gob.issste.gys.repository;
 
+import java.sql.SQLException;
 import java.util.List;
 
 import gob.issste.gys.model.Paga;
 
 public interface IPagaRepository {
 
-	public String QUERY_ADD_NEW_PAGAS      = "INSERT INTO gys_fechas_control ( fec_pago, descripcion, estatus, fec_inicio, fec_fin, anio_ejercicio ) VALUES( ?, ?, ?, ?, ?, ? )";
-	int save(Paga tipMovPresup);
+	public String QUERY_ADD_NEW_PAGAS      = "INSERT INTO gys_fechas_control ( fec_pago, descripcion, estatus, fec_inicio, fec_fin, "
+										   + "anio_ejercicio, mes_ejercicio, id_tipo_paga ) VALUES( ?, ?, ?, ?, ?, ?, ?, ? )";
+	int save(Paga tipMovPresup) throws SQLException;
 
-	public String QUERY_UPDATE_PAGAS       = "UPDATE gys_fechas_control Set descripcion = ?, estatus = ?, fec_inicio = ?, fec_fin = ?, anio_ejercicio = ? Where id = ?";
+	public String QUERY_UPDATE_PAGAS       = "UPDATE gys_fechas_control Set descripcion = ?, estatus = ?, fec_inicio = ?, fec_fin = ?, "
+										   + "anio_ejercicio = ?, mes_ejercicio = ?, id_tipo_paga = ? Where id = ?";
 	int update(Paga tipMovPresup);
 
 	public String QUERY_DELETE_PAGAS_BY_ID = "DELETE FROM gys_fechas_control WHERE id=?";

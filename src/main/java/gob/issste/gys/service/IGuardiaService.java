@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 import gob.issste.gys.model.DatosGuardia;
 
-public interface IGuardiaInternaService {
+public interface IGuardiaService {
 	double CalculaImporteGuardia(String tipo_tabulador, String zona, String nivel, String subnivel, String tipo_jornada, Integer riesgos, String tipo, Double horas, String quincena) throws SQLException;
 	int guardarGuardia(DatosGuardia guardia, double importe) throws SQLException;
 	void actualizaImportesGuardias(String fechaPago, String tipo);

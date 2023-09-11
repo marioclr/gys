@@ -173,4 +173,10 @@ public class JdbcDatosRepository implements IDatosRepository {
 		return jdbcTemplate.query(QUERY_GET_PAGAS, BeanPropertyRowMapper.newInstance(Paga.class));
 	}
 
+	@Override
+	public Delegacion getDatosDelegacionById(String idDelegacion) {
+		logger.info(QUERY_GET_DELEGACION_BY_ID);
+		return jdbcTemplate.queryForObject(QUERY_GET_DELEGACION_BY_ID, BeanPropertyRowMapper.newInstance(Delegacion.class), idDelegacion);
+	}
+
 }

@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.Empleado;
+import gob.issste.gys.model.Usuario;
 import gob.issste.gys.repository.IEmpleadoRepository;
+import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,13 +36,16 @@ public class EmpleadoController {
 
 	@Autowired
 	IEmpleadoRepository empleadoRepository;
+	@Autowired
+	UsuarioRepository usuarioRepository;
 
 	@Operation(summary = "Obtener porcentaje de riesgos profesionales del empleado en el Sistema", description = "Obtener porcentaje de riesgos profesionales del empleado en el Sistema", tags = { "Empleados" })
 	@GetMapping("/empleados/datos")
 	public ResponseEntity<Object> getEmpleado(
 			@Parameter(description = "Número de empleado para obtener los datos del empleado", required = true) @RequestParam(required = true) String idEmpleado,
 			@Parameter(description = "Fecha en la que se desea obtener los datos del empleado", required = false) @RequestParam(required = false) String fecha,
-			@Parameter(description = "Delegación del Usuario para validar si el Empleado pertenece a su Delegación", required = false) @RequestParam(required = false) String idDelegacion) {
+			@Parameter(description = "Delegación del Usuario para validar si el Empleado pertenece a su Delegación", required = false) @RequestParam(required = false) String idDelegacion,
+			@Parameter(description = "ID del usuario para validar conforme a su Nivel de visibilidad", required = false) @RequestParam(required = false) Integer idUsuario ) {
 
 		if (fecha == null) {
 			DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -51,25 +56,32 @@ public class EmpleadoController {
 			DatosEmpleado empleado = null;
 
 			empleado = empleadoRepository.getDatosEmpleado(fecha, idEmpleado);
-
-//			if (idDelegacion != null) {
-//				if(!idDelegacion.equals(empleado.getId_delegacion()))
-//				//return new ResponseEntity<>(HttpStatus.CONFLICT);
-//					return ResponseHandler.generateResponse("El empleado consultado pertenece a una Delegación diferente a la del Usuario", HttpStatus.CONFLICT, null);
-//			}
+			Usuario usuario = usuarioRepository.findById(idUsuario);
+			usuario.setCentrosTrabajo(usuarioRepository.getCentTrabForUsu(idUsuario));
 
 			if (empleado == null) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("El empleado consultado pertenece a una Delegación diferente a la del Usuario", HttpStatus.NO_CONTENT, null);
+				return ResponseHandler.generateResponse("No se obtuvo el empleado consultado", HttpStatus.NOT_FOUND, null);
 			}
 
-			//return new ResponseEntity<>(empleado, HttpStatus.OK);
+			if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==3 ) {
+				if ( ! usuario.contieneCT(empleado.getId_centro_trabajo())) {
+					return ResponseHandler.generateResponse("El Empleado consultado pertenece a un Centro de trabajo diferente a los que se asignaron al Usuario", HttpStatus.CONFLICT, null);
+				}
+			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==2 ) {
+				if ( ! usuario.getDelegacion().getId_div_geografica().equals(empleado.getId_delegacion())) {
+					return ResponseHandler.generateResponse("El empleado consultado pertenece a una Delegación diferente a la del Usuario", HttpStatus.CONFLICT, null);
+				}
+			}
+
+			if (idDelegacion != null) {
+				if(!idDelegacion.equals(empleado.getId_delegacion()))
+					return ResponseHandler.generateResponse("El empleado consultado pertenece a una Delegación diferente a la del Usuario", HttpStatus.CONFLICT, null);
+			}
+
 			return ResponseHandler.generateResponse("Se encontro el empleado y pertenece a la Delegación del Usuario", HttpStatus.OK, empleado);
 		} catch (EmptyResultDataAccessException e) {
-			//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			return ResponseHandler.generateResponse("No se encontró el empleado indicado", HttpStatus.NO_CONTENT, null);
+			return ResponseHandler.generateResponse("No se encontró el empleado indicado", HttpStatus.NOT_FOUND, null);
 		} catch (Exception e) {
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al buscar al empleado indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
@@ -105,8 +117,8 @@ public class EmpleadoController {
 				empleadoRepository.findByNombre(nombre).forEach(empleados::add);
 
 			if (empleados.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros de empleados en el sistema", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros de empleados en el sistema", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(empleados, HttpStatus.OK);
@@ -128,7 +140,7 @@ public class EmpleadoController {
 			return ResponseHandler.generateResponse("Se encontró el empleado mediante su ID", HttpStatus.OK, empleado);
 		} else {
 			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			return ResponseHandler.generateResponse("No se encontró el empleado mediante su ID", HttpStatus.NO_CONTENT, null);
+			return ResponseHandler.generateResponse("No se encontró el empleado mediante su ID", HttpStatus.NOT_FOUND, null);
 		}
 	}
 }

@@ -161,7 +161,7 @@ public class UsuarioController {
 				usuarioRepository.findByClave(clave, conPerfiles).forEach(usuarios::add);
 
 			if (usuarios.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se obtuvieron los usuarios del Sistema", HttpStatus.NOT_FOUND, null);
 				
 			}

@@ -201,9 +201,21 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
+	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio) {
+		logger.info(QUERY_GET_SALDO_SUPLENCIA_INT_CT);
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio );
+	}
+
+	@Override
 	public double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio) {
 		logger.info(QUERY_GET_SALDO_SUPLENCIA_EXT);
 		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_EXT, Double.class, idDelegacion, anio_ejercicio );
+	}
+
+	@Override
+	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio) {
+		logger.info(QUERY_GET_SALDO_SUPLENCIA_EXT_CT);
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio );
 	}
 
 	@Override
@@ -284,7 +296,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 		String QUERY_TABLE_BASE = "";
 		List<Object> objects = new ArrayList<Object>();
 
-		if (tipo.equals(String.valueOf("I"))) {
+		if (tipo.equals(String.valueOf("SI"))) {
 			QUERY_TABLE_BASE = "gys_suplencias_emp";
 			EMPLOYEE_FIELD   = "G.id_empleado";
 		} else {
@@ -298,7 +310,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 		}
 
 		if (clave_empleado != null) {
-			if (tipo.equals(String.valueOf("I"))) {
+			if (tipo.equals(String.valueOf("SI"))) {
 				QUERY_CONDITION += "And G.id_empleado = ?\r\n";
 				objects.add(clave_empleado);
 			} else {

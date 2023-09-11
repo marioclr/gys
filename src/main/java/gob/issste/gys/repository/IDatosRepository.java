@@ -102,19 +102,22 @@ public interface IDatosRepository {
 													+ "Order by G.fec_paga desc, G.fec_inicio";
 	public List<DatosGuardia> ConsultaGuardiasInternas(String claveEmpleado);
 
-	public String QUERY_GET_DELEGACIONES            = "Select * From m4t_delegaciones";
+	public String QUERY_GET_DELEGACIONES			= "Select * From m4t_delegaciones";
 	List<Delegacion> getDatosDelegaciones();
 
-	public String QUERY_GET_HORARIOS            	= "Select * From m4t_horarios";
+	public String QUERY_GET_HORARIOS				= "Select * From m4t_horarios";
 	List<Horario> getHorarios();
 
-	public String QUERY_GET_TIP_INCIDENCIA         	= "Select * From m4t_tip_ausentismo Order By Length(id_tipo_ausentismo), id_tipo_ausentismo";
+	public String QUERY_GET_TIP_INCIDENCIA			= "Select * From m4t_tip_ausentismo Order By Length(id_tipo_ausentismo), id_tipo_ausentismo";
 	List<Incidencia> getIncidencia();
 
-	public String QUERY_GET_PAGAS            		= "Select * From gys_fechas_control Where estatus <> 0";
+	public String QUERY_GET_PAGAS					= "Select * From gys_fechas_control Where estatus <> 0";
 	List<Paga> getPagas();
 
-	public String QUERY_VALIDA_PERSONAL_EXTERNO     = "Select nombre From gys_bolsa_trabajo Where id_legal = ?";
+	public String QUERY_VALIDA_PERSONAL_EXTERNO		= "Select nombre From gys_bolsa_trabajo Where id_legal = ?";
 	String ValidaPersonalExterno(String rfc);
+
+	public String QUERY_GET_DELEGACION_BY_ID		= "Select * From m4t_delegaciones Where id_div_geografica = ?";
+	Delegacion getDatosDelegacionById(String idDelegacion);
 
 }

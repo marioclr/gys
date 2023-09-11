@@ -65,8 +65,8 @@ public class DatosController {
 				}
 			}
 			if (adscripciones.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de adscripciones", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de adscripciones", HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>(adscripciones, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el catálogo de adscripciones", HttpStatus.OK, adscripciones);
@@ -87,7 +87,7 @@ public class DatosController {
 			adscripciones = datosRepository.getDatosAdscForDeleg(idDeleg);
 
 			if (adscripciones.isEmpty()) {
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de adscripciones", HttpStatus.NO_CONTENT, null);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de adscripciones", HttpStatus.NOT_FOUND, null);
 			}
 			return ResponseHandler.generateResponse("Se encontró el catálogo de adscripciones", HttpStatus.OK, adscripciones);
 		} catch (Exception e) {
@@ -110,8 +110,8 @@ public class DatosController {
 				puestos = datosRepository.getDatosPuestosGuardia(adsc);
 
 			if (puestos.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de puestos", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de puestos", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(puestos, HttpStatus.OK);
@@ -138,8 +138,8 @@ public class DatosController {
 				servicios = datosRepository.getDatosServiciosGuardia(adsc, puesto);
 
 			if (servicios.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de servicios", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de servicios", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(servicios, HttpStatus.OK);
@@ -167,8 +167,8 @@ public class DatosController {
 				niveles = datosRepository.getDatosNivelesGuardia(adsc, puesto, servicio);
 
 			if (niveles.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de niveles", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de niveles", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(niveles, HttpStatus.OK);
@@ -197,8 +197,8 @@ public class DatosController {
 				jornadas = datosRepository.getDatosJornadasGuardia(adsc, puesto, servicio, niveles);
 
 			if (jornadas.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de jornadas", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de jornadas", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(jornadas, HttpStatus.OK);
@@ -218,8 +218,8 @@ public class DatosController {
 			List<Delegacion> delegaciones = new ArrayList<Delegacion>();
 			delegaciones = datosRepository.getDatosDelegaciones();
 			if (delegaciones.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de delegaciones", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de delegaciones", HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>(delegaciones, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el catálogo de delegaciones", HttpStatus.OK, delegaciones);
@@ -238,8 +238,8 @@ public class DatosController {
 			List<Horario> horarios = new ArrayList<Horario>();
 			horarios = datosRepository.getHorarios();
 			if (horarios.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de horarios", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de horarios", HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>(horarios, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el catálogo de horarios", HttpStatus.OK, horarios);
@@ -258,8 +258,8 @@ public class DatosController {
 			List<Incidencia> incidencias = new ArrayList<Incidencia>();
 			incidencias = datosRepository.getIncidencia();
 			if (incidencias.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de incidencias", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de incidencias", HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>(incidencias, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el catálogo de incidencias", HttpStatus.OK, incidencias);
@@ -278,8 +278,8 @@ public class DatosController {
 			List<Paga> pagas = new ArrayList<Paga>();
 			pagas = datosRepository.getPagas();
 			if (pagas.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("No exixten registros en el catálogo de fechas", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de fechas", HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>(pagas, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el catálogo de fechas", HttpStatus.OK, pagas);
@@ -304,11 +304,11 @@ public class DatosController {
 		try {
 			long valida = 0;
 
-			valida = datosRepository.ValidaPuestoAutorizado(tipo_ct, clave_servicio, puesto, nivel, subnivel, tipo_jornada, tipo_guardia);
+			valida = datosRepository.ValidaPuestoAutorizado(tipo_ct, clave_servicio, puesto, nivel, subnivel, tipo_jornada, tipo_guardia.substring(1));
 
 			if (valida == 0) {
-				//return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-				return ResponseHandler.generateResponse("Estas características no son autarizadas para guardias o suplencias", HttpStatus.NO_CONTENT, null);
+				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+				return ResponseHandler.generateResponse("Estas características no son autarizadas para guardias o suplencias", HttpStatus.NOT_FOUND, null);
 			}
 
 			//return new ResponseEntity<>(valida, HttpStatus.OK);
