@@ -20,6 +20,7 @@ public class PresupuestoMapper implements RowMapper<Presupuesto> {
 
 		presupuesto.setId(rs.getInt("id"));
 		presupuesto.setAnio(rs.getInt("anio"));
+		presupuesto.setMes(rs.getInt("mes"));
 		presupuesto.setSaldo(rs.getDouble("saldo"));
 		
 		Delegacion delegacion = new Delegacion();

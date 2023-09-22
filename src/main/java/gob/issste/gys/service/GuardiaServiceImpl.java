@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
-import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.DatosGuardia;
 import gob.issste.gys.model.ValoresTabulador;
 import gob.issste.gys.repository.GuardiaRepository;
@@ -133,25 +132,25 @@ public class GuardiaServiceImpl implements IGuardiaService {
 			guardias = guardiaRepository.ConsultaGuardiasExternasXFecha(fechaPago);
 
 		for(DatosGuardia g:guardias) {
-//			try {
-//				g.setRiesgos(empleadoRepository.ConsultaRiesgosEmp(g.getEmpleado1(), g.getFec_paga()));
-//			} catch(Exception ex) {
-//				g.setRiesgos(0);
-//			}
-//			try {
-//				DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(fechaPago, g.getEmpleado1());
-//				g.setDatos_empleado1(empleado);
-//				g.setImporte(this.CalculaImporteGuardia(g.getId_tipo_tabulador(), g.getId_zona(), g.getId_nivel(), g.getId_sub_nivel(), g.getId_tipo_jornada(), 
-//						g.getRiesgos(), "GE", g.getHoras(), fechaPago));
-//			} catch(Exception ex) {
-//				g.setImporte((double) 0);
-//				continue;
-//			}
-//			if (tipo.equals(String.valueOf("GI"))) {
-//				guardiaRepository.updateGuardiaIntVars(g);
-//			} else {
-//				guardiaRepository.updateGuardiaExtVars(g);
-//			}
+			try {
+				g.setRiesgos(empleadoRepository.ConsultaRiesgosEmp(g.getClave_empleado(), g.getFec_paga())); // Se probo aquí el poner el empleado1
+			} catch(Exception ex) {
+				g.setRiesgos(0);
+			}
+			try {
+				//DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(fechaPago, g.getClave_empleado()); // Se probo aquí el poner el empleado1
+				//g.setDatos_empleado1(empleado);
+				g.setImporte(this.CalculaImporteGuardia(g.getId_tipo_tabulador(), g.getId_zona(), g.getId_nivel(), g.getId_sub_nivel(), g.getId_tipo_jornada(), 
+						g.getRiesgos(), "GE", g.getHoras(), fechaPago));
+			} catch(Exception ex) {
+				g.setImporte((double) 0);
+				continue;
+			}
+			if (tipo.equals(String.valueOf("GI"))) {
+				guardiaRepository.updateGuardiaIntVars(g);
+			} else {
+				guardiaRepository.updateGuardiaExtVars(g);
+			}
 		}
 	}
 

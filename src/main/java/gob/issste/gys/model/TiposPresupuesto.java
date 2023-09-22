@@ -33,4 +33,10 @@ public class TiposPresupuesto {
 	public void setDescripcion(String descripcion) {
 		this.descripcion = descripcion;
 	}
+
+	@Override
+	public String toString() {
+		return "TiposPresupuesto [clave=" + clave + ", descripcion=" + descripcion + "]";
+	}
+	
 }

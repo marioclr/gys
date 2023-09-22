@@ -66,4 +66,10 @@ public class JdbcTiposPresupuestoRepository implements ITiposPresupuestoReposito
 		return jdbcTemplate.query(QUERY_FIND_TIP_PRES_BY_DESC, BeanPropertyRowMapper.newInstance(TiposPresupuesto.class), "%" + desc + "%");
 	}
 
+	@Override
+	public TiposPresupuesto findByClave(String clave) {
+		logger.info(QUERY_FIND_TIP_PRES_BY_CLAVE);
+		return jdbcTemplate.queryForObject(QUERY_FIND_TIP_PRES_BY_CLAVE, BeanPropertyRowMapper.newInstance(TiposPresupuesto.class), clave);
+	}
+
 }

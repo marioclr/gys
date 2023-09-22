@@ -1,5 +1,7 @@
 package gob.issste.gys.repository.jdbc;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,11 +56,18 @@ public class JdbcAdminRepository implements IAdminRepository {
 	@Override
 	public CifrasImpuesto consultaCifras(String fec_pago, String tipo) {
 
-		logger.info(STMT_CONSULTA_CIFRAS_ISR);
+		logger.info(QUERY_CONSULTA_CIFRAS_ISR);
 
-		return jdbcTemplate.queryForObject(STMT_CONSULTA_CIFRAS_ISR, BeanPropertyRowMapper.newInstance(CifrasImpuesto.class), 
+		return jdbcTemplate.queryForObject(QUERY_CONSULTA_CIFRAS_ISR, BeanPropertyRowMapper.newInstance(CifrasImpuesto.class), 
 		new Object [] { fec_pago, tipo } );
 
+	}
+
+	@Override
+	public List<String> consultaLayoutSPEP(String fec_pago, String tipo) {
+		logger.info(QUERY_CONSULTA_LAYOUT_SPEP);
+
+		return jdbcTemplate.queryForList(QUERY_CONSULTA_LAYOUT_SPEP, String.class, fec_pago, tipo, fec_pago, tipo );
 	}
 
 }

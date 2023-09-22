@@ -37,9 +37,10 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
         PreparedStatementCreator statementCreator = (Connection connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_PRESUPUESTO, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, presupuesto.getAnio());
-            preparedStatement.setString(2, presupuesto.getDelegacion().getId_div_geografica());
-            preparedStatement.setInt(3, presupuesto.getTipoPresup().getId());
-            preparedStatement.setDouble(4, presupuesto.getSaldo());
+            preparedStatement.setInt(2, presupuesto.getMes());
+            preparedStatement.setString(3, presupuesto.getDelegacion().getId_div_geografica());
+            preparedStatement.setInt(4, presupuesto.getTipoPresup().getId());
+            preparedStatement.setDouble(5, presupuesto.getSaldo());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -61,10 +62,11 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
         PreparedStatementCreator statementCreator = (Connection connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_PRESUPUESTO_CT, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, presupuesto.getAnio());
-            preparedStatement.setString(2, presupuesto.getDelegacion().getId_div_geografica());
-            preparedStatement.setString(3, presupuesto.getCentroTrabajo().getClave());
-            preparedStatement.setInt(4, presupuesto.getTipoPresup().getId());
-            preparedStatement.setDouble(5, presupuesto.getSaldo());
+            preparedStatement.setInt(2, presupuesto.getMes());
+            preparedStatement.setString(3, presupuesto.getDelegacion().getId_div_geografica());
+            preparedStatement.setString(4, presupuesto.getCentroTrabajo().getClave());
+            preparedStatement.setInt(5, presupuesto.getTipoPresup().getId());
+            preparedStatement.setDouble(6, presupuesto.getSaldo());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -123,34 +125,34 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 	}
 
 	@Override
-	public Presupuesto getElementByType_ct(String idCentroTrab, Integer idTipo, Integer anio) {
+	public Presupuesto getElementByType_ct(String idCentroTrab, String idTipo, Integer anio, Integer mes) {
 		logger.info(QUERY_GET_PRESUPUESTO_BY_TYPE_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_BY_TYPE_CT, new PresupuestoMapper(), idCentroTrab, idTipo, anio );
+		return jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_BY_TYPE_CT, new PresupuestoMapper(), idCentroTrab, idTipo, anio, mes);
 	}
 
 	@Override
 	public int existe_presupuesto(Presupuesto presupuesto) {
 		logger.info(QUERY_EXISTS_PRESUPUESTO);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_PRESUPUESTO, Integer.class,
-				new Object[] { presupuesto.getAnio(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getTipoPresup().getId() } );
+				new Object[] { presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getTipoPresup().getId() } );
 	}
 
 	@Override
 	public int existe_presupuesto_ct(Presupuesto presupuesto) {
 		logger.info(QUERY_EXISTS_PRESUPUESTO_CT);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_PRESUPUESTO_CT, Integer.class,
-				new Object[] { presupuesto.getAnio(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getCentroTrabajo().getClave(), presupuesto.getTipoPresup().getId() } );
+				new Object[] { presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getCentroTrabajo().getClave(), presupuesto.getTipoPresup().getId() } );
 	}
 
 	@Override
 	public double validaSumaPresupuestal(Presupuesto presupuesto) {
 		logger.info(QUERY_SUMA_PRESUPUESTO_CT);
 		return jdbcTemplate.queryForObject(QUERY_SUMA_PRESUPUESTO_CT, Double.class,
-				new Object[] { presupuesto.getSaldo(), presupuesto.getAnio(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getTipoPresup().getId() } );
+				new Object[] { presupuesto.getSaldo(), presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getTipoPresup().getId() } );
 	}
 
 	@Override
-	public List<Presupuesto> get_dynamic_regs(String idDelegacion, Integer idTipoPresup, Integer anio, String idCentTrab, boolean solo_deleg) {
+	public List<Presupuesto> get_dynamic_regs(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, String idCentTrab, boolean solo_deleg) {
 
 		String QUERY_CONDITION = ""; // , ADSC_TABLE = "", ADSC_FIELDS = "", ADSC_WHERE = "";
 		List<Object> objects = new ArrayList<Object>();
@@ -160,14 +162,19 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 			objects.add(idDelegacion);
 		}
 
-		if (idTipoPresup != null) {
-			QUERY_CONDITION += "And P.idTipoPresup = ?\r\n";
-			objects.add(idTipoPresup);
+		if (claveTipoPresup != null) {
+			QUERY_CONDITION += "And T.clave = ?\r\n";
+			objects.add(claveTipoPresup);
 		}
 
 		if (anio != null) {
 			QUERY_CONDITION += "And P.anio = ?\r\n";
 			objects.add(anio);
+		}
+
+		if (mes != null) {
+			QUERY_CONDITION += "And P.mes = ?\r\n";
+			objects.add(mes);
 		}
 
 		if (idCentTrab != null) {
@@ -184,7 +191,7 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 			//QUERY_CONDITION += "And P.id_centro_trabajo Is Not NULL\r\n";
 		}
 
-		String QUERY_GET_DYNAMIC_PRESUPUESTO = "Select P.id, P.anio, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
+		String QUERY_GET_DYNAMIC_PRESUPUESTO = "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
 				 + "P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
 				 + "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
 				 + "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
@@ -192,24 +199,14 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 				 + QUERY_CONDITION
 				 + "Order by idDelegacion";
 
-//		String QUERY_GET_DYNAMIC_PRESUPUESTO = "Select P.id, P.anio, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
-//										     + ADSC_FIELDS
-//											 + "P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup\r\n"
-//											 + "From gys_presupuesto P, gys_tip_presupuesto T, m4t_delegaciones D" + ADSC_TABLE + "\r\n"
-//											 + "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica" + ADSC_WHERE + "\r\n"
-//											 + QUERY_CONDITION
-//											 + "Order by idDelegacion";
-
 		logger.info(QUERY_GET_DYNAMIC_PRESUPUESTO);
-		//logger.info(objects.toString());
-		List<Presupuesto> presupuestos = jdbcTemplate.query(QUERY_GET_DYNAMIC_PRESUPUESTO, new PresupuestoMapper(),	objects.toArray() );
-				//idDelegacion, idTipoPresup);
+		List<Presupuesto> presupuestos = jdbcTemplate.query(QUERY_GET_DYNAMIC_PRESUPUESTO, new PresupuestoMapper(),	objects.toArray());
 
 		return presupuestos;
 	}
 
 	@Override
-	public double getSaldoDelegCt(String idDelegacion, Integer idTipoPresup, Integer anio, String idCentTrab) {
+	public double getSaldoDelegCt(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, String idCentTrab) {
 
 		String QUERY_CONDITION = "";
 		List<Object> objects = new ArrayList<Object>();
@@ -218,13 +215,17 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 			QUERY_CONDITION += "And P.idDelegacion = ?\r\n";
 			objects.add(idDelegacion);
 		}
-		if (idTipoPresup != null) {
-			QUERY_CONDITION += "And P.idTipoPresup = ?\r\n";
-			objects.add(idTipoPresup);
+		if (claveTipoPresup != null) {
+			QUERY_CONDITION += "And T.clave = ?\r\n";
+			objects.add(claveTipoPresup);
 		}
 		if (anio != null) {
 			QUERY_CONDITION += "And P.anio = ?\r\n";
 			objects.add(anio);
+		}
+		if (mes != null) {
+			QUERY_CONDITION += "And P.mes = ?\r\n";
+			objects.add(mes);
 		}
 		if (idCentTrab != null) {
 			QUERY_CONDITION += "And P.id_centro_trabajo = ?\r\n";
@@ -243,10 +244,10 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 	}
 
 	@Override
-	public double getSaldoDistribuido(Integer anio, String idDelegacion, Integer idTipoPresup) {
+	public double getSaldoDistribuido(Integer anio, Integer mes, String idDelegacion, String idTipoPresup) {
 		logger.info(QUERY_GET_SALDO_DISTRIBUIDO);
 		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_DISTRIBUIDO, Double.class,
-				new Object[] { anio, idDelegacion, idTipoPresup } );
+				new Object[] { anio, mes, idDelegacion, idTipoPresup } );
 	}
 
 }

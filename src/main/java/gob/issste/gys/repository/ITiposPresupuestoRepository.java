@@ -18,6 +18,9 @@ public interface ITiposPresupuestoRepository {
 	public String QUERY_FIND_TIP_PRES_BY_ID   = "SELECT * FROM gys_tip_presupuesto WHERE id=?";
 	TiposPresupuesto findById(int id);
 
+	public String QUERY_FIND_TIP_PRES_BY_CLAVE = "SELECT * FROM gys_tip_presupuesto WHERE clave=?";
+	TiposPresupuesto findByClave(String clave);
+
 	public String QUERY_GET_ALL_TIP_PRES      = "SELECT * FROM gys_tip_presupuesto";
 	List<TiposPresupuesto> findAll();
 

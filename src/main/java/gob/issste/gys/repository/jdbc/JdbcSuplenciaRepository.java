@@ -18,6 +18,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
+import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.DatosSuplencia;
 import gob.issste.gys.model.FactoresSuplencia;
 import gob.issste.gys.repository.ISuplenciaRepository;
@@ -62,6 +63,152 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
             preparedStatement.setDouble(17, suplencia.getImporte().doubleValue());
             preparedStatement.setString(18, suplencia.getFolio());
             preparedStatement.setString(19, suplencia.getMotivo());
+
+            return preparedStatement;
+        };
+
+        int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
+        if (updatesCount == 1) {
+            Number generatedKey = keyHolder.getKey();
+            if (generatedKey == null) {
+                throw new SQLException("Getting user id error.");
+            }
+            return generatedKey.intValue();
+        }
+        throw new SQLException("Expected one row insert.");
+	}
+
+	@Override
+	public int save(DatosSuplencia suplencia, DatosEmpleado empleado) throws SQLException {
+        logger.info(QUERY_ADD_NEW_SUPLENCIA_EMP);
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        PreparedStatementCreator statementCreator = (Connection connection) -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_NEW_SUPLENCIA_EMP, Statement.RETURN_GENERATED_KEYS);
+
+            preparedStatement.setString(1, "01");
+            preparedStatement.setString(2, suplencia.getEmpleado().getClave_empleado());
+            preparedStatement.setString(3, suplencia.getFec_paga());
+            preparedStatement.setString(4, suplencia.getFec_inicio());
+            preparedStatement.setString(5, suplencia.getEmpleado().getClave_empleado());
+            preparedStatement.setString(6, suplencia.getFec_paga());
+            preparedStatement.setString(7, suplencia.getFec_inicio());
+            preparedStatement.setString(8, suplencia.getFec_fin());
+            preparedStatement.setString(9, suplencia.getId_empresa().compareTo("")== 0 ? "01" :suplencia.getId_empresa() );
+            preparedStatement.setDouble(10, suplencia.getDias());
+            preparedStatement.setString(11, ""); // inf_ordinal
+            preparedStatement.setString(12, suplencia.getId_usuario());
+            preparedStatement.setString(13, suplencia.getComent());
+            preparedStatement.setString(14, suplencia.getEmpleado_suplir().getClave_empleado());
+            preparedStatement.setString(15, suplencia.getId_clave_movimiento());
+            preparedStatement.setString(16, "0801"); //id_tipo_ausentismo
+            preparedStatement.setDouble(17, suplencia.getImporte().doubleValue());
+            preparedStatement.setString(18, suplencia.getFolio());
+            preparedStatement.setString(19, suplencia.getMotivo());
+            preparedStatement.setInt(20, suplencia.getRiesgos());
+            preparedStatement.setString(21, empleado.getId_puesto_plaza());
+            preparedStatement.setString(22, empleado.getId_clave_servicio());
+            preparedStatement.setString(23, empleado.getId_tipo_jornada());
+            preparedStatement.setString(24, empleado.getId_nivel());
+            preparedStatement.setString(25, empleado.getId_sub_nivel());
+            preparedStatement.setString(26, empleado.getId_centro_trabajo());
+            preparedStatement.setString(27, empleado.getId_turno());
+
+            return preparedStatement;
+        };
+
+        int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
+        if (updatesCount == 1) {
+            Number generatedKey = keyHolder.getKey();
+            if (generatedKey == null) {
+                throw new SQLException("Getting user id error.");
+            }
+            return generatedKey.intValue();
+        }
+        throw new SQLException("Expected one row insert.");
+	}
+
+	@Override
+	public int saveExt(DatosSuplencia suplencia) throws SQLException {
+        logger.info(QUERY_ADD_NEW_SUPLENCIA_EXT);
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        PreparedStatementCreator statementCreator = (Connection connection) -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_NEW_SUPLENCIA_EXT, Statement.RETURN_GENERATED_KEYS);
+
+            // id_sociedad, id_empleado, fec_paga, fec_inicio, id_ordinal, fec_fin, id_empresa, "
+			//+ "dias, inf_ordinal, id_usuario, fec_ult_actualizacion, coment, id_empleado_sup, "
+			//+ "id_clave_movimiento, id_tipo_ausentismo, importe, folio,  motivo
+
+			//String folio, String motivo, String movim, String coment, String usuario, String riesgos
+
+            //preparedStatement.setString(1, "01");
+            preparedStatement.setString(1, suplencia.getEmpleado().getClave_empleado());
+            preparedStatement.setString(2, suplencia.getFec_paga());
+            preparedStatement.setString(3, suplencia.getFec_inicio());
+            preparedStatement.setString(4, suplencia.getEmpleado().getClave_empleado());
+            preparedStatement.setString(5, suplencia.getFec_paga());
+            preparedStatement.setString(6, suplencia.getFec_inicio());
+            preparedStatement.setString(7, suplencia.getFec_fin());
+            //preparedStatement.setString(9, suplencia.getId_empresa().compareTo("")== 0 ? "01" :suplencia.getId_empresa() );
+            preparedStatement.setDouble(8, suplencia.getDias());
+            preparedStatement.setString(9, ""); // inf_ordinal
+            preparedStatement.setString(10, suplencia.getId_usuario());
+            preparedStatement.setString(11, suplencia.getComent());
+            preparedStatement.setString(12, suplencia.getEmpleado_suplir().getClave_empleado());
+            preparedStatement.setString(13, suplencia.getId_clave_movimiento());
+            preparedStatement.setString(14, "0801"); //id_tipo_ausentismo
+            preparedStatement.setDouble(15, suplencia.getImporte().doubleValue());
+            preparedStatement.setString(16, suplencia.getFolio());
+            preparedStatement.setString(17, suplencia.getMotivo());
+
+            return preparedStatement;
+        };
+
+        int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
+        if (updatesCount == 1) {
+            Number generatedKey = keyHolder.getKey();
+            if (generatedKey == null) {
+                throw new SQLException("Getting user id error.");
+            }
+            return generatedKey.intValue();
+        }
+        throw new SQLException("Expected one row insert.");
+	}
+
+	@Override
+	public int saveExt(DatosSuplencia suplencia, DatosEmpleado empleado) throws SQLException {
+        logger.info(QUERY_ADD_NEW_SUPLENCIA_EXT_EMP);
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        PreparedStatementCreator statementCreator = (Connection connection) -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_NEW_SUPLENCIA_EXT_EMP, Statement.RETURN_GENERATED_KEYS);
+
+            preparedStatement.setString(1, suplencia.getEmpleado().getClave_empleado());
+            preparedStatement.setString(2, suplencia.getFec_paga());
+            preparedStatement.setString(3, suplencia.getFec_inicio());
+            preparedStatement.setString(4, suplencia.getEmpleado().getClave_empleado());
+            preparedStatement.setString(5, suplencia.getFec_paga());
+            preparedStatement.setString(6, suplencia.getFec_inicio());
+            preparedStatement.setString(7, suplencia.getFec_fin());
+            preparedStatement.setDouble(8, suplencia.getDias());
+            preparedStatement.setString(9, ""); // inf_ordinal
+            preparedStatement.setString(10, suplencia.getId_usuario());
+            preparedStatement.setString(11, suplencia.getComent());
+            preparedStatement.setString(12, suplencia.getEmpleado_suplir().getClave_empleado());
+            preparedStatement.setString(13, suplencia.getId_clave_movimiento());
+            preparedStatement.setString(14, "0801"); //id_tipo_ausentismo
+            preparedStatement.setDouble(15, suplencia.getImporte().doubleValue());
+            preparedStatement.setString(16, suplencia.getFolio());
+            preparedStatement.setString(17, suplencia.getMotivo());
+            preparedStatement.setInt(18, suplencia.getRiesgos());
+            preparedStatement.setString(19, empleado.getId_puesto_plaza());
+            preparedStatement.setString(20, empleado.getId_clave_servicio());
+            preparedStatement.setString(21, empleado.getId_tipo_jornada());
+            preparedStatement.setString(22, empleado.getId_nivel());
+            preparedStatement.setString(23, empleado.getId_sub_nivel());
+            preparedStatement.setString(24, empleado.getId_centro_trabajo());
+            preparedStatement.setString(25, empleado.getId_turno());
 
             return preparedStatement;
         };
@@ -141,81 +288,33 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
-	public int saveExt(DatosSuplencia suplencia) throws SQLException {
-        logger.info(QUERY_ADD_NEW_SUPLENCIA_EXT);
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        PreparedStatementCreator statementCreator = (Connection connection) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_NEW_SUPLENCIA_EXT, Statement.RETURN_GENERATED_KEYS);
-
-            // id_sociedad, id_empleado, fec_paga, fec_inicio, id_ordinal, fec_fin, id_empresa, "
-			//+ "dias, inf_ordinal, id_usuario, fec_ult_actualizacion, coment, id_empleado_sup, "
-			//+ "id_clave_movimiento, id_tipo_ausentismo, importe, folio,  motivo
-
-			//String folio, String motivo, String movim, String coment, String usuario, String riesgos
-
-            //preparedStatement.setString(1, "01");
-            preparedStatement.setString(1, suplencia.getEmpleado().getClave_empleado());
-            preparedStatement.setString(2, suplencia.getFec_paga());
-            preparedStatement.setString(3, suplencia.getFec_inicio());
-            preparedStatement.setString(4, suplencia.getEmpleado().getClave_empleado());
-            preparedStatement.setString(5, suplencia.getFec_paga());
-            preparedStatement.setString(6, suplencia.getFec_inicio());
-            preparedStatement.setString(7, suplencia.getFec_fin());
-            //preparedStatement.setString(9, suplencia.getId_empresa().compareTo("")== 0 ? "01" :suplencia.getId_empresa() );
-            preparedStatement.setDouble(8, suplencia.getDias());
-            preparedStatement.setString(9, ""); // inf_ordinal
-            preparedStatement.setString(10, suplencia.getId_usuario());
-            preparedStatement.setString(11, suplencia.getComent());
-            preparedStatement.setString(12, suplencia.getEmpleado_suplir().getClave_empleado());
-            preparedStatement.setString(13, suplencia.getId_clave_movimiento());
-            preparedStatement.setString(14, "0801"); //id_tipo_ausentismo
-            preparedStatement.setDouble(15, suplencia.getImporte().doubleValue());
-            preparedStatement.setString(16, suplencia.getFolio());
-            preparedStatement.setString(17, suplencia.getMotivo());
-
-            return preparedStatement;
-        };
-
-        int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
-        if (updatesCount == 1) {
-            Number generatedKey = keyHolder.getKey();
-            if (generatedKey == null) {
-                throw new SQLException("Getting user id error.");
-            }
-            return generatedKey.intValue();
-        }
-        throw new SQLException("Expected one row insert.");
-	}
-
-	@Override
 	public DatosSuplencia findByIdExt(Integer idSuplencia) {
 		logger.info(QUERY_GET_SUPLENCIA_EXT_BY_ID);
 		return jdbcTemplate.queryForObject(QUERY_GET_SUPLENCIA_EXT_BY_ID, BeanPropertyRowMapper.newInstance(DatosSuplencia.class), idSuplencia );
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizado(String idDelegacion, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizado(String idDelegacion, int anio_ejercicio, int mes_ejercicio) {
 		logger.info(QUERY_GET_SALDO_SUPLENCIA_INT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_INT, Double.class, idDelegacion, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_INT, Double.class, idDelegacion, anio_ejercicio, mes_ejercicio );
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio) {
 		logger.info(QUERY_GET_SALDO_SUPLENCIA_INT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio );
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio, int mes_ejercicio) {
 		logger.info(QUERY_GET_SALDO_SUPLENCIA_EXT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_EXT, Double.class, idDelegacion, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_EXT, Double.class, idDelegacion, anio_ejercicio, mes_ejercicio );
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio) {
 		logger.info(QUERY_GET_SALDO_SUPLENCIA_EXT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio );
 	}
 
 	@Override

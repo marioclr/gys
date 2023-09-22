@@ -101,7 +101,7 @@ public class PresupuestoController {
 					return ResponseHandler.generateResponse("Existe un registro de presupuesto en este mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 				List<Presupuesto> presupuestos= presupuestoRepository.get_dynamic_regs(presupuesto.getDelegacion().getId_div_geografica(), 
-						presupuesto.getTipoPresup().getId(), presupuesto.getAnio(), null, true);
+						presupuesto.getTipoPresup().getClave(), presupuesto.getAnio(), presupuesto.getMes(), null, true);
 				if (presupuestos == null || presupuestos.size() == 0)
 					return ResponseHandler.generateResponse("No existe presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
@@ -112,15 +112,76 @@ public class PresupuestoController {
 			}
 
 			if( presupuesto.getCentroTrabajo() == null ) {
-				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
+				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
 						presupuesto.getTipoPresup(), presupuesto.getSaldo()));				
 			} else {				
-				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
+				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
 						presupuesto.getTipoPresup(), presupuesto.getSaldo()));
 			}
 			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));
 			platformTransactionManager.commit(status);
 			return ResponseHandler.generateResponse("El Presupuesto con ID " + idPresup + " ha sido creado de manera exitosa. Con número de movimiento: " + idMovPresup, HttpStatus.CREATED, null);
+		} catch (Exception e) {
+			platformTransactionManager.rollback(status);
+			return ResponseHandler.generateResponse("Error al realizar el registro de presupuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Agrega un nuevo presupuesto al Sistema", description = "Agrega un nuevo presupuesto al Sistema", tags = { "Presupuesto" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Successful operation", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Presupuesto.class)) }),
+			@ApiResponse(responseCode = "405", description = "Invalid input")
+	})
+	@PostMapping("/Presupuestos")
+//	public ResponseEntity<Object> createPresupuestos(
+//			@Parameter(description = "Objeto de Presupuesto a crear en el Sistema") @RequestBody List<Presupuesto> presupuestos, 
+//			@Parameter(description = "Comentarios del registro de presupuesto.") @RequestBody List<String> comentarios) {
+	public ResponseEntity<Object> createPresupuestos(
+			@Parameter(description = "Objeto de Presupuesto a crear en el Sistema") @RequestBody PresupuestosGlobal presupuestos) {
+
+		DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
+		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
+		//int idPresup;
+
+		try {
+
+			List<Presupuesto> presup = presupuestos.getPresupuestos();
+			List<String> coments = presupuestos.getComentarios();
+
+			for (int i = 0; i < presup.size(); i ++) {
+	            System.out.println("Presupuesto " + presup.get(i) + " is located at index " + i);
+	            System.out.println("Comentario " + coments.get(i) + " is located at index " + i);
+	        }
+
+//			if( presupuesto.getCentroTrabajo() == null ) {
+//				if(presupuestoRepository.existe_presupuesto(presupuesto)>0) {
+//					return ResponseHandler.generateResponse("Existe un registro de presupuesto en este mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//				}
+//			} else {
+//				if(presupuestoRepository.existe_presupuesto_ct(presupuesto)>0) {
+//					return ResponseHandler.generateResponse("Existe un registro de presupuesto en este mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//				}
+//				List<Presupuesto> presupuestos= presupuestoRepository.get_dynamic_regs(presupuesto.getDelegacion().getId_div_geografica(), 
+//						presupuesto.getTipoPresup().getClave(), presupuesto.getAnio(), presupuesto.getMes(), null, true);
+//				if (presupuestos == null || presupuestos.size() == 0)
+//					return ResponseHandler.generateResponse("No existe presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//
+//				double suma_dist_ct = presupuestoRepository.validaSumaPresupuestal(presupuesto);
+//				if( suma_dist_ct > presupuestos.get(0).getSaldo() ) {
+//					return ResponseHandler.generateResponse("La suma del importe asignado al centro de trabajo indicado excede el presupuesto asignado a la Delegación", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//				}
+//			}
+//
+//			if( presupuesto.getCentroTrabajo() == null ) {
+//				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
+//						presupuesto.getTipoPresup(), presupuesto.getSaldo()));				
+//			} else {				
+//				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
+//						presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+//			}
+//			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));
+//			platformTransactionManager.commit(status);
+			return ResponseHandler.generateResponse("El Presupuesto con ID ha sido creado de manera exitosa. Con número de movimiento: ", HttpStatus.CREATED, null);
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
 			return ResponseHandler.generateResponse("Error al realizar el registro de presupuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -134,14 +195,15 @@ public class PresupuestoController {
 			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "movim", required = true, defaultValue = "false") boolean movim,
 			@Parameter(description = "Bandera para indicar si se requiere incluir los centros de trabajo de la delegación", required = true) @RequestParam(name = "solo_deleg", required = true, defaultValue = "true") boolean solo_deleg,
 			@Parameter(description = "Parámetro opcional para indicar el anio del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer anio,
+			@Parameter(description = "Parámetro opcional para indicar el mes del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer mes,
 			@Parameter(description = "Parámetro opcional para indicar el ID de la delegación del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idDelegacion,
 			@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
-			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer idTipoPresup) {
+			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String claveTipoPresup) {
 		try {
 			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
 
-			if ( (idDelegacion != null) || (idTipoPresup != null) || (anio != null) || (idCentTrab != null) ) {
-				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, idTipoPresup, anio, idCentTrab, solo_deleg);
+			if ( (idDelegacion != null) || (claveTipoPresup != null) || (anio != null) || (idCentTrab != null) ) {
+				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, claveTipoPresup, anio, mes, idCentTrab, solo_deleg);
 			} else {
 				presupuestos = presupuestoRepository.findAll();
 			}
@@ -168,52 +230,51 @@ public class PresupuestoController {
 	public ResponseEntity<Object> getPresupuestoCt(
 			@Parameter(description = "Parámetro para indicar el ID del Usuario del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer idUsuario,
 			@Parameter(description = "Parámetro para indicar el anio del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el mes del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer mes,
 			@Parameter(description = "Parámetro para indicar el ID de la delegación del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) String idDelegacion,
 			//@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
-			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer idTipoPresup) {
+			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) String claveTipoPresup) {
 		try {
 
 			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
 			List<DatosAdscripcion> adsc; // = datosRepository.getDatosAdscripciones(idUsuario);
-			TiposPresupuesto tipoPresup = tiposPresupuestoRepository.findById(idTipoPresup);
+			TiposPresupuesto tipoPresup = tiposPresupuestoRepository.findByClave(claveTipoPresup);
 			Usuario usuario = usuarioRepository.findById(idUsuario);
 			Delegacion delegacion = datosRepository.getDatosDelegacionById(idDelegacion);
 			Presupuesto presupuesto;
 			double saldoDelegCt;
 
-			// String idDelegacion, Integer idTipoPresup, Integer anio, String idCentTrab
-			
 			if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()== 1 ) {
 				//List<Delegacion> delegaciones = datosRepository.getDatosDelegaciones();
 				//for(Delegacion del:delegaciones) {
-				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), idTipoPresup, anio, null);
-				presupuesto = new Presupuesto(anio, delegacion, null, tipoPresup, saldoDelegCt);
+				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
+				presupuesto = new Presupuesto(anio, mes, delegacion, null, tipoPresup, saldoDelegCt);
 				presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscForDeleg(delegacion.getId_div_geografica());
 				for(DatosAdscripcion ct:adsc) {
-					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), idTipoPresup, anio, ct.getClave());
-					presupuesto = new Presupuesto(anio, delegacion, ct, tipoPresup, saldoDelegCt);
+					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+					presupuesto = new Presupuesto(anio, mes, delegacion, ct, tipoPresup, saldoDelegCt);
 					presupuestos.add(presupuesto);
 				}
 				//}
 			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==2 ) {
-				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), idTipoPresup, anio, null);
-				presupuesto = new Presupuesto(anio, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
+				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, null);
+				presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
 				presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscForDeleg(usuario.getDelegacion().getId_div_geografica());
 				for(DatosAdscripcion ct:adsc) {
-					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), idTipoPresup, anio, ct.getClave());
-					presupuesto = new Presupuesto(anio, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
+					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
 					presupuestos.add(presupuesto);
 				}
 			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==3 ) {
-				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), idTipoPresup, anio, null);
-				presupuesto = new Presupuesto(anio, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
+				saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, null);
+				presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
 				presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscripciones_ct(idUsuario);
 				for(DatosAdscripcion ct:adsc) {
-					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), idTipoPresup, anio, ct.getClave());
-					presupuesto = new Presupuesto(anio, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
+					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
 					presupuestos.add(presupuesto);
 				}				
 			}
@@ -236,16 +297,17 @@ public class PresupuestoController {
 			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "movim", required = true, defaultValue = "false") boolean movim,
 			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = true) @RequestParam(name = "solo_deleg", required = true, defaultValue = "true") boolean solo_deleg,
 			@Parameter(description = "Parámetro opcional para indicar el anio del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer anio,
+			@Parameter(description = "Parámetro opcional para indicar el mes del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer mes,
 			@Parameter(description = "Parámetro opcional para indicar el ID de la delegación del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idDelegacion,
 			@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
-			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer idTipoPresup) {
+			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String claveTipoPresup) {
 		try {
 			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
 			List<PresupuestoUtilizado> presupuestosUtilizado = new ArrayList<PresupuestoUtilizado>();
 			double saldo_utilizado=0;
 
-			if ( (idDelegacion != null) || (idTipoPresup != null) || (anio != null) || (idCentTrab != null) ) {
-				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, idTipoPresup, anio, idCentTrab, solo_deleg);
+			if ( (idDelegacion != null) || (claveTipoPresup != null) || (anio != null) || (idCentTrab != null) ) {
+				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, claveTipoPresup, anio, mes, idCentTrab, solo_deleg);
 			} else {
 				presupuestos = presupuestoRepository.findAll();
 			}
@@ -264,16 +326,16 @@ public class PresupuestoController {
 				pu.setPresupuesto(p);
 				if (p.getTipoPresup().getClave().equals(String.valueOf("GI"))) {
 					if (p.getCentroTrabajo() != null)
-						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio());
+						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes());
 				} else if (p.getTipoPresup().getClave().equals(String.valueOf("GE"))) {
 					if (p.getCentroTrabajo() != null)
-						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio());
+						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes());
 				} else if (p.getTipoPresup().getClave().equals(String.valueOf("SI"))) {
 					if (p.getCentroTrabajo() != null)
-						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio());
+						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes());
 				} else if (p.getTipoPresup().getClave().equals(String.valueOf("SE"))) {
 					if (p.getCentroTrabajo() != null)
-						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio());
+						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes());
 				}
 				pu.setSaldo(saldo_utilizado);
 				presupuestosUtilizado.add(pu);
@@ -289,14 +351,15 @@ public class PresupuestoController {
 	@GetMapping("/Presupuesto/saldo")
 	public ResponseEntity<Object> getSaldoPresupuesto(
 			@Parameter(description = "Año del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer anio_ejercicio,
+			@Parameter(description = "Mes del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer mes_ejercicio,
 			@Parameter(description = "ID de la Delegación que se consulta el saldo utilizado", required = true) @RequestParam(required = true) String idDelegacion,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) Integer tipoPresupuesto) {
+			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String claveTipoPresupuesto) {
 
 		double saldo=0;
 
 		try {
 
-			saldo = presupuestoRepository.getSaldoDistribuido(anio_ejercicio, idDelegacion, tipoPresupuesto);
+			saldo = presupuestoRepository.getSaldoDistribuido(anio_ejercicio, mes_ejercicio, idDelegacion, claveTipoPresupuesto);
 
 			return ResponseHandler.generateResponse("Se obtuvo el saldo presupuestal distribuido para las condiciones indicadas", HttpStatus.OK, saldo);
 		} catch (Exception e) {
@@ -460,7 +523,6 @@ public class PresupuestoController {
 			return ResponseHandler.generateResponse("Error al obtener movimientos del presupuesto en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
-
 
 	@Operation(summary = "Agrega un movimiento al presupuesto en el Sistema", description = "Agrega un movimiento al presupuesto en el Sistema", tags = { "Movimientos de presupuesto" })
 	@PostMapping("/MovimientoPresupuesto")

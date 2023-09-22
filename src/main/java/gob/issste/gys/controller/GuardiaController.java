@@ -154,6 +154,7 @@ public class GuardiaController {
 	public ResponseEntity<Object> getSaldoGuardia(
 			@Parameter(description = "ID de la Delegación que se consulta el saldo utilizado", required = true) @RequestParam(required = true) String idDelegacion,
 			@Parameter(description = "Año del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer anio_ejercicio,
+			@Parameter(description = "Mes del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer mes_ejercicio,
 			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String tipoGuardia,
 			@Parameter(description = "ID del Centro de Trabajo del que se consulta el saldo utilizado", required = false) @RequestParam(required = false) String idCentroTrab) {
 
@@ -161,15 +162,15 @@ public class GuardiaController {
 
 		if (tipoGuardia.equals(String.valueOf("GI"))) {
 			if (idCentroTrab == null) {
-				saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio);
+				saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
 			} else {
-				saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio);
+				saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
 			}
 		} else {
-			if (idCentroTrab == null) {					
-				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio);
+			if (idCentroTrab == null) {
+				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
 			} else {
-				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio);
+				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
 			}
 		}
 		return ResponseHandler.generateResponse("Se obtuvo el saldo utilizado para guardias para las condiciones indicadas", HttpStatus.OK, saldo);
@@ -181,7 +182,7 @@ public class GuardiaController {
 			@Parameter(description = "Objeto de la guardia a crearse en el Sistema") @RequestBody DatosGuardia guardia) {
 		try {
 
-			int id = 0, idTipoPresup, anio;
+			int id = 0, anio, mes;
 			double saldo_utilizado=0, saldo=0;
 			Presupuesto presup;
 
@@ -189,19 +190,20 @@ public class GuardiaController {
 			String idCentroTrab = guardia.getId_centro_trabajo();
 			String fec_pago = guardia.getFec_paga();
 
-			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-				idTipoPresup = 1;
-			} else {
-				idTipoPresup = 2;
-			}
+//			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
+//				idTipoPresup = 1;
+//			} else {
+//				idTipoPresup = 2;
+//			}
 
 			try {
 				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
+				mes = pagaRepository.findByFecha(fec_pago).getMes_ejercicio();
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			try {			
-				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, idTipoPresup, anio);
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
@@ -209,9 +211,9 @@ public class GuardiaController {
 			saldo = (presup != null) ? presup.getSaldo(): 0; 
 
 			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio());
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(), presup.getMes());
 			} else {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio());
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(), presup.getMes());
 			}
 
 			double importe = guardiaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(), 
@@ -239,26 +241,27 @@ public class GuardiaController {
 			@Parameter(description = "Objeto de la guardia a actualizarse en el Sistema") @RequestBody DatosGuardia guardia) {
 		try {
 
-			int idTipoPresup, anio;
+			int anio, mes;
 			double saldo_utilizado=0, saldo=0;
 			Presupuesto presup;
 
 			String idCentroTrab = guardia.getId_centro_trabajo();
 			String fec_pago = guardia.getFec_paga();
 
-			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-				idTipoPresup = 1;
-			} else {
-				idTipoPresup = 2;
-			}
+//			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
+//				idTipoPresup = 1;
+//			} else {
+//				idTipoPresup = 2;
+//			}
 
 			try {
 				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
+				mes = pagaRepository.findByFecha(fec_pago).getMes_ejercicio();
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			try {			
-				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, idTipoPresup, anio);
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
@@ -266,9 +269,9 @@ public class GuardiaController {
 			saldo = (presup != null) ? presup.getSaldo(): 0;
 
 			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(guardia.getId(), idCentroTrab, presup.getAnio());
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(guardia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
 			} else {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(guardia.getId(), idCentroTrab, presup.getAnio());
+				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(guardia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
 			}
 
 			double importe = guardiaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(), 

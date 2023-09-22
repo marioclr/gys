@@ -30,7 +30,7 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 	ITabuladorRepository tabuladorRepository;
 
 	@Override
-	public double CalculaImporteSuplencia(String quincena, String clave_empleado, int dias, String tipo) {
+	public double CalculaImporteSuplencia(String quincena, String clave_empleado, int dias, String tipo, int riesgos ) {
 
 		double importe = 0.0;
 		ValoresTabulador valores;
@@ -44,7 +44,7 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 			valores = tabuladorRepository.ConsultaTabuladorOperativo(empleado.getId_zona(), empleado.getId_nivel(), empleado.getId_sub_nivel(), empleado.getId_tipo_jornada(), quincena);
 		}
 
-		switch (empleadoRepository.ConsultaRiesgosEmp(empleado.getClave_empleado(), quincena))
+		switch ( riesgos )
         {
 	        case 10: importe = valores.getSueldo() * 1.1; break;
 	        case 20: importe = valores.getSueldo() * 1.2; break;
@@ -124,12 +124,12 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 	}
 
 	@Override
-	public int GuardarSuplencia(DatosSuplencia suplencia, double importe) throws SQLException {
+	public int GuardarSuplencia(DatosSuplencia suplencia, double importe, DatosEmpleado empleado) throws SQLException {
 		suplencia.setImporte(importe);
 		if( suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-			return suplenciaRepository.save(suplencia);
+			return suplenciaRepository.save(suplencia, empleado);
 		} else {
-			return suplenciaRepository.saveExt(suplencia);
+			return suplenciaRepository.saveExt(suplencia, empleado);
 		}
 	}
 
@@ -149,7 +149,7 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 				s.setRiesgos(0);
 			}
 			try {
-				s.setImporte(this.CalculaImporteSuplencia(fechaPago, s.getClave_empleado_suplir(), s.getDias(), tipo));
+				s.setImporte(this.CalculaImporteSuplencia(fechaPago, s.getClave_empleado_suplir(), s.getDias(), tipo, s.getRiesgos()));
 			} catch(Exception ex) {
 				s.setImporte((double) 0);
 			}
@@ -179,13 +179,12 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 	}
 
 	@Override
-	public double CalculaImporteSuplencia(String quincena, DatosEmpleado empleado, int dias, String tipo) {
-		int riesgos = 0;
+	public double CalculaImporteSuplencia(String quincena, DatosEmpleado empleado, int dias, String tipo, int riesgos) {
+		//int riesgos = 0;
 		double importe = 0.0;
 		ValoresTabulador valores;
 		FactoresSuplencia factor = new FactoresSuplencia();
 
-		//DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(quincena, clave_empleado);
 
 		if (empleado.getId_tipo_tabulador().equals(String.valueOf("M"))) {
 			valores = tabuladorRepository.ConsultaTabuladorMedico(empleado.getId_zona(), empleado.getId_nivel(), empleado.getId_sub_nivel(), empleado.getId_tipo_jornada(), quincena);
@@ -197,10 +196,10 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 	    logger.info("Asigna: " + valores.getAsignacion());
 	    logger.info("Compen: " + valores.getCompen_un());
 
-		riesgos = empleadoRepository.ConsultaRiesgosEmp(empleado.getClave_empleado(), quincena);
+		//riesgos = empleadoRepository.ConsultaRiesgosEmp(empleado.getClave_empleado(), quincena);
 		logger.info("Riesgos: " + riesgos);
 
-		switch (riesgos)
+		switch ( riesgos )
         {
 	        case 10: importe = valores.getSueldo() * 1.1; break;
 	        case 20: importe = valores.getSueldo() * 1.2; break;
@@ -215,14 +214,6 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
             }
 
             importe = (importe / 30);
-
-//            factor = suplenciaRepository.ConsultaFactoresSuplencia(empleado.getId_turno());
-//
-//            if (dias >= factor.getFact_turno()) {
-//            	importe = importe * dias * factor.getFact_jornada();
-//            } else {
-//            	importe = importe * dias;
-//            }
 
             int diasAdic = 0;
             factor = suplenciaRepository.ConsultaFactoresSuplencia(empleado.getId_turno());
@@ -308,7 +299,7 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 			try {
 				empleado = empleadoRepository.getDatosEmpleado(fechaPago, s.getClave_empleado_suplir());
 				s.setEmpleado_suplir(empleado);
-				s.setImporte(this.CalculaImporteSuplencia(fechaPago, empleado, s.getDias(), tipo));
+				s.setImporte(this.CalculaImporteSuplencia(fechaPago, empleado, s.getDias(), tipo, s.getRiesgos()));
 			} catch(Exception ex) {
 				s.setImporte((double) 0);
 				continue;

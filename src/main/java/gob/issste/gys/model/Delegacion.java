@@ -26,4 +26,9 @@ public class Delegacion {
 	public void setCentrosTrabajo(List<DatosAdscripcion> centrosTrabajo) {
 		this.centrosTrabajo = centrosTrabajo;
 	}
+
+	@Override
+	public String toString() {
+		return "Delegacion [id_div_geografica=" + id_div_geografica + ", n_div_geografica=" + n_div_geografica + "]";
+	}
 }

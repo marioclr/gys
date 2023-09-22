@@ -1,7 +1,5 @@
 package gob.issste.gys.model;
 
-import java.util.Objects;
-
 public class DatosAdscripcion {
 
 	private String clave;
@@ -35,15 +33,9 @@ public class DatosAdscripcion {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hashCode(clave);
-	}
-	@Override
-	public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        DatosAdscripcion adsc = (DatosAdscripcion) obj;
-		return clave.equals(adsc.clave);
+	public String toString() {
+		return "DatosAdscripcion [clave=" + clave + ", descripcion=" + descripcion + ", tipo=" + tipo + ", zona=" + zona
+				+ "]";
 	}
 
 }

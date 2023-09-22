@@ -83,8 +83,9 @@ public class SuplenciaController {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strDate = dateFormat.format(quincena);
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(strDate, clave_empleado);
+			int riesgos = empleadoRepository.ConsultaRiesgosEmp(clave_empleado, strDate);
 
-			importe = suplenciaService.CalculaImporteSuplencia( strDate, empleado, dias, tipo );
+			importe = suplenciaService.CalculaImporteSuplencia( strDate, empleado, dias, tipo, riesgos );
 			BigDecimal importe2 = new BigDecimal(importe).setScale(2, RoundingMode.HALF_UP);
 			//return new ResponseEntity<>(importe2, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el importe de la suplencia conforme a los criterios establecidos", HttpStatus.OK, importe2);
@@ -181,6 +182,7 @@ public class SuplenciaController {
 
 			if (tipoSuplencia.equals(String.valueOf("SI"))) {
 				suplencia = suplenciaRepository.findById(idSuplencia);
+				suplencia.setTipo_suplencia("SI");
 				try {
 					empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado());
 				} catch (Exception ex) {
@@ -195,6 +197,7 @@ public class SuplenciaController {
 				suplencia.setEmpleado_suplir(empleado_sup);
 			} else {
 				suplencia = suplenciaRepository.findByIdExt(idSuplencia);
+				suplencia.setTipo_suplencia("SE");
 				try {
 					BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado());
 					empleado = new DatosEmpleado();
@@ -227,7 +230,8 @@ public class SuplenciaController {
 	@GetMapping("/suplencias/saldo")
 	public ResponseEntity<Object> getSaldoSuplencia(
 			@Parameter(description = "ID de la Delegación que se consulta el presupuesto", required = true) @RequestParam(required = true) String idDelegacion,
-			@Parameter(description = "ID de la Delegación que se consulta el presupuesto", required = true) @RequestParam(required = true) Integer anio_ejercicio,
+			@Parameter(description = "Año del ejercicio en que se consulta el presupuesto", required = true) @RequestParam(required = true) Integer anio_ejercicio,
+			@Parameter(description = "Mes del ejercicio en que se consulta el presupuesto", required = true) @RequestParam(required = true) Integer mes_ejercicio,
 			@Parameter(description = "Tipo para obtener las suplencias del empleado (internas o externas)", required = false) @RequestParam(required = false) String tipoSuplencia,
 			@Parameter(description = "ID del Centro de Trabajo del que se consulta el saldo utilizado", required = false) @RequestParam(required = false) String idCentroTrab) {
 
@@ -236,18 +240,18 @@ public class SuplenciaController {
 		if (tipoSuplencia != null) {
 			if (tipoSuplencia.equals(String.valueOf("SI")))
 				if (idCentroTrab == null) {
-					saldo = suplenciaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio);
+					saldo = suplenciaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
 				} else {
-					saldo = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio);
+					saldo = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
 				}
 			else
 				if (idCentroTrab == null) {
-					saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio);
+					saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
 				} else {
-					saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idDelegacion, anio_ejercicio);
+					saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idDelegacion, anio_ejercicio, mes_ejercicio);
 				}
 		} else {
-			saldo = suplenciaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio) + suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio); 
+			saldo = suplenciaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio) + suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio); 
 		}
 		return ResponseHandler.generateResponse("Se obtuvo el saldo utilizado para guardias para las condiciones indicadas", HttpStatus.OK, saldo);
 	}
@@ -258,17 +262,17 @@ public class SuplenciaController {
 			@Parameter(description = "Objeto de Suplencia que se creará en el Sistema") @RequestBody DatosSuplencia suplencia) {
 		try {
 
-			int id = 0, idTipoPresup, anio;
+			int id = 0, anio, mes;
 			double saldo_utilizado=0, saldo=0;
 			Presupuesto presup;
 
 			String fec_pago = suplencia.getFec_paga();
 
-			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-				idTipoPresup = 3;
-			} else {
-				idTipoPresup = 4;
-			}
+//			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
+//				idTipoPresup = 3;
+//			} else {
+//				idTipoPresup = 4;
+//			}
 
 			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
 				if (suplenciaRepository.existe_suplencia(suplencia)>0)
@@ -279,16 +283,20 @@ public class SuplenciaController {
 			}
 
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
+			int riesgos = empleadoRepository.ConsultaRiesgosEmp(suplencia.getEmpleado_suplir().getClave_empleado(), suplencia.getFec_paga());
+			suplencia.setRiesgos(riesgos);
+
 			String idCentroTrab = empleado.getId_centro_trabajo();
 
 			// Validaciones presupuestales
 			try {
 				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
+				mes = pagaRepository.findByFecha(fec_pago).getMes_ejercicio();
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			try {			
-				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, idTipoPresup, anio);
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
@@ -296,19 +304,19 @@ public class SuplenciaController {
 			saldo = (presup != null) ? presup.getSaldo(): 0; 
 
 			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio());
+				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(), presup.getMes() );
 			} else {
-				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio());
+				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(), presup.getMes());
 			}
-			
+
 			// Fin de las Validaciones presupuestales
 
 			double importe = suplenciaService.CalculaImporteSuplencia(suplencia.getFec_paga(), 
-					empleado, suplencia.getDias(), suplencia.getTipo_suplencia());
+					empleado, suplencia.getDias(), suplencia.getTipo_suplencia(), riesgos);
 
 			if (importe + saldo_utilizado <= saldo) {
 
-				id = suplenciaService.GuardarSuplencia(suplencia, importe);
+				id = suplenciaService.GuardarSuplencia(suplencia, importe, empleado);
 
 			} else {
 
@@ -345,17 +353,17 @@ public class SuplenciaController {
 			@Parameter(description = "Objeto de la guardia a actualizarse en el Sistema") @RequestBody DatosSuplencia suplencia) {
 		try {
 
-			int idTipoPresup, anio;
+			int anio, mes;
 			double saldo_utilizado=0, saldo=0;
 			Presupuesto presup;
 
 			String fec_pago = suplencia.getFec_paga();
 
-			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-				idTipoPresup = 3;
-			} else {
-				idTipoPresup = 4;
-			}
+//			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
+//				idTipoPresup = 3;
+//			} else {
+//				idTipoPresup = 4;
+//			}
 
 			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
 				if (suplenciaRepository.existe_suplencia_upd(suplencia)>0)
@@ -366,16 +374,19 @@ public class SuplenciaController {
 			}
 
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
+			int riesgos = empleadoRepository.ConsultaRiesgosEmp(suplencia.getEmpleado_suplir().getClave_empleado(), suplencia.getFec_paga());
+
 			String idCentroTrab = empleado.getId_centro_trabajo();
 
 			// Validaciones presupuestales
 			try {
 				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
+				mes = pagaRepository.findByFecha(fec_pago).getMes_ejercicio();
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			try {			
-				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, idTipoPresup, anio);
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
@@ -383,14 +394,14 @@ public class SuplenciaController {
 			saldo = (presup != null) ? presup.getSaldo(): 0; 
 
 			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(suplencia.getId(), idCentroTrab, presup.getAnio());
+				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
 			} else {
-				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(suplencia.getId(), idCentroTrab, presup.getAnio());
+				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
 			}
 			// Fin de las Validaciones presupuestales
 
 			double importe = suplenciaService.CalculaImporteSuplencia(suplencia.getFec_paga(), 
-					suplencia.getEmpleado_suplir().getClave_empleado(), suplencia.getDias(), suplencia.getTipo_suplencia());
+					suplencia.getEmpleado_suplir().getClave_empleado(), suplencia.getDias(), suplencia.getTipo_suplencia(), riesgos);
 
 			if (importe + saldo_utilizado <= saldo) {
 				suplenciaService.actualizaSuplencia(suplencia, importe);

@@ -105,27 +105,27 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizado(String idDelegacion, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizado(String idDelegacion, int anio_ejercicio, int mes_ejercicio) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_INT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT, Double.class, idDelegacion, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT, Double.class, idDelegacion, anio_ejercicio, mes_ejercicio );
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_INT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio );
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio, int mes_ejercicio) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_EXT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT, Double.class, idDelegacion, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT, Double.class, idDelegacion, anio_ejercicio, mes_ejercicio );
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio) {
+	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_EXT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio );
 	}
 
 	@Override

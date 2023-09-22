@@ -3,6 +3,7 @@ package gob.issste.gys.repository;
 import java.sql.SQLException;
 import java.util.List;
 
+import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.DatosSuplencia;
 import gob.issste.gys.model.FactoresSuplencia;
 
@@ -15,12 +16,31 @@ public interface ISuplenciaRepository {
 												+ "?, ?, ?, ?, ?, CURRENT YEAR TO SECOND, ?, ?, ?, ?, ?, ?, ?)";
 	int save(DatosSuplencia suplencia) throws SQLException;
 
+	public String QUERY_ADD_NEW_SUPLENCIA_EMP   = "INSERT INTO gys_suplencias_emp (id_sociedad, id_empleado, fec_paga, fec_inicio, id_ordinal, fec_fin, id_empresa, "
+												+ "dias, inf_ordinal, id_usuario, fec_ult_actualizacion, coment, id_empleado_sup, "
+												+ "id_clave_movimiento, id_tipo_ausentismo, importe, folio,  motivo, riesgos, id_puesto_plaza, "
+												+ "id_clave_servicio, id_tipo_jornada, id_nivel, id_sub_nivel, id_centro_trabajo, id_turno) "
+												+ "Values (?, ?, ?, ?, "
+												+ "(Select NVL(MAX(id_ordinal),0) + 1 From gys_suplencias_emp Where id_empleado = ? And fec_paga = ? And fec_inicio = ?), "
+												+ "?, ?, ?, ?, ?, CURRENT YEAR TO SECOND, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	int save(DatosSuplencia suplencia, DatosEmpleado empleado) throws SQLException;
+
 	public String QUERY_ADD_NEW_SUPLENCIA_EXT   = "INSERT INTO gys_suplencias_ext (rfc, fec_paga, fec_inicio, id_ordinal, fec_fin, "
 												+ "dias, inf_ordinal, id_usuario, fec_ult_actualizacion, coment, id_empleado_sup, "
-												+ "id_clave_movimiento, id_tipo_ausentismo, importe, folio,  motivo) Values (?, ?, ?, "
+												+ "id_clave_movimiento, id_tipo_ausentismo, importe, folio,  motivo) "
+												+ "Values (?, ?, ?, "
 												+ "(Select NVL(MAX(id_ordinal),0) + 1 From gys_suplencias_ext Where rfc = ? And fec_paga = ? And fec_inicio = ?), "
 												+ "?, ?, ?, ?, CURRENT YEAR TO SECOND, ?, ?, ?, ?, ?, ?, ?)";
 	int saveExt(DatosSuplencia suplencia) throws SQLException;
+
+	public String QUERY_ADD_NEW_SUPLENCIA_EXT_EMP = "INSERT INTO gys_suplencias_ext (rfc, fec_paga, fec_inicio, id_ordinal, fec_fin, "
+												+ "dias, inf_ordinal, id_usuario, fec_ult_actualizacion, coment, id_empleado_sup, "
+												+ "id_clave_movimiento, id_tipo_ausentismo, importe, folio,  motivo, riesgos, id_puesto_plaza, "
+												+ "id_clave_servicio, id_tipo_jornada, id_nivel, id_sub_nivel, id_centro_trabajo, id_turno) "
+												+ "Values (?, ?, ?, "
+												+ "(Select NVL(MAX(id_ordinal),0) + 1 From gys_suplencias_ext Where rfc = ? And fec_paga = ? And fec_inicio = ?), "
+												+ "?, ?, ?, ?, CURRENT YEAR TO SECOND, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	int saveExt(DatosSuplencia suplencia, DatosEmpleado empleado) throws SQLException;
 
 	public String QUERY_UPD_SUPLENCIA			= "Update gys_suplencias_emp Set importe = ?, folio = ?, motivo = ?, id_clave_movimiento = ?, dias = ?, coment = ?, id_usuario = ?, fec_fin = ?\r\n"
 												+ "Where id = ?";
@@ -108,26 +128,26 @@ public interface ISuplenciaRepository {
 	public String QUERY_GET_SALDO_SUPLENCIA_INT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_emp\r\n"
 												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_delegacion = ?)\r\n"
-												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ?)";
-	double ObtenerSaldoUtilizado(String idDelegacion, int anio_ejercicio);
+												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
+	double ObtenerSaldoUtilizado(String idDelegacion, int anio_ejercicio, int mes_ejercicio);
 
 	public String QUERY_GET_SALDO_SUPLENCIA_INT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_emp\r\n"
 												+ "Where id<>? And id_centro_trabajo = ?\r\n"
-												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ?)";
-	double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio);
+												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
+	double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio);
 	
 	public String QUERY_GET_SALDO_SUPLENCIA_EXT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_ext\r\n"
 												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_delegacion = ?)\r\n"
-												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ?)";
-	double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio);
+												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
+	double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio, int mes_ejercicio);
 
 	public String QUERY_GET_SALDO_SUPLENCIA_EXT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_ext\r\n"
 												+ "Where id<>? And id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_delegacion = ?)\r\n"
-												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ?)";
-	double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio);
+												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
+	double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio);
 
 	public String QUERY_EXISTS_SUPL_INT         = "Select COUNT(*) \r\n"
 												+ "From gys_suplencias_emp\r\n"

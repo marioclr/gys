@@ -5,6 +5,7 @@ import java.util.List;
 public class Presupuesto {
 	private int id;
 	private int anio;
+	private int mes;
 	private Delegacion delegacion;
 	private TiposPresupuesto tipoPresup;
 	private Double saldo;
@@ -14,15 +15,15 @@ public class Presupuesto {
 	public Presupuesto() {
 	}
 
-	public Presupuesto(int anio, Delegacion delegacion, DatosAdscripcion centroTrabajo, TiposPresupuesto tipoPresup, Double saldo) {
+	public Presupuesto(int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, TiposPresupuesto tipoPresup, Double saldo) {
 		super();
 		this.anio = anio;
+		this.mes = mes;
 		this.delegacion = delegacion;
 		this.centroTrabajo = centroTrabajo;
 		this.tipoPresup = tipoPresup;
 		this.saldo = saldo;
 	}
-
 	public int getId() {
 		return id;
 	}
@@ -34,6 +35,12 @@ public class Presupuesto {
 	}
 	public void setAnio(int anio) {
 		this.anio = anio;
+	}
+	public int getMes() {
+		return mes;
+	}
+	public void setMes(int mes) {
+		this.mes = mes;
 	}
 	public Delegacion getDelegacion() {
 		return delegacion;
@@ -65,4 +72,11 @@ public class Presupuesto {
 	public void setMovimientos(List<MovimientosPresupuesto> movimientos) {
 		this.movimientos = movimientos;
 	}
+
+	@Override
+	public String toString() {
+		return "Presupuesto [anio=" + anio + ", mes=" + mes + ", delegacion=" + delegacion + ", tipoPresup="
+				+ tipoPresup + ", saldo=" + saldo + ", centroTrabajo=" + centroTrabajo + "]";
+	}
+
 }
