@@ -43,8 +43,8 @@ public class PerfilController {
 	public ResponseEntity<Object> createPerfil(@RequestBody Perfil perfil) {
 		try {
 			perfilRepository.save(new Perfil(perfil.getDescripcion(), perfil.getId_usuario()));
-			//return new ResponseEntity<>("La opcion ha sido creada de manera exitosa", HttpStatus.CREATED);
-			return ResponseHandler.generateResponse("La opcion ha sido creada de manera exitosa", HttpStatus.CREATED, null);
+			//return new ResponseEntity<>("La opcion ha sido creada de manera exitosa", HttpStatus.OK);
+			return ResponseHandler.generateResponse("La opcion ha sido creada de manera exitosa", HttpStatus.OK, null);
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("No se pudo crear la opcion de manera exitosa", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -61,8 +61,8 @@ public class PerfilController {
 			for(Opcion o:perfil.getOpciones()) {
 				perfilRepository.addOpcionToPerfil(perfil.getIdPerfil(), o.getIdOpcion());
 			}
-			//return new ResponseEntity<>("Las opciones y el perfil han sido creada de manera exitosa", HttpStatus.CREATED);
-			return ResponseHandler.generateResponse("Las opciones y el perfil han sido creada de manera exitosa", HttpStatus.CREATED, null);
+			//return new ResponseEntity<>("Las opciones y el perfil han sido creada de manera exitosa", HttpStatus.OK);
+			return ResponseHandler.generateResponse("Las opciones y el perfil han sido creada de manera exitosa", HttpStatus.OK, null);
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al guardar las opciones del perfil en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -80,8 +80,8 @@ public class PerfilController {
 				for(Opcion o:perfil.getOpciones()) {
 					perfilRepository.addOpcionToPerfil(perfil.getIdPerfil(), o.getIdOpcion());
 				}
-				//return new ResponseEntity<>("Las opciones y el perfil han sido actualizadas de manera exitosa", HttpStatus.CREATED);
-				return ResponseHandler.generateResponse("Las opciones y el perfil han sido actualizadas de manera exitosa", HttpStatus.CREATED, null);
+				//return new ResponseEntity<>("Las opciones y el perfil han sido actualizadas de manera exitosa", HttpStatus.OK);
+				return ResponseHandler.generateResponse("Las opciones y el perfil han sido actualizadas de manera exitosa", HttpStatus.OK, null);
 			} else {
 				//return new ResponseEntity<>("No se indicó el ID del Perfil", HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se indicó el ID del Perfil", HttpStatus.NOT_FOUND, null);

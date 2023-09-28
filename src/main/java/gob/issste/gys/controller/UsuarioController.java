@@ -84,8 +84,8 @@ public class UsuarioController {
 				usuarioRepository.saveCentTrabForUsu(idUsuario, ct.getClave(), usuario.getId_usuario());
 			}
 			platformTransactionManager.commit(status);
-			//return new ResponseEntity<>("El Usuario ha sido creado de manera exitosa", HttpStatus.CREATED);
-			return ResponseHandler.generateResponse("El Usuario ha sido creado de manera exitosa", HttpStatus.CREATED, null);
+			//return new ResponseEntity<>("El Usuario ha sido creado de manera exitosa", HttpStatus.OK);
+			return ResponseHandler.generateResponse("El Usuario ha sido creado de manera exitosa", HttpStatus.OK, null);
 			
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);

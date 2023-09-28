@@ -28,6 +28,8 @@ public class DatosGuardia {
 	private String id_clave_movimiento;
 	private String coment;
 	private String id_empresa;
+	private Integer hora_inicio;
+	private Integer hora_fin;
 
 	public Integer getId() {
 		return id;
@@ -180,6 +182,18 @@ public class DatosGuardia {
 	}
 	public void setId_empresa(String id_empresa) {
 		this.id_empresa = id_empresa;
+	}
+	public Integer getHora_inicio() {
+		return hora_inicio;
+	}
+	public void setHora_inicio(Integer hora_inicio) {
+		this.hora_inicio = hora_inicio;
+	}
+	public Integer getHora_fin() {
+		return hora_fin;
+	}
+	public void setHora_fin(Integer hora_fin) {
+		this.hora_fin = hora_fin;
 	}
 
 	@Override

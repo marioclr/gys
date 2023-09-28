@@ -45,7 +45,7 @@ public class ExpedienteController {
 				documento.setImagen(archivo.getBytes());
 			}
 			int idImgBolsa = imagenBolsaRepository.save(documento);
-			return new ResponseEntity<>("El registro de la imaben ha sido guardado de manera exitosa, con ID = " + idImgBolsa, HttpStatus.CREATED);
+			return new ResponseEntity<>("El registro de la imaben ha sido guardado de manera exitosa, con ID = " + idImgBolsa, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -76,7 +76,7 @@ public class ExpedienteController {
 				
 			}
 			int idImgBolsa = imagenBolsaRepository.save(documento);
-			return new ResponseEntity<>("El registro de la imaben ha sido guardado de manera exitosa, con ID = " + idImgBolsa, HttpStatus.CREATED);
+			return new ResponseEntity<>("El registro de la imaben ha sido guardado de manera exitosa, con ID = " + idImgBolsa, HttpStatus.OK);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}

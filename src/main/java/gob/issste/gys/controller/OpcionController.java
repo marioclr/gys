@@ -43,7 +43,7 @@ public class OpcionController {
 	public ResponseEntity<Object> createOpcion(@RequestBody Opcion opcion) {
 		try {
 			opcionRepository.save(new Opcion(opcion.getDescripcion(), opcion.getComponente(), opcion.getId_usuario()));
-			//return new ResponseEntity<>("La opcion ha sido creada de manera exitosa", HttpStatus.CREATED);
+			//return new ResponseEntity<>("La opcion ha sido creada de manera exitosa", HttpStatus.OK);
 			return ResponseHandler.generateResponse("La opcion ha sido creada de manera exitosa", HttpStatus.OK, null);
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

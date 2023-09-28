@@ -67,6 +67,8 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
             preparedStatement.setString(21, guardia.getComent());
             preparedStatement.setString(22, guardia.getId_usuario());
             preparedStatement.setInt(23, guardia.getRiesgos().intValue());
+            preparedStatement.setInt(24, guardia.getHora_inicio());
+            preparedStatement.setInt(25, guardia.getHora_fin());
             return preparedStatement;
         };
 
@@ -330,6 +332,16 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 		return guardias;
 
+	}
+
+	@Override
+	public int existe_guardia(DatosGuardia guardia) {
+		logger.info(QUERY_EXISTS_GUARDIA_INT);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_paga(), 
+							   guardia.getHora_inicio(), guardia.getHora_fin(),
+							   guardia.getHora_inicio(), guardia.getHora_fin(),
+							   guardia.getHora_inicio(), guardia.getHora_fin() } );
 	}
 
 }

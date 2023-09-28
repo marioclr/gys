@@ -37,7 +37,7 @@ public class PagaController {
 		try {
 			int idPaga = pagaRepository.save(paga);
 
-			return ResponseHandler.generateResponse("La fecha de control de pagos ha sido creado de manera exitosa con ID " + idPaga, HttpStatus.CREATED, null);
+			return ResponseHandler.generateResponse("La fecha de control de pagos ha sido creado de manera exitosa con ID " + idPaga, HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);

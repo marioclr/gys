@@ -215,10 +215,17 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 
             importe = (importe / 30);
 
-            int diasAdic = 0;
             factor = suplenciaRepository.ConsultaFactoresSuplencia(empleado.getId_turno());
-            diasAdic = (dias / factor.getFact_turno()) * 2; 
-            importe  = importe * (dias + diasAdic) * factor.getFact_jornada();
+
+            //int diasAdic = 0;
+            //diasAdic = (dias / factor.getFact_turno()) * 2; 
+            //importe  = importe * (dias + diasAdic) * factor.getFact_jornada();
+
+            if (dias >= factor.getFact_turno()) {
+            	importe = importe * dias * factor.getFact_jornada();
+            } else {
+            	importe = importe * dias;
+            }
 
         } else {
 
@@ -245,28 +252,28 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 	    			}
 	    			break;
 	    		case 41, 42:
-	    			if (dias >= 5) {
+	    			if (dias >= 2) {
 	    				importe = importe * dias * 1.4 * 4;
 	    			} else {
 	    				importe = importe * dias * 4;
 	    			}
 	    			break;
 	    		case 31, 32:
-	    			if (dias >= 5) {
+	    			if (dias >= 4) {
 	    				importe = importe * dias * 1.4 * 2;
 	    			} else {
 	    				importe = importe * dias * 2;
 	    			}
 	    			break;
 	    		case 21:
-	    			if (dias >= 5) {
+	    			if (dias >= 3) {
 	    				importe = importe * dias * 1.4 * 2;
 	    			} else {
 	    				importe = importe * dias * 2;
 	    			}
 	    			break;
 	    		case 22:
-	    			if (dias >= 5) {
+	    			if (dias >= 3) {
 	    				importe = importe * dias * 1.4 * 2;
 	    			} else {
 	    				importe = importe * dias * 2;

@@ -54,7 +54,7 @@ public interface IPresupuestoRepository {
 													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
 													+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
 													+ "  And P.id=?";
-	Presupuesto getElementById(String id);
+	Presupuesto getElementById(int id);
 
 	public String QUERY_GET_PRESUPUESTO_BY_TYPE     = "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
 													+ "NVL(P.id_centro_trabajo, '00000') id_centro_trabajo, P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"

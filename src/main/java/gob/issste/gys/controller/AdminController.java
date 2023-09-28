@@ -54,7 +54,7 @@ public class AdminController {
 				adminRepository.calcula_isr_sup(strDate);
 			}
 			cifras = adminRepository.consultaCifras(strDate, tipoConcepto);
-			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.CREATED, cifras);
+			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuestos", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -105,7 +105,7 @@ public class AdminController {
 
 			layout = adminRepository.consultaLayoutSPEP(strDate, tipoConcepto);
 
-			return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.CREATED, layout);
+			return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, layout);
 
 		} catch (Exception e) {
 
@@ -121,7 +121,7 @@ public class AdminController {
 
 		try {
 
-			return ResponseHandler.generateResponse("La fecha de control de pagos ha sido creado de manera exitosa con ID ", HttpStatus.CREATED, null);
+			return ResponseHandler.generateResponse("La fecha de control de pagos ha sido creado de manera exitosa con ID ", HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);

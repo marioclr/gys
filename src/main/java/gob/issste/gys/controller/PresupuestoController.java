@@ -120,7 +120,7 @@ public class PresupuestoController {
 			}
 			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));
 			platformTransactionManager.commit(status);
-			return ResponseHandler.generateResponse("El Presupuesto con ID " + idPresup + " ha sido creado de manera exitosa. Con número de movimiento: " + idMovPresup, HttpStatus.CREATED, null);
+			return ResponseHandler.generateResponse("El Presupuesto con ID " + idPresup + " ha sido creado de manera exitosa. Con número de movimiento: " + idMovPresup, HttpStatus.OK, null);
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
 			return ResponseHandler.generateResponse("Error al realizar el registro de presupuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -181,7 +181,7 @@ public class PresupuestoController {
 //			}
 //			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));
 //			platformTransactionManager.commit(status);
-			return ResponseHandler.generateResponse("El Presupuesto con ID ha sido creado de manera exitosa. Con número de movimiento: ", HttpStatus.CREATED, null);
+			return ResponseHandler.generateResponse("El Presupuesto con ID ha sido creado de manera exitosa. Con número de movimiento: ", HttpStatus.OK, null);
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
 			return ResponseHandler.generateResponse("Error al realizar el registro de presupuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -408,8 +408,8 @@ public class PresupuestoController {
 	public ResponseEntity<Object> createTipMovPresup(@RequestBody TipoMovPresupuesto TipoMovPresupuesto) {
 		try {
 			tipMovPresupRepository.save(new TipoMovPresupuesto(TipoMovPresupuesto.getClave(), TipoMovPresupuesto.getDescripcion()));
-			//return new ResponseEntity<>("El tipo de movimiento ha sido creado de manera exitosa", HttpStatus.CREATED);
-			return ResponseHandler.generateResponse("El tipo de movimiento ha sido creado de manera exitosa", HttpStatus.CREATED, null);
+			//return new ResponseEntity<>("El tipo de movimiento ha sido creado de manera exitosa", HttpStatus.OK);
+			return ResponseHandler.generateResponse("El tipo de movimiento ha sido creado de manera exitosa", HttpStatus.OK, null);
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al agregar nuevo elemento de tipos de presupuesto al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -531,12 +531,69 @@ public class PresupuestoController {
 		DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
 
+		Presupuesto presup = presupuestoRepository.getElementById(movimPresupuesto.getIdPresup());
+		double saldo=0;
+
 		try {
+
+			// Si es por CT
+			//   Validar saldo utilizado del CT y si el Saldo + Importe < Saldo actual: Continuar
+			//   Si no Mandar la excepción
+
+			// Si es por DEL
+			//   Validar saldo utilizado de todos los CT de la DEL y si el Saldo + Importe < Saldo actual: Continuar
+			//   Si no Mandar la excepción
+
+			switch (presup.getTipoPresup().getClave()) {
+				case "GI":
+					if (presup.getCentroTrabajo() == null) {
+						saldo = guardiaRepository.ObtenerSaldoUtilizado(presup.getDelegacion().getId_div_geografica(),
+								presup.getAnio(), presup.getMes());
+					} else {
+						saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, presup.getCentroTrabajo().getClave(),
+								presup.getAnio(), presup.getMes());
+					}
+					break;
+				case "GE":
+					if (presup.getCentroTrabajo() == null) {
+						saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(presup.getDelegacion().getId_div_geografica(),
+								presup.getAnio(), presup.getMes());
+					} else {
+						saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, presup.getCentroTrabajo().getClave(),
+								presup.getAnio(), presup.getMes());
+					}
+					break;
+				case "SI":
+					if (presup.getCentroTrabajo() == null) {
+						saldo = suplenciaRepository.ObtenerSaldoUtilizado(presup.getDelegacion().getId_div_geografica(),
+								presup.getAnio(), presup.getMes());
+					} else {
+						saldo = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, presup.getCentroTrabajo().getClave(),
+								presup.getAnio(), presup.getMes());
+					}
+					break;
+				case "SE":
+					if (presup.getCentroTrabajo() == null) {
+						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt(presup.getDelegacion().getId_div_geografica(),
+								presup.getAnio(), presup.getMes());
+					} else {
+						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, presup.getCentroTrabajo().getClave(),
+								presup.getAnio(), presup.getMes());
+					}
+					break;
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de presupuesto del movimiento indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+
+			if ( presup.getSaldo() + movimPresupuesto.getImporte() < saldo ) {
+				return ResponseHandler.generateResponse("No se puede realizar la modificación solicitada, debio a que ya al realizar la modificación se afectan recursos comprometidos para pago ($ " + saldo + "). Sí es necesario, elimine registros ya capturados.", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+
 			presupuestoRepository.update(movimPresupuesto.getIdPresup(), movimPresupuesto.getImporte());
 			movPresupuestoRepository.save(new MovimientosPresupuesto(movimPresupuesto.getIdPresup(), movimPresupuesto.getImporte(), movimPresupuesto.getComentarios(), movimPresupuesto.getTipMovPresup().getId()));
 			platformTransactionManager.commit(status);
-			//return new ResponseEntity<>("El movimiento ha sido creado de manera exitosa", HttpStatus.CREATED);
-			return ResponseHandler.generateResponse("El movimiento ha sido creado de manera exitosa", HttpStatus.CREATED, null);
+			//return new ResponseEntity<>("El movimiento ha sido creado de manera exitosa", HttpStatus.OK);
+			return ResponseHandler.generateResponse("El movimiento ha sido creado de manera exitosa", HttpStatus.OK, null);
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -587,8 +644,8 @@ public class PresupuestoController {
 	public ResponseEntity<Object> createTipoPresup(@RequestBody TiposPresupuesto tipoPresupuesto) {
 		try {
 			tiposPresupuestoRepository.save(new TiposPresupuesto(tipoPresupuesto.getClave(), tipoPresupuesto.getDescripcion()));
-			//return new ResponseEntity<>("El tipo de movimiento ha sido creado de manera exitosa", HttpStatus.CREATED);
-			return ResponseHandler.generateResponse("El tipo de movimiento ha sido creado de manera exitosa", HttpStatus.CREATED, null);
+			//return new ResponseEntity<>("El tipo de movimiento ha sido creado de manera exitosa", HttpStatus.OK);
+			return ResponseHandler.generateResponse("El tipo de movimiento ha sido creado de manera exitosa", HttpStatus.OK, null);
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al agregar nuevo elemento de tipos de presupuesto al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);

@@ -113,7 +113,7 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 	}
 
 	@Override
-	public Presupuesto getElementById(String id) {
+	public Presupuesto getElementById(int id) {
 		logger.info(QUERY_GET_PRESUPUESTO_BY_ID);
 		return jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_BY_ID, new PresupuestoMapper(), id );
 	}

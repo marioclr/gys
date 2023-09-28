@@ -85,7 +85,7 @@ public class SuplenciaController {
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(strDate, clave_empleado);
 			int riesgos = empleadoRepository.ConsultaRiesgosEmp(clave_empleado, strDate);
 
-			importe = suplenciaService.CalculaImporteSuplencia( strDate, empleado, dias, tipo, riesgos );
+			importe = suplenciaService.CalculaImporteSuplencia( strDate, empleado.getClave_empleado(), dias, tipo, riesgos );
 			BigDecimal importe2 = new BigDecimal(importe).setScale(2, RoundingMode.HALF_UP);
 			//return new ResponseEntity<>(importe2, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el importe de la suplencia conforme a los criterios establecidos", HttpStatus.OK, importe2);
@@ -442,7 +442,7 @@ public class SuplenciaController {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
 			suplenciaService.ActualizaImportesSuplencias2(strQuincena, tipoSuplencia);
-			//return new ResponseEntity<>("Los importes de las Suplencias se actualizaron de manera exitósa.", HttpStatus.CREATED);
+			//return new ResponseEntity<>("Los importes de las Suplencias se actualizaron de manera exitósa.", HttpStatus.OK);
 			return ResponseHandler.generateResponse("Los importes de las Suplencias se actualizaron de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
