@@ -52,12 +52,12 @@ public class DatosController {
 			@Parameter(description = "ID del usuario obtener las adscripciones que coincidan con su clave", required = false) @RequestParam(required = false) Integer idUsuario ) {
 
 		try {
-			Usuario _usuario = usuarioRepository.findById(idUsuario);
 			List<DatosAdscripcion> adscripciones = new ArrayList<DatosAdscripcion>();
 
 			if (idUsuario==null) {
 				adscripciones = datosRepository.getDatosAdscripciones();
 			} else {
+				Usuario _usuario = usuarioRepository.findById(idUsuario);
 				if (_usuario.getNivelVisibilidad().getIdNivelVisibilidad()==3) {
 					adscripciones = datosRepository.getDatosAdscripciones_ct(idUsuario);
 				} else {

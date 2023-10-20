@@ -85,9 +85,10 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 	@Override
 	public int updateGuardia(DatosGuardia guardia) {
+		logger.info(QUERY_UPD_GUARDIA);
 		return jdbcTemplate.update(QUERY_UPD_GUARDIA, 
 				new Object[] { guardia.getImporte(), guardia.getFolio(), guardia.getMotivo(), guardia.getId_clave_movimiento(), guardia.getHoras(),
-						guardia.getComent(), guardia.getId_usuario(), guardia.getId() });
+						guardia.getComent(), guardia.getId_usuario(), guardia.getHora_inicio(), guardia.getHora_fin(), guardia.getId() });
 	}
 
 	@Override
@@ -199,6 +200,8 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
             preparedStatement.setString(19, guardia.getComent());
             preparedStatement.setString(20, guardia.getId_usuario());
             preparedStatement.setInt(21, guardia.getRiesgos().intValue());
+            preparedStatement.setInt(22, guardia.getHora_inicio());
+            preparedStatement.setInt(23, guardia.getHora_fin());
             return preparedStatement;
         };
 
@@ -338,10 +341,40 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	public int existe_guardia(DatosGuardia guardia) {
 		logger.info(QUERY_EXISTS_GUARDIA_INT);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT, Integer.class,
-				new Object[] { guardia.getClave_empleado(), guardia.getFec_paga(), 
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(), 
 							   guardia.getHora_inicio(), guardia.getHora_fin(),
 							   guardia.getHora_inicio(), guardia.getHora_fin(),
 							   guardia.getHora_inicio(), guardia.getHora_fin() } );
+	}
+
+	@Override
+	public int existe_guardia_upd(DatosGuardia guardia) {
+		logger.info(QUERY_EXISTS_GUARDIA_INT_UPD);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT_UPD, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getId(), 
+						guardia.getHora_inicio(), guardia.getHora_fin(), 
+						guardia.getHora_inicio(), guardia.getHora_fin(), 
+						guardia.getHora_inicio(), guardia.getHora_fin() } );
+	}
+
+	@Override
+	public int existe_guardia_ext(DatosGuardia guardia) {
+		logger.info(QUERY_EXISTS_GUARDIA_INT);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT_UPD, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(), 
+							   guardia.getHora_inicio(), guardia.getHora_fin(),
+							   guardia.getHora_inicio(), guardia.getHora_fin(),
+							   guardia.getHora_inicio(), guardia.getHora_fin() } );
+	}
+
+	@Override
+	public int existe_guardia_ext_upd(DatosGuardia guardia) {
+		logger.info(QUERY_EXISTS_GUARDIA_INT_UPD);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_EXT_UPD, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getId(), 
+						guardia.getHora_inicio(), guardia.getHora_fin(), 
+						guardia.getHora_inicio(), guardia.getHora_fin(), 
+						guardia.getHora_inicio(), guardia.getHora_fin() } );
 	}
 
 }

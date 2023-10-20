@@ -366,24 +366,30 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	public int existe_suplenciaExt(DatosSuplencia suplencia) {
 		logger.info(QUERY_EXISTS_SUPL_EXT);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPL_EXT, Integer.class,
-				new Object[] { suplencia.getClave_empleado(), suplencia.getFec_inicio(), suplencia.getFec_fin(), 
-						suplencia.getFec_inicio(), suplencia.getFec_fin(), suplencia.getFec_inicio(), suplencia.getFec_fin() } );
+				new Object[] { suplencia.getClave_empleado(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin() } );
 	}
 
 	@Override
 	public int existe_suplencia_upd(DatosSuplencia suplencia) {
 		logger.info(QUERY_EXISTS_SUPL_INT_UPD);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPL_INT_UPD, Integer.class,
-				new Object[] { suplencia.getClave_empleado(), suplencia.getId(), suplencia.getFec_inicio(), suplencia.getFec_fin(), 
-						suplencia.getFec_inicio(), suplencia.getFec_fin(), suplencia.getFec_inicio(), suplencia.getFec_fin() } );
+				new Object[] { suplencia.getClave_empleado(), suplencia.getId(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin() } );
 	}
 
 	@Override
 	public int existe_suplenciaExt_upd(DatosSuplencia suplencia) {
 		logger.info(QUERY_EXISTS_SUPL_EXT_UPD);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPL_EXT_UPD, Integer.class,
-				new Object[] { suplencia.getClave_empleado(), suplencia.getId(), suplencia.getFec_inicio(), suplencia.getFec_fin(), 
-						suplencia.getFec_inicio(), suplencia.getFec_fin(), suplencia.getFec_inicio(), suplencia.getFec_fin() } );
+				new Object[] { suplencia.getClave_empleado(), suplencia.getId(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin() } );
 	}
 
 	@Override

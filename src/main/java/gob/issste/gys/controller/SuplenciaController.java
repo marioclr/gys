@@ -268,18 +268,20 @@ public class SuplenciaController {
 
 			String fec_pago = suplencia.getFec_paga();
 
-//			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-//				idTipoPresup = 3;
-//			} else {
-//				idTipoPresup = 4;
-//			}
+			switch (suplencia.getTipo_suplencia()) {
 
-			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-				if (suplenciaRepository.existe_suplencia(suplencia)>0)
-					return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			} else {
-				if (suplenciaRepository.existe_suplenciaExt(suplencia)>0)
-					return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				case "SI":
+					if (suplenciaRepository.existe_suplencia(suplencia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					break;
+
+				case "SE":
+					if (suplenciaRepository.existe_suplenciaExt(suplencia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la suplencia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
@@ -303,10 +305,15 @@ public class SuplenciaController {
 
 			saldo = (presup != null) ? presup.getSaldo(): 0; 
 
-			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(), presup.getMes() );
-			} else {
-				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(), presup.getMes());
+			switch (suplencia.getTipo_suplencia()) {
+				case "SI":
+					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(), presup.getMes() );
+					break;
+				case "SE":
+					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(), presup.getMes());
+					break;
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la suplencia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			// Fin de las Validaciones presupuestales
@@ -359,18 +366,21 @@ public class SuplenciaController {
 
 			String fec_pago = suplencia.getFec_paga();
 
-//			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-//				idTipoPresup = 3;
-//			} else {
-//				idTipoPresup = 4;
-//			}
 
-			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-				if (suplenciaRepository.existe_suplencia_upd(suplencia)>0)
-					return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			} else {
-				if (suplenciaRepository.existe_suplenciaExt_upd(suplencia)>0)
-					return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			switch (suplencia.getTipo_suplencia()) {
+
+				case "SI":
+					if (suplenciaRepository.existe_suplencia_upd(suplencia)>0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					break;
+
+				case "SE":
+					if (suplenciaRepository.existe_suplenciaExt_upd(suplencia)>0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la suplencia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
@@ -393,10 +403,18 @@ public class SuplenciaController {
 
 			saldo = (presup != null) ? presup.getSaldo(): 0; 
 
-			if (suplencia.getTipo_suplencia().equals(String.valueOf("SI"))) {
-				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
-			} else {
-				saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
+			switch (suplencia.getTipo_suplencia()) {
+
+				case "SI":
+					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
+					break;
+
+				case "SE":
+					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la suplencia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			// Fin de las Validaciones presupuestales
 

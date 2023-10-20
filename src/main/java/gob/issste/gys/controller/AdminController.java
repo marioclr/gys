@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import gob.issste.gys.model.CifrasDeImpuestos;
 import gob.issste.gys.model.CifrasImpuesto;
 import gob.issste.gys.repository.IAdminRepository;
 import gob.issste.gys.response.ResponseHandler;
@@ -61,6 +62,54 @@ public class AdminController {
 		}
 	}
 
+	@Operation(summary = "Realiza el proceso de cálculo de impuestos a guardias o suplencias", description = "Realiza el proceso de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
+	@PostMapping("/calculo_isr")
+	public ResponseEntity<Object> calculoISR(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para indicar el Tipo de concepto (Guardias externas: GE o Suplencias externas: SE)", required = true) @RequestParam(required = true) String tipoConcepto ) {
+
+		CifrasDeImpuestos cifras;
+
+		if (! tipoConcepto.equals(String.valueOf("GE")) && ! tipoConcepto.equals(String.valueOf("SE"))) {
+			return ResponseHandler.generateResponse("El tipo de concepto debe ser GE: Guardias externas o SE: Suplencias externas", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+		try {
+
+			adminRepository.elimina_cifras_impuesto(anio, mes, tipoFechaControl, tipoConcepto);
+
+			switch (tipoConcepto) {
+
+				case "GE":
+					if (tipoFechaControl == 1) {
+						adminRepository.calcula_isr_guardia_non(anio, mes);
+					} else {
+						adminRepository.calcula_isr_guardia_par(anio, mes);
+					}
+					break;
+
+				case "SE":
+					if (tipoFechaControl == 1) {
+						adminRepository.calcula_isr_suplencia_non(anio, mes);
+					} else {
+						adminRepository.calcula_isr_suplencia_par(anio, mes);
+					}
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+
+			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl, tipoConcepto);
+
+			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuestos", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
 	@Operation(summary = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", description = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
 	@GetMapping("/isr")
 	public ResponseEntity<Object> getCalculoISR(
@@ -78,6 +127,35 @@ public class AdminController {
 		try {
 
 			cifras = adminRepository.consultaCifras(strDate, tipoConcepto);
+
+			if (cifras == null) {
+				return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Se obtubieron las cifras de ISR de manera exitosa", HttpStatus.OK, cifras);
+
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener las cifras de ISR del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", description = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
+	@GetMapping("/cifras_isr")
+	public ResponseEntity<Object> getCifrasISR(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para indicar el tipo de concepto (Guardias externas: GE o Suplencias externas: SE)", required = true) @RequestParam(required = true) String tipoConcepto ) {
+
+		CifrasDeImpuestos cifras;
+
+		if (! tipoConcepto.equals(String.valueOf("GE")) && ! tipoConcepto.equals(String.valueOf("SE"))) {
+			return ResponseHandler.generateResponse("El tipo de concepto debe ser GE: Guardias externas o SE: Suplencias externas", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+		try {
+
+			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl, tipoConcepto);
 
 			if (cifras == null) {
 				return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, null);
@@ -127,4 +205,5 @@ public class AdminController {
 			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
+
 }

@@ -250,4 +250,11 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 				new Object[] { anio, mes, idDelegacion, idTipoPresup } );
 	}
 
+	@Override
+	public double suma_presupuestos(Integer anio_ejercicio, String idDelegacion) {
+		logger.info(QUERY_GET_SUM_PRESUP_BY_DEL);
+		return jdbcTemplate.queryForObject(QUERY_GET_SUM_PRESUP_BY_DEL, Double.class,
+				new Object[] { anio_ejercicio, idDelegacion } );
+	}
+
 }

@@ -16,12 +16,12 @@ public interface GuardiaRepository {
 
 	public String QUERY_ADD_NEW_GUARDIA_EXT     = "INSERT INTO gys_guardias_ext (rfc, fec_paga, fec_inicio, id_ordinal, fec_fin, "
 												+ "id_puesto_plaza, id_clave_servicio, id_centro_trabajo, id_tipo_jornada, id_nivel, id_sub_nivel, horas, importe, folio, "
-												+ "motivo, id_clave_movimiento, coment, id_usuario, fec_ult_actualizacion, riesgos) Values (?, ?, ?, "
+												+ "motivo, id_clave_movimiento, coment, id_usuario, fec_ult_actualizacion, riesgos, hora_inicio, hora_fin) Values (?, ?, ?, "
 												+ "(Select NVL(MAX(id_ordinal),0) + 1 From gys_guardias_ext Where rfc = ? And fec_paga = ? And fec_inicio = ?), "
-												+ "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT YEAR TO SECOND, ? )";
+												+ "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT YEAR TO SECOND, ?, ?, ? )";
 	int saveExt(DatosGuardia guardia) throws SQLException;
 
-	public String QUERY_UPD_GUARDIA				= "Update gys_guardias_emp Set importe = ?, folio = ?, motivo = ?, id_clave_movimiento = ?, horas = ?, coment = ?, id_usuario = ?\r\n"
+	public String QUERY_UPD_GUARDIA				= "Update gys_guardias_emp Set importe = ?, folio = ?, motivo = ?, id_clave_movimiento = ?, horas = ?, coment = ?, id_usuario = ?, hora_inicio = ?, hora_fin = ?\r\n"
 												+ "Where id = ?";
 	int updateGuardia(DatosGuardia guardia);
 
@@ -173,5 +173,31 @@ public interface GuardiaRepository {
 												+ "    Or ((hora_fin>=?)    And (hora_fin <= ?))    \r\n"
 												+ "    Or ((hora_fin>=?)    And (hora_inicio <= ?)))";
 	public int existe_guardia(DatosGuardia guardia);
+
+	public String QUERY_EXISTS_GUARDIA_INT_UPD  = "Select COUNT(*) \r\n"
+												+ "From gys_guardias_emp\r\n"
+												+ "Where id_empleado = ?\r\n"
+												+ "  And id<>?\r\n"
+												+ "  And (((hora_inicio>=?) And (hora_inicio <= ?)) \r\n"
+												+ "    Or ((hora_fin>=?)    And (hora_fin <= ?))    \r\n"
+												+ "    Or ((hora_fin>=?)    And (hora_inicio <= ?)))";
+	public int existe_guardia_upd(DatosGuardia guardia);
+
+	public String QUERY_EXISTS_GUARDIA_EXT      = "Select COUNT(*) \r\n"
+												+ "From gys_guardias_ext\r\n"
+												+ "Where rfc = ? And fec_inicio = ?\r\n"
+												+ "  And (((hora_inicio>=?) And (hora_inicio <= ?)) \r\n"
+												+ "    Or ((hora_fin>=?)    And (hora_fin <= ?))    \r\n"
+												+ "    Or ((hora_fin>=?)    And (hora_inicio <= ?)))";
+	public int existe_guardia_ext(DatosGuardia guardia);
+
+	public String QUERY_EXISTS_GUARDIA_EXT_UPD  = "Select COUNT(*) \r\n"
+												+ "From gys_guardias_ext\r\n"
+												+ "Where rfc = ?\r\n"
+												+ "  And id<>?\r\n"
+												+ "  And (((hora_inicio>=?) And (hora_inicio <= ?)) \r\n"
+												+ "    Or ((hora_fin>=?)    And (hora_fin <= ?))    \r\n"
+												+ "    Or ((hora_fin>=?)    And (hora_inicio <= ?)))";
+	public int existe_guardia_ext_upd(DatosGuardia guardia);
 
 }

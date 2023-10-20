@@ -32,4 +32,13 @@ public interface IPresupuestoGlobalRepository {
 													+ "Where anio = ?\r\n"
 													+ "  And idDelegacion = ?";
 	public int existe_presupuesto(PresupuestoGlobal presupuestoGlobal);
+
+	public String QUERY_GET_SALDO_BY_ANIO_DEL		= "Select NVL(SUM(saldo), 0) saldo \r\n"
+													+ "From gys_presupuesto_global\r\n"
+													+ "Where anio = ?\r\n"
+													+ "  And idDelegacion = ?";
+	public double saldo_presup_global(Integer anio_ejercicio, String idDelegacion);
+
+	public List<PresupuestoGlobal> get_dynamic_regs(String idDelegacion, Integer anio, String coment);
+
 }

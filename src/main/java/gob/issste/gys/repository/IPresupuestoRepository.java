@@ -117,4 +117,11 @@ public interface IPresupuestoRepository {
 													+ "Group By idDelegacion";
 	public double getSaldoDistribuido(Integer anio, Integer mes, String idDelegacion, String idTipoPresup);
 
+	public String QUERY_GET_SUM_PRESUP_BY_DEL		= "Select NVL(SUM(saldo), 0) saldo \r\n"
+													+ "From gys_presupuesto\r\n"
+													+ "Where anio = ?\r\n"
+													+ "  And idDelegacion = ?\r\n"
+													+ "  And id_centro_trabajo Is NULL";
+	public double suma_presupuestos(Integer anio_ejercicio, String idDelegacion);
+
 }

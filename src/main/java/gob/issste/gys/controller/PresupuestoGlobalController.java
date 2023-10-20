@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.PresupuestoGlobal;
+import gob.issste.gys.model.PresupuestoGlobalDesglozado;
 import gob.issste.gys.repository.IPresupuestoGlobalRepository;
+import gob.issste.gys.repository.IPresupuestoRepository;
 import gob.issste.gys.response.ResponseHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,6 +40,8 @@ public class PresupuestoGlobalController {
 
 	@Autowired
 	IPresupuestoGlobalRepository presGlobalRepository;
+	@Autowired
+	IPresupuestoRepository presupuestoRepository;
 
 	@Operation(summary = "Agregar un elemento de Presupuesto global en el Sistema", description = "Agregar un elemento de Presupuesto global en el Sistema", tags = { "Presupuesto Global" })
 	@PostMapping("/PresupuestoGlobal")
@@ -113,21 +117,42 @@ public class PresupuestoGlobalController {
 	@Operation(summary = "Obtiene los elementos del Presupuesto global en el Sistema", description = "Obtiene los elementos del Presupuesto global en el Sistema", tags = { "Presupuesto Global" })
 	@GetMapping("/PresupuestoGlobal")
 	public ResponseEntity<Object> getPresupuestoGlobal(
-			@Parameter(description = "Texto en comentarios del que se desea obtener la información", required = false) @RequestParam(required = false) String coment) {
+			@Parameter(description = "Parámetro opcional para indicar el anio del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer anio,
+			@Parameter(description = "Parámetro opcional para indicar el ID de la delegación del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idDelegacion,
+			@Parameter(description = "Frase o palagra incluida en los comentarios del que se desea obtener la información", required = false) @RequestParam(required = false) String coment,
+			@Parameter(description = "Parámetro opcional para indicar sí se incluye el saldo desglozado por meses y tipos de presupuesto", required = true) @RequestParam(required = true, defaultValue = "false") boolean conDesgloce ) {
 		try {
-			List<PresupuestoGlobal> presupGlobal = new ArrayList<PresupuestoGlobal>();
 
-			if (coment == null)
-				presGlobalRepository.findAll().forEach(presupGlobal::add);
-			else
-				presGlobalRepository.findByComent(coment).forEach(presupGlobal::add);
+			List<PresupuestoGlobal> presupuestosGlobal = new ArrayList<PresupuestoGlobal>();
 
-			if (presupGlobal.isEmpty()) {
-
-				return ResponseHandler.generateResponse("No se pudo obtener la información de elementos de Presupuesto global en el Sistema", HttpStatus.NOT_FOUND, null);
+			if ( (idDelegacion != null) || (anio != null) || (coment != null) ) {
+				presupuestosGlobal = presGlobalRepository.get_dynamic_regs(idDelegacion, anio, coment);
+			} else {
+				presupuestosGlobal = presGlobalRepository.findAll();
 			}
 
-			return ResponseHandler.generateResponse("Se obtuvo la información de elementos de Presupuesto global en el Sistema", HttpStatus.OK, presupGlobal);
+			if (presupuestosGlobal.isEmpty()) {
+
+				return ResponseHandler.generateResponse("No se obtuvieron registros de Presupuesto global en el Sistema", HttpStatus.NOT_FOUND, null);
+			}
+			
+			if (conDesgloce == true) {
+				List<PresupuestoGlobalDesglozado> presupuestosGlobalDesglozado = new ArrayList<PresupuestoGlobalDesglozado>();
+				for(PresupuestoGlobal p:presupuestosGlobal) {
+					double saldo = presupuestoRepository.suma_presupuestos(anio, p.getDelegacion().getId_div_geografica());
+					PresupuestoGlobalDesglozado pd = new PresupuestoGlobalDesglozado();
+					pd.setPresupuestoGlobal(p);
+					pd.setSaldoDesglozado(saldo);
+					presupuestosGlobalDesglozado.add(pd);
+				}
+
+				return ResponseHandler.generateResponse("Se obtuvo la información de elementos de Presupuesto global en el Sistema", HttpStatus.OK, presupuestosGlobalDesglozado);
+
+			} else {
+
+				return ResponseHandler.generateResponse("Se obtuvo la información de elementos de Presupuesto global en el Sistema", HttpStatus.OK, presupuestosGlobal);
+
+			}
 
 		} catch (Exception e) {
 

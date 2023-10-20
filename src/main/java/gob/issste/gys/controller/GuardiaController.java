@@ -201,25 +201,25 @@ public class GuardiaController {
 			double saldo_utilizado = 0, saldo = 0;
 			Presupuesto presup;
 
-			// String idDeleg =
-			// usuarioRepository.findByName(guardia.getId_usuario()).getDelegacion().getId_div_geografica();
 			String idCentroTrab = guardia.getId_centro_trabajo();
 			String fec_pago = guardia.getFec_paga();
 
-//			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-//				idTipoPresup = 1;
-//			} else {
-//				idTipoPresup = 2;
-//			}
+			switch (guardia.getTipo_guardia()) {
 
-			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-				if (guardiaRepository.existe_guardia(guardia) > 0)
-					return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario",
-							HttpStatus.INTERNAL_SERVER_ERROR, null);
-			} else {
-				if (guardiaRepository.existe_guardia(guardia) > 0)
-					return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario",
-							HttpStatus.INTERNAL_SERVER_ERROR, null);
+				case "GI":
+					if (guardiaRepository.existe_guardia(guardia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario",
+								HttpStatus.INTERNAL_SERVER_ERROR, null);
+					break;
+
+				case "GE":
+					if (guardiaRepository.existe_guardia(guardia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario",
+								HttpStatus.INTERNAL_SERVER_ERROR, null);
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			try {
@@ -229,6 +229,7 @@ public class GuardiaController {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
+
 			try {
 				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes);
 			} catch (EmptyResultDataAccessException e) {
@@ -239,12 +240,20 @@ public class GuardiaController {
 
 			saldo = (presup != null) ? presup.getSaldo() : 0;
 
-			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(),
-						presup.getMes());
-			} else {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(),
-						presup.getMes());
+			switch (guardia.getTipo_guardia()) {
+
+				case "GI":
+					saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(),
+							presup.getMes());
+					break;
+
+				case "GE":
+					saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(),
+							presup.getMes());
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			double importe = guardiaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(),
@@ -254,6 +263,7 @@ public class GuardiaController {
 			if (importe + saldo_utilizado <= saldo) {
 
 				id = guardiaService.guardarGuardia(guardia, importe);
+
 			} else {
 
 				return ResponseHandler.generateResponse(
@@ -262,8 +272,8 @@ public class GuardiaController {
 			}
 
 			return ResponseHandler.generateResponse(
-					"El registro de guardia ha sido guardado de manera exitosa, con ID = " + id, HttpStatus.OK,
-					null);
+					"El registro de guardia ha sido guardado de manera exitosa, con ID = " + id, 
+					HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al realizar el registro de guardia indicado",
@@ -271,8 +281,7 @@ public class GuardiaController {
 		}
 	}
 
-	@Operation(summary = "Actualiza un registro de guardia en el Sistema", description = "Actualiza un registro de guardia en el Sistema", tags = {
-			"Guardia" })
+	@Operation(summary = "Actualiza un registro de guardia en el Sistema", description = "Actualiza un registro de guardia en el Sistema", tags = {"Guardia" })
 	@PutMapping("/guardias")
 	public ResponseEntity<Object> actualizarGuardia(
 			@Parameter(description = "Objeto de la guardia a actualizarse en el Sistema") @RequestBody DatosGuardia guardia) {
@@ -285,11 +294,21 @@ public class GuardiaController {
 			String idCentroTrab = guardia.getId_centro_trabajo();
 			String fec_pago = guardia.getFec_paga();
 
-//			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-//				idTipoPresup = 1;
-//			} else {
-//				idTipoPresup = 2;
-//			}
+			switch (guardia.getTipo_guardia()) {
+
+				case "GI":
+					if (guardiaRepository.existe_guardia_upd(guardia)>0)
+						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					break;
+
+				case "GE":
+					if (guardiaRepository.existe_guardia_ext_upd(guardia)>0)
+						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
 
 			try {
 				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
@@ -298,6 +317,7 @@ public class GuardiaController {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
+
 			try {
 				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes);
 			} catch (EmptyResultDataAccessException e) {
@@ -308,12 +328,20 @@ public class GuardiaController {
 
 			saldo = (presup != null) ? presup.getSaldo() : 0;
 
-			if (guardia.getTipo_guardia().equals(String.valueOf("GI"))) {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(guardia.getId(), idCentroTrab,
-						presup.getAnio(), presup.getMes());
-			} else {
-				saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(guardia.getId(), idCentroTrab,
-						presup.getAnio(), presup.getMes());
+			switch (guardia.getTipo_guardia()) {
+
+				case "GI":
+					saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(guardia.getId(), idCentroTrab,
+							presup.getAnio(), presup.getMes());
+					break;
+
+				case "GE":
+					saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(guardia.getId(), idCentroTrab,
+							presup.getAnio(), presup.getMes());
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			double importe = guardiaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(),
@@ -321,8 +349,10 @@ public class GuardiaController {
 					guardia.getRiesgos(), guardia.getTipo_guardia(), guardia.getHoras(), guardia.getFec_paga());
 
 			if (importe + saldo_utilizado <= saldo) {
+
 				guardiaService.actualizaGuardia(guardia, importe);
 			} else {
+
 				return ResponseHandler.generateResponse(
 						"No existe presupuesto suficiente para realizar la actualización del registro",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -338,10 +368,8 @@ public class GuardiaController {
 		}
 	}
 
-	@Operation(summary = "Actualizar importes de guardias en el Sistema", description = "Actualizar importes de guardias en el Sistema", tags = {
-			"Guardia" })
+	@Operation(summary = "Actualizar importes de guardias en el Sistema", description = "Actualizar importes de guardias en el Sistema", tags = { "Guardia" })
 	@PutMapping("/guardias/actualiza")
-	// public ResponseEntity<String> actualizaImportes(
 	public ResponseEntity<Object> actualizaImportes(
 			@Parameter(description = "Fecha de quincena para el cálculo del importe de la guardia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
 			@Parameter(description = "Tipo para obtener las guardidas del empleado ('I': Internas o 'E': Externas)", required = true) @RequestParam(required = true) String tipoGuardia) {
@@ -349,22 +377,19 @@ public class GuardiaController {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
 			guardiaService.actualizaImportesGuardias(strQuincena, tipoGuardia);
-			// return new ResponseEntity<>("Los importes de las guardias se actualizaron de
-			// manera exitósa.", HttpStatus.OK);
+
 			return ResponseHandler.generateResponse("Los importes de las guardias se actualizaron de manera exitósa.",
 					HttpStatus.OK, null);
 		} catch (Exception e) {
-			// return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse(
 					"Error al realizar la actualización del registro de guardia indicado",
 					HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
-	@Operation(summary = "Actualizar importes de guardias en el Sistema", description = "Actualizar importes de guardias en el Sistema", tags = {
-			"Guardia" })
+	@Operation(summary = "Actualizar importes de guardias en el Sistema", description = "Actualizar importes de guardias en el Sistema", tags = { "Guardia" })
 	@PutMapping("/guardias/actualiza2")
-	// public ResponseEntity<String> actualizaImportes2(
 	public ResponseEntity<Object> actualizaImportes2(
 			@Parameter(description = "Fecha de quincena para el cálculo del importe de la Suplencia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
 			@Parameter(description = "Tipo para obtener las guardidas del empleado ('I': Internas o 'E': Externas)", required = true) @RequestParam(required = true) String tipoSuplencia) {
@@ -372,42 +397,35 @@ public class GuardiaController {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
 			guardiaService.actualizaImportesGuardias2(strQuincena, tipoSuplencia);
-			// return new ResponseEntity<>("Los importes de las guardidas se actualizaron de
-			// manera exitósa", HttpStatus.OK);
+
 			return ResponseHandler.generateResponse("Los importes de las guardidas se actualizaron de manera exitósa",
 					HttpStatus.OK, null);
 		} catch (Exception e) {
-			// return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al actualizar importes de guardias en el Sistema",
 					HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
-	@Operation(summary = "Eliminar un registro de guardia del Sistema", description = "Eliminar un registro de guardia del Sistema", tags = {
-			"Guardia" })
+	@Operation(summary = "Eliminar un registro de guardia del Sistema", description = "Eliminar un registro de guardia del Sistema", tags = { "Guardia" })
 	@DeleteMapping("/guardias")
-	// public ResponseEntity<String> eliminarGuardia(
 	public ResponseEntity<Object> eliminarGuardia(
 			@Parameter(description = "Número de ID para obtener la guardia del empleado", required = true) @RequestParam(required = true) Integer idGuardia,
 			@Parameter(description = "Tipo para obtener la guardia del empleado (I-Interna o E-Externa)", required = true) @RequestParam(required = true) String tipoGuardia) {
 		try {
 			guardiaService.eliminarGuardia(idGuardia, tipoGuardia);
-			// return new ResponseEntity<>("El un registro de guardia fué eliminado
-			// exitosamente.", HttpStatus.OK);
+
 			return ResponseHandler.generateResponse("El un registro de guardia fué eliminado exitosamente.",
 					HttpStatus.OK, null);
 		} catch (Exception e) {
-			// return new ResponseEntity<>("No se borró el registro de guardia.",
-			// HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("No se borró satisfactoriamente el registro de la guardia.",
 					HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
-	@Operation(summary = "Obtener los registros de guardias del empleado en el Sistema", description = "Obtener los registros de guardias del empleado en el Sistema", tags = {
-			"Guardia" })
+	@Operation(summary = "Obtener los registros de guardias del empleado en el Sistema", description = "Obtener los registros de guardias del empleado en el Sistema", tags = { "Guardia" })
 	@GetMapping("/guardias/consulta")
-	// public ResponseEntity<List<DatosGuardia>> getDynamicGuardias(
 	public ResponseEntity<Object> getDynamicGuardias(
 			@Parameter(description = "Fecha de quincena para la consulta de guardias", required = false) @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
 			@Parameter(description = "Tipo para obtener las guardias (I-Internas o E-Externas)", required = true) @RequestParam(required = true) String tipoGuardia,
@@ -432,19 +450,18 @@ public class GuardiaController {
 					importe_max, idDelegacion, idCentroTrab, claveServicio, puesto);
 
 			if (guardias.isEmpty()) {
-				// return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 				return ResponseHandler.generateResponse(
 						"No se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.NOT_FOUND,
 						null);
 			}
 
-			// return new ResponseEntity<>(guardias, HttpStatus.OK);
 			return ResponseHandler.generateResponse(
 					"Se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.OK, guardias);
 
 		} catch (Exception e) {
 			logger.info(e.toString());
-			// return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al consultar guardias bajo las condiciones indicadas.",
 					HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}

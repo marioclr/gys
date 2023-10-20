@@ -75,6 +75,11 @@ public class BolsaTrabajoController {
 
 		try {
 
+			BolsaTrabajo bolsasDeTrabajo = bolsaTrabajoRepository.findByRFC(elemento.getRfc());
+
+			if (bolsasDeTrabajo == null)
+				return ResponseHandler.generateResponse("Ya existe un elemento en la bolsa de trabajo del sistema con el RFC indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
 			int idBolsa = bolsaTrabajoRepository.save(elemento);
 			//return new ResponseEntity<>("Se ha creado elemento en bolsa de trabajo con ID " + idBolsa, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se ha creado elemento en bolsa de trabajo con ID " + idBolsa, HttpStatus.OK, null);

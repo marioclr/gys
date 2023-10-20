@@ -1,5 +1,6 @@
 package gob.issste.gys.repository.jdbc;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -72,6 +73,44 @@ public class JdbcPresupuestoGlobalRepository implements IPresupuestoGlobalReposi
 		logger.info(QUERY_EXISTS_PRESUPUESTO);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_PRESUPUESTO, Integer.class,
 				new Object[] { presupuestoGlobal.getAnio(), presupuestoGlobal.getDelegacion().getId_div_geografica() } );
+	}
+
+	@Override
+	public double saldo_presup_global(Integer anio_ejercicio, String idDelegacion) {
+		logger.info(QUERY_GET_SALDO_BY_ANIO_DEL);
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_BY_ANIO_DEL, Double.class,
+				new Object[] { anio_ejercicio, idDelegacion } );
+	}
+
+	@Override
+	public List<PresupuestoGlobal> get_dynamic_regs(String idDelegacion, Integer anio, String coment) {
+		String QUERY_CONDITION = "";
+		List<Object> objects = new ArrayList<Object>();
+
+		if (idDelegacion != null) {
+			QUERY_CONDITION += "And P.idDelegacion = ?\r\n";
+			objects.add(idDelegacion);
+		}
+
+		if (anio != null) {
+			QUERY_CONDITION += "And P.anio = ?\r\n";
+			objects.add(anio);
+		}
+
+		if (coment != null) {
+			QUERY_CONDITION += "And comentarios like ?\r\n";
+			objects.add("%" + coment + "%");
+		}
+
+		String QUERY_GET_DYNAMIC_PRESUP_GLOBAL  = "SELECT * FROM gys_presupuesto_global P, m4t_delegaciones D\r\n"
+												+ "Where P.idDelegacion=D.id_div_geografica\r\n"
+												+ QUERY_CONDITION
+												+ "Order by idDelegacion";
+
+		logger.info(QUERY_GET_DYNAMIC_PRESUP_GLOBAL);
+		List<PresupuestoGlobal> presupuestos = jdbcTemplate.query(QUERY_GET_DYNAMIC_PRESUP_GLOBAL, new PresupuestoGlobalMapper(),	objects.toArray());
+
+		return presupuestos;
 	}
 
 }
