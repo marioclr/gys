@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.Empleado;
+import gob.issste.gys.model.HorarioEmpleado;
 import gob.issste.gys.repository.IEmpleadoRepository;
 
 @Repository
@@ -67,6 +68,21 @@ public class JdbcEmpleadoRepository implements IEmpleadoRepository {
 		String q = "SELECT * from m4t_empleados WHERE nombre LIKE '%" + nombre + "%'";
 
 	    return jdbcTemplate.query(q, BeanPropertyRowMapper.newInstance(Empleado.class));
+	}
+
+	@Override
+	public HorarioEmpleado valida_horario(String empleado, String fec_pago, int inicio, int fin) {
+		logger.info(QUERY_VALIDA_HORARIO_EMPLEADO);
+		try {
+			HorarioEmpleado horario = jdbcTemplate.queryForObject(QUERY_VALIDA_HORARIO_EMPLEADO, 
+					BeanPropertyRowMapper.newInstance(HorarioEmpleado.class), empleado,
+					fec_pago, fec_pago, fec_pago, fec_pago, fec_pago, fec_pago,
+					inicio, fin, inicio, fin, inicio, fin);
+			return horario;
+		} catch (EmptyResultDataAccessException e) {
+		//catch (IncorrectResultSizeDataAccessException e) {
+			return null;
+		}
 	}
 
 }

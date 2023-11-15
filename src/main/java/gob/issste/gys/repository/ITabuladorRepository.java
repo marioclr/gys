@@ -15,7 +15,7 @@ public interface ITabuladorRepository {
 	public String QUERY_GET_TABULADOR_OPERATIVO = "Select *\r\n"
 												+ "From gys_tabulador_operativo\r\n"
 												+ "Where id_zona = ?      And id_nivel = ?\r\n"
-												+ "  And id_sub_nivel = ? And id_tipo_jornada = ?\r\n"
+												+ "  And id_sub_nivel = ?\r\n"
 												+ "  And fec_inicio <= ? AND (fec_fin >= ? OR fec_fin IS NULL)";
 	ValoresTabulador ConsultaTabuladorOperativo(String zona, String nivel, String subnivel, String tipo_jornada, String quincena);
 

@@ -351,17 +351,18 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	public int existe_guardia_upd(DatosGuardia guardia) {
 		logger.info(QUERY_EXISTS_GUARDIA_INT_UPD);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT_UPD, Integer.class,
-				new Object[] { guardia.getClave_empleado(), guardia.getId(), 
-						guardia.getHora_inicio(), guardia.getHora_fin(), 
-						guardia.getHora_inicio(), guardia.getHora_fin(), 
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
+						guardia.getId(),
+						guardia.getHora_inicio(), guardia.getHora_fin(),
+						guardia.getHora_inicio(), guardia.getHora_fin(),
 						guardia.getHora_inicio(), guardia.getHora_fin() } );
 	}
 
 	@Override
 	public int existe_guardia_ext(DatosGuardia guardia) {
-		logger.info(QUERY_EXISTS_GUARDIA_INT);
-		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT_UPD, Integer.class,
-				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(), 
+		logger.info(QUERY_EXISTS_GUARDIA_EXT);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_EXT, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
 							   guardia.getHora_inicio(), guardia.getHora_fin(),
 							   guardia.getHora_inicio(), guardia.getHora_fin(),
 							   guardia.getHora_inicio(), guardia.getHora_fin() } );
@@ -369,11 +370,12 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 	@Override
 	public int existe_guardia_ext_upd(DatosGuardia guardia) {
-		logger.info(QUERY_EXISTS_GUARDIA_INT_UPD);
+		logger.info(QUERY_EXISTS_GUARDIA_EXT_UPD);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_EXT_UPD, Integer.class,
-				new Object[] { guardia.getClave_empleado(), guardia.getId(), 
-						guardia.getHora_inicio(), guardia.getHora_fin(), 
-						guardia.getHora_inicio(), guardia.getHora_fin(), 
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
+						guardia.getId(),
+						guardia.getHora_inicio(), guardia.getHora_fin(),
+						guardia.getHora_inicio(), guardia.getHora_fin(),
 						guardia.getHora_inicio(), guardia.getHora_fin() } );
 	}
 

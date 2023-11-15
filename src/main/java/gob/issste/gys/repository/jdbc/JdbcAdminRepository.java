@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.CifrasDeImpuestos;
-import gob.issste.gys.model.CifrasImpuesto;
+import gob.issste.gys.model.DetalleCifrasDeImpuestos;
 import gob.issste.gys.repository.IAdminRepository;
 
 @Repository
@@ -21,48 +21,6 @@ public class JdbcAdminRepository implements IAdminRepository {
 
 	@Autowired
 	JdbcTemplate jdbcTemplate;
-
-	@Override
-	public int calcula_isr_gua(String fec_pago) {
-
-		logger.info(STMT_CALCULA_ISR_GUA);
-
-		return jdbcTemplate.update(STMT_CALCULA_ISR_GUA, fec_pago );
-	}
-
-	@Override
-	public int elimina_calculo_isr_guardia(String fec_pago) {
-
-		logger.info(STMT_ELIMINA_CALCULO_ISR_GUA);
-
-		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR_GUA, fec_pago );
-	}
-
-	@Override
-	public int calcula_isr_sup(String fec_pago) {
-
-		logger.info(STMT_CALCULA_ISR_SUP);
-
-		return jdbcTemplate.update(STMT_CALCULA_ISR_SUP, fec_pago );
-	}
-
-	@Override
-	public int elimina_calculo_isr_suplencia(String fec_pago) {
-
-		logger.info(STMT_ELIMINA_CALCULO_ISR_SUP);
-
-		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR_SUP, fec_pago );
-	}
-
-	@Override
-	public CifrasImpuesto consultaCifras(String fec_pago, String tipo) {
-
-		logger.info(QUERY_CONSULTA_CIFRAS_ISR);
-
-		return jdbcTemplate.queryForObject(QUERY_CONSULTA_CIFRAS_ISR, BeanPropertyRowMapper.newInstance(CifrasImpuesto.class), 
-		new Object [] { fec_pago, tipo } );
-
-	}
 
 	@Override
 	public List<String> consultaLayoutSPEP(String fec_pago, String tipo) {
@@ -75,7 +33,29 @@ public class JdbcAdminRepository implements IAdminRepository {
 	public int calcula_isr_guardia_non(Integer anio, Integer mes) {
 		logger.info(STMT_CALCULA_ISR_GUARIDAS_NON);
 
-		return jdbcTemplate.update(STMT_CALCULA_ISR_GUARIDAS_NON, anio, mes );
+		return jdbcTemplate.update(STMT_CALCULA_ISR_GUARIDAS_NON, anio, mes, anio, mes );
+	}
+
+
+	@Override
+	public int calcula_isr_non(Integer anio, Integer mes) {
+		logger.info(STMT_CALCULA_ISR_NON);
+
+		return jdbcTemplate.update(STMT_CALCULA_ISR_NON, anio, mes, anio, mes, anio, mes );
+	}
+
+	@Override
+	public int re_calcula_isr_non(Integer anio, Integer mes, String fec_min, String fec_max) {
+		logger.info(STMT_RE_CALCULA_ISR_NON);
+
+		return jdbcTemplate.update(STMT_RE_CALCULA_ISR_NON, anio, mes, anio, mes, fec_min, fec_max, anio, mes, fec_min, fec_max );
+	}
+
+	@Override
+	public int re_calcula_isr_guardia_non(Integer anio, Integer mes, String fec_min, String fec_max) {
+		logger.info(STMT_RECALCULA_ISR_GUARIDAS_NON);
+
+		return jdbcTemplate.update(STMT_RECALCULA_ISR_GUARIDAS_NON, anio, mes, fec_min, fec_max );
 	}
 
 	@Override
@@ -86,18 +66,25 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
-	public CifrasDeImpuestos consultaCifrasDeImpuestos(Integer anio, Integer mes, Integer tipoPaga, String tipo) {
+	public List<CifrasDeImpuestos> consultaCifrasDeImpuestos(Integer anio, Integer mes, Integer tipoPaga) {
 		logger.info(QUERY_GET_CIFRAS_ISR);
 
-		return jdbcTemplate.queryForObject(QUERY_GET_CIFRAS_ISR, BeanPropertyRowMapper.newInstance(CifrasDeImpuestos.class), 
-		new Object [] { anio, mes, tipoPaga, tipo } );
+		return jdbcTemplate.query(QUERY_GET_CIFRAS_ISR, BeanPropertyRowMapper.newInstance(CifrasDeImpuestos.class), new Object [] { anio, mes, tipoPaga } );
+	}
+
+	@Override
+	public CifrasDeImpuestos consultaCifrasDeImpuestosByOrdinal(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal) {
+		logger.info(QUERY_GET_CIFRAS_ISR_BY_ORDINAL);
+
+		return jdbcTemplate.queryForObject(QUERY_GET_CIFRAS_ISR_BY_ORDINAL, 
+				BeanPropertyRowMapper.newInstance(CifrasDeImpuestos.class), new Object [] { anio, mes, tipoPaga, id_ordinal } );
 	}
 
 	@Override
 	public int calcula_isr_suplencia_non(Integer anio, Integer mes) {
 		logger.info(STMT_CALCULA_ISR_SUPLENC_NON);
 
-		return jdbcTemplate.update(STMT_CALCULA_ISR_SUPLENC_NON, anio, mes );
+		return jdbcTemplate.update(STMT_CALCULA_ISR_SUPLENC_NON, anio, mes, anio, mes );
 	}
 
 	@Override
@@ -108,10 +95,29 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
-	public int elimina_cifras_impuesto(Integer anio, Integer mes, Integer tipoPaga, String tipo) {
+	public int elimina_cifras_impuesto(Integer anio, Integer mes, Integer tipoPaga) {
 		logger.info(STMT_ELIMINA_CALCULO_ISR);
 
-		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR, anio, mes, tipoPaga, tipo );
+		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR, anio, mes, tipoPaga );
+	}
+
+	@Override
+	public int elimina_cifras_impuesto_x_rec(Integer anio, Integer mes, Integer tipoPaga, 
+			String fec_min, String fec_max) {
+		logger.info(STMT_ELIMINA_CALCULO_ISR_X_REC);
+
+		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR_X_REC, anio, mes, tipoPaga, fec_min, fec_max );
+
+	}
+
+	@Override
+	public List<DetalleCifrasDeImpuestos> getDetalleCifrasDeImpuestos(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal) {
+		logger.info(QUERY_GET_DETALLE_CIFRAS_ISR);
+
+		return jdbcTemplate.query(QUERY_GET_DETALLE_CIFRAS_ISR, 
+				BeanPropertyRowMapper.newInstance(DetalleCifrasDeImpuestos.class), 
+				new Object [] { anio, mes, tipoPaga, id_ordinal } );
+
 	}
 
 }

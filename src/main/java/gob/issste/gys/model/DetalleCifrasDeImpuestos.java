@@ -1,24 +1,18 @@
 package gob.issste.gys.model;
 
-public class CifrasDeImpuestos {
+public class DetalleCifrasDeImpuestos {
 
-	//private String tipo;
 	private String id_tipo_paga;
 	private int anio_ejercicio;
 	private int mes_ejercicio;
-	private int id_ordinal;
+	private String rfc;
 	private int casos;
 	private Double percepciones;
 	private Double isr;
-	private String fec_min;
-	private String fec_max;
+	private String fec_paga;
+	private String id_clave_servicio;
+	private String id_centro_trabajo;
 
-//	public String getTipo() {
-//		return tipo;
-//	}
-//	public void setTipo(String tipo) {
-//		this.tipo = tipo;
-//	}
 	public String getId_tipo_paga() {
 		return id_tipo_paga;
 	}
@@ -36,12 +30,6 @@ public class CifrasDeImpuestos {
 	}
 	public void setMes_ejercicio(int mes_ejercicio) {
 		this.mes_ejercicio = mes_ejercicio;
-	}
-	public int getId_ordinal() {
-		return id_ordinal;
-	}
-	public void setId_ordinal(int id_ordinal) {
-		this.id_ordinal = id_ordinal;
 	}
 	public int getCasos() {
 		return casos;
@@ -61,17 +49,29 @@ public class CifrasDeImpuestos {
 	public void setIsr(Double isr) {
 		this.isr = isr;
 	}
-	public String getFec_min() {
-		return fec_min;
+	public String getFec_paga() {
+		return fec_paga;
 	}
-	public void setFec_min(String fec_min) {
-		this.fec_min = fec_min;
+	public void setFec_paga(String fec_paga) {
+		this.fec_paga = fec_paga;
 	}
-	public String getFec_max() {
-		return fec_max;
+	public String getRfc() {
+		return rfc;
 	}
-	public void setFec_max(String fec_max) {
-		this.fec_max = fec_max;
+	public void setRfc(String rfc) {
+		this.rfc = rfc;
+	}
+	public String getId_clave_servicio() {
+		return id_clave_servicio;
+	}
+	public void setId_clave_servicio(String id_clave_servicio) {
+		this.id_clave_servicio = id_clave_servicio;
+	}
+	public String getId_centro_trabajo() {
+		return id_centro_trabajo;
+	}
+	public void setId_centro_trabajo(String id_centro_trabajo) {
+		this.id_centro_trabajo = id_centro_trabajo;
 	}
 
 }

@@ -23,6 +23,7 @@ public class DatosSuplencia {
 	private String id_clave_movimiento;
 	private String coment;
 	private String id_empresa;
+	private String estatus;
 
 	// Para Validaciones
 	private Double sueldo;
@@ -154,6 +155,12 @@ public class DatosSuplencia {
 	}
 	public void setSueldo(Double sueldo) {
 		this.sueldo = sueldo;
+	}
+	public String getEstatus() {
+		return estatus;
+	}
+	public void setEstatus(String estatus) {
+		this.estatus = estatus;
 	}
 
 	@Override

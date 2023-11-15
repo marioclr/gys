@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import gob.issste.gys.model.Paga;
 import gob.issste.gys.repository.IPagaRepository;
 import gob.issste.gys.response.ResponseHandler;
+import gob.issste.gys.service.PagaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -30,11 +31,16 @@ public class PagaController {
 
 	@Autowired
 	IPagaRepository pagaRepository;
+	@Autowired
+	PagaService pagaService;
 
 	@Operation(summary = "Crea registro de la fecha de control de pagos de GyS en el Sistema", description = "Crea registro de la fecha de control de pagos de GyS en el Sistema", tags = { "Control de fechas de pago" })
 	@PostMapping("/Paga")
 	public ResponseEntity<Object> createPaga(@RequestBody Paga paga) {
 		try {
+			if(pagaService.validaPagasAlCrear(paga)) {
+				return ResponseHandler.generateResponse("Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
 			int idPaga = pagaRepository.save(paga);
 
 			return ResponseHandler.generateResponse("La fecha de control de pagos ha sido creado de manera exitosa con ID " + idPaga, HttpStatus.OK, null);
@@ -43,7 +49,6 @@ public class PagaController {
 			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
-
 
 	@Operation(summary = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", description = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", tags = { "Control de fechas de pago" })
 	@PutMapping("/Paga/{id}")
@@ -68,6 +73,33 @@ public class PagaController {
 		}
 	}
 
+	@Operation(summary = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", description = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/open/{id}")
+	public ResponseEntity<Object> openPaga(@PathVariable("id") Integer id) {
+		Paga _paga = pagaRepository.findById(id);
+
+		if (pagaService.validaPagasAlAbrir(_paga)) {
+
+			return ResponseHandler.generateResponse("Existen fechas de control abiertas en este mismo periodo", HttpStatus.OK, false);
+		} else {
+
+			return ResponseHandler.generateResponse("No Existen fechas de control abiertas en este mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, true);
+		}
+	}
+
+	@Operation(summary = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", description = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/close/{id}")
+	public ResponseEntity<Object> closePaga(@PathVariable("id") Integer id) {
+		Paga _paga = pagaRepository.findById(id);
+
+		if (pagaService.validaPagasAlCerrar(_paga)) {
+
+			return ResponseHandler.generateResponse("Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.OK, false);
+		} else {
+
+			return ResponseHandler.generateResponse("No Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.INTERNAL_SERVER_ERROR, true);
+		}
+	}
 
 	@Operation(summary = "Obtiene información de fechas de control de pagos de GyS en el Sistema", description = "Obtiene información de fechas de control de pagos de GyS en el Sistema", tags = { "Control de fechas de pago" })
 	@GetMapping("/Paga")
@@ -93,7 +125,6 @@ public class PagaController {
 		}
 	}
 
-
 	@Operation(summary = "Obtiene información de una fecha de control de pagos de GyS en el Sistema", description = "Obtiene información de una fecha de control de pagos de GyS en el Sistema", tags = { "Control de fechas de pago" })
 	@GetMapping("/Paga/{id}")
 	public ResponseEntity<Object> getPagaPorId(
@@ -109,7 +140,6 @@ public class PagaController {
 			return ResponseHandler.generateResponse("No se pudo obtener la información de fecha de control de pagos en el Sistema", HttpStatus.NOT_FOUND, null);
 		}
 	}
-
 
 	@Operation(summary = "Elimina información de una fecha de control de pagos de GyS en el Sistema", description = "Elimina información de una fecha de control de pagos de GyS en el Sistema", tags = { "Control de fechas de pago" })
 	@DeleteMapping("/Paga/{id}")
@@ -169,4 +199,28 @@ public class PagaController {
 			return ResponseHandler.generateResponse("Error al obtener la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}	
 	}
+
+	@Operation(summary = "Obtiene información de fechas de control de pagos de GyS activas en el Sistema", description = "Obtiene información de fechas de control de pagos de GyS activas en el Sistema", tags = { "Control de fechas de pago" })
+	@GetMapping("/Paga/byStatus")
+	public ResponseEntity<Object> getPagas(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio de las fechas de control de pagos", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio de las fechas de control de pagos", required = true) @RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1) de las fechas de control de pagos", required = true) @RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "ID del Sstatus del que se desea obtener las fechas de control de pagos", required = true) @RequestParam(required = true) Integer status) {
+
+		try {
+			List<Paga> pagas = pagaRepository.findByStatus(anio, mes, tipoFechaControl, status);
+
+			if (pagas.isEmpty()) {
+
+				return ResponseHandler.generateResponse("No existen fechas de control de pagos de GyS con las condiciones indicadas", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Se obtuvo la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.OK, pagas);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}	
+	}
+
 }

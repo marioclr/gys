@@ -65,7 +65,6 @@ public class GuardiaController {
 	@Operation(summary = "Obtener el importe de una guardia conforme a los criterios establecidos", description = "Agrega un nuevo presupuesto al Sistema", tags = {
 			"Guardia" })
 	@GetMapping("/guardias/importe")
-	// public ResponseEntity<BigDecimal> getImporteGuardia(
 	public ResponseEntity<Object> getImporteGuardia(
 			@Parameter(description = "Clave del tipo de tabulador para obtener el importe de la guardia", required = true) @RequestParam(required = true) String tipo_tabulador,
 			@Parameter(description = "Clave de la zona para obtener el importe de la guardia", required = true) @RequestParam(required = true) String zona,
@@ -85,7 +84,6 @@ public class GuardiaController {
 			importe = guardiaService.CalculaImporteGuardia(tipo_tabulador, zona, nivel, subnivel, tipo_jornada, riesgos,
 					tipo, horas, strDate);
 			BigDecimal importe2 = new BigDecimal(importe).setScale(2, RoundingMode.HALF_UP);
-			// return new ResponseEntity<>(importe2, HttpStatus.OK);
 			return ResponseHandler.generateResponse(
 					"Se encontró el importe de la guardia conforme a los criterios establecidos", HttpStatus.OK,
 					importe2);
@@ -103,33 +101,39 @@ public class GuardiaController {
 	@Operation(summary = "Obtener los registros de guardias del empleado en el Sistema", description = "Obtener los registros de guardias del empleado en el Sistema", tags = {
 			"Guardia" })
 	@GetMapping("/guardias")
-	// public ResponseEntity<List<DatosGuardia>> getGuardiasEmpleado(
 	public ResponseEntity<Object> getGuardiasEmpleado(
 			@Parameter(description = "Número de empleado para obtener las guardias del empleado", required = true) @RequestParam(required = true) String claveEmpleado,
-			@Parameter(description = "Tipo para obtener las guardias del empleado (internas o externas)", required = true) @RequestParam(required = true) String tipoGuardia) {
+			@Parameter(description = "Tipo para obtener las guardias del empleado ('GI': Internas o 'GE': Externas)", required = true) @RequestParam(required = true) String tipoGuardia) {
 
 		try {
+
 			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
 
-			if (tipoGuardia.equals(String.valueOf("GI"))) {
-				guardias = guardiaRepository.ConsultaGuardiasInternas(claveEmpleado);
-			} else {
-				guardias = guardiaRepository.ConsultaGuardiasExternas(claveEmpleado);
+			switch (tipoGuardia) {
+
+				case "GI":
+					guardias = guardiaRepository.ConsultaGuardiasInternas(claveEmpleado);
+					break;
+	
+				case "GE":
+					guardias = guardiaRepository.ConsultaGuardiasExternas(claveEmpleado);
+					break;
+	
+				default:
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
 			}
 
 			if (guardias.isEmpty()) {
-				// return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No existen guardias para la clave y el tipo asignado",
 						HttpStatus.NOT_FOUND, null);
 			}
 
-			// return new ResponseEntity<>(guardias, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontraron guardias para la clave y el tipo asignado",
 					HttpStatus.OK, guardias);
 
 		} catch (Exception e) {
 			logger.info(e.toString());
-			// return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al consultar guardias para la clave y el tipo asignado",
 					HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
@@ -138,24 +142,31 @@ public class GuardiaController {
 	@Operation(summary = "Obtener una Guardia del Sistema mediante el ID", description = "Obtener una Guardia del Sistema mediante el ID", tags = {
 			"Guardia" })
 	@GetMapping("/guardiaPorId")
-	// public ResponseEntity<DatosGuardia> getGuardiaById(
 	public ResponseEntity<Object> getGuardiaById(
 			@Parameter(description = "ID de la guardia del empleado", required = true) @RequestParam(required = true) Integer idGuardia,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String tipoGuardia) {
+			@Parameter(description = "Tipo para obtener las guardidas del empleado ('GI': Internas o 'GE': Externas)", required = true) @RequestParam(required = true) String tipoGuardia) {
 
 		DatosGuardia guardia = null;
 
-		if (tipoGuardia.equals(String.valueOf("GI")))
-			guardia = guardiaRepository.findById(idGuardia);
-		else
-			guardia = guardiaRepository.findByIdExterno(idGuardia);
+		switch (tipoGuardia) {
+
+			case "GI":
+				guardia = guardiaRepository.findById(idGuardia);
+				break;
+
+			case "GE":
+				guardia = guardiaRepository.findByIdExterno(idGuardia);
+				break;
+
+			default:
+				return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+		}
 
 		if (guardia != null) {
-			// return new ResponseEntity<>(guardia, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró la guardia para la clave y el tipo asignado",
 					HttpStatus.OK, guardia);
 		} else {
-			// return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			return ResponseHandler.generateResponse("Error al consultar la guardia con las condiciones indicadas",
 					HttpStatus.NOT_FOUND, null);
 		}
@@ -168,24 +179,34 @@ public class GuardiaController {
 			@Parameter(description = "ID de la Delegación que se consulta el saldo utilizado", required = true) @RequestParam(required = true) String idDelegacion,
 			@Parameter(description = "Año del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer anio_ejercicio,
 			@Parameter(description = "Mes del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer mes_ejercicio,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String tipoGuardia,
+			@Parameter(description = "Tipo para obtener las guardidas del empleado ('GI': Internas o 'GE': Externas)", required = true) @RequestParam(required = true) String tipoGuardia,
 			@Parameter(description = "ID del Centro de Trabajo del que se consulta el saldo utilizado", required = false) @RequestParam(required = false) String idCentroTrab) {
 
 		double saldo = 0;
 
-		if (tipoGuardia.equals(String.valueOf("GI"))) {
-			if (idCentroTrab == null) {
-				saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
-			} else {
-				saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
-			}
-		} else {
-			if (idCentroTrab == null) {
-				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
-			} else {
-				saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
-			}
+		switch (tipoGuardia) {
+
+			case "GI":
+				if (idCentroTrab == null) {
+					saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
+				} else {
+					saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
+				}
+				break;
+
+			case "GE":
+				if (idCentroTrab == null) {
+					saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
+				} else {
+					saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
+				}
+				break;
+
+			default:
+				return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
 		}
+
 		return ResponseHandler.generateResponse(
 				"Se obtuvo el saldo utilizado para guardias para las condiciones indicadas", HttpStatus.OK, saldo);
 	}
@@ -213,13 +234,13 @@ public class GuardiaController {
 					break;
 
 				case "GE":
-					if (guardiaRepository.existe_guardia(guardia) > 0)
+					if (guardiaRepository.existe_guardia_ext(guardia) > 0)
 						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario",
 								HttpStatus.INTERNAL_SERVER_ERROR, null);
 					break;
 
 				default:
-					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			try {
@@ -253,7 +274,7 @@ public class GuardiaController {
 					break;
 
 				default:
-					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			double importe = guardiaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(),
@@ -307,7 +328,7 @@ public class GuardiaController {
 					break;
 
 				default:
-					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			try {
@@ -341,7 +362,7 @@ public class GuardiaController {
 					break;
 
 				default:
-					return ResponseHandler.generateResponse("No se identificó el tipo de la guardia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			double importe = guardiaService.CalculaImporteGuardia(guardia.getId_tipo_tabulador(), guardia.getId_zona(),
@@ -372,7 +393,7 @@ public class GuardiaController {
 	@PutMapping("/guardias/actualiza")
 	public ResponseEntity<Object> actualizaImportes(
 			@Parameter(description = "Fecha de quincena para el cálculo del importe de la guardia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado ('I': Internas o 'E': Externas)", required = true) @RequestParam(required = true) String tipoGuardia) {
+			@Parameter(description = "Tipo para obtener las guardidas del empleado ('GI': Internas o 'GE': Externas)", required = true) @RequestParam(required = true) String tipoGuardia) {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
@@ -392,7 +413,7 @@ public class GuardiaController {
 	@PutMapping("/guardias/actualiza2")
 	public ResponseEntity<Object> actualizaImportes2(
 			@Parameter(description = "Fecha de quincena para el cálculo del importe de la Suplencia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado ('I': Internas o 'E': Externas)", required = true) @RequestParam(required = true) String tipoSuplencia) {
+			@Parameter(description = "Tipo para obtener las guardidas del empleado ('GI': Internas o 'GE': Externas)", required = true) @RequestParam(required = true) String tipoSuplencia) {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
@@ -428,7 +449,7 @@ public class GuardiaController {
 	@GetMapping("/guardias/consulta")
 	public ResponseEntity<Object> getDynamicGuardias(
 			@Parameter(description = "Fecha de quincena para la consulta de guardias", required = false) @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
-			@Parameter(description = "Tipo para obtener las guardias (I-Internas o E-Externas)", required = true) @RequestParam(required = true) String tipoGuardia,
+			@Parameter(description = "Tipo para obtener las guardias (GI-Internas o GE-Externas)", required = true) @RequestParam(required = true) String tipoGuardia,
 			@Parameter(description = "ID de empleado o RFC para obtener las guardias", required = false) @RequestParam(required = false) String claveEmpleado,
 			@Parameter(description = "Importe mínimo para obtener las guardias", required = false) @RequestParam(required = false) Double importe_min,
 			@Parameter(description = "Importe máximo para obtener las guardias", required = false) @RequestParam(required = false) Double importe_max,

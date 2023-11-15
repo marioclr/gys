@@ -41,4 +41,12 @@ public interface IBolsaTrabajoRepository {
 													+ "Order by id";
 	BolsaTrabajo getElementById(int id);
 
+	public String QUERY_GET_BOLSA_TRABAJO_FOR_DELEG	= "Select b.id id, b.rfc rfc, b.nombre nombre, b.apellidopat apellidopat, b.apellidomat apellidomat, d.id_div_geografica, n_div_geografica,\r\n"
+													+ "codigo_postal, curp, id_beneficiario\r\n"
+													+ "From gys_bolsatrabajo b, m4t_delegaciones d\r\n"
+													+ "Where b.idDelegacion=d.id_div_geografica\r\n"
+													+ "  And b.idDelegacion=?\r\n"
+													+ "Order by id";
+	List<BolsaTrabajo> findForDeleg(String idDeleg);
+
 }

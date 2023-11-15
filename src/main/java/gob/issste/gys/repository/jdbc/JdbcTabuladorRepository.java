@@ -33,7 +33,7 @@ public class JdbcTabuladorRepository implements ITabuladorRepository {
 
 		logger.info(QUERY_GET_TABULADOR_OPERATIVO);
 		return jdbcTemplate.queryForObject(QUERY_GET_TABULADOR_OPERATIVO, BeanPropertyRowMapper.newInstance(ValoresTabulador.class), 
-				new Object [] { zona, nivel, subnivel, tipo_jornada, quincena, quincena } );
+				new Object [] { zona, nivel, subnivel, quincena, quincena } );
 
 	}
 }

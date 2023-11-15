@@ -9,6 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -77,8 +78,14 @@ public class JdbcBolsaTrabajoRepository implements IBolsaTrabajoRepository {
 	@Override
 	public BolsaTrabajo findByRFC(String rfc) {
 		logger.info(QUERY_GET_BOLSA_TRABAJO_BY_RFC);
-		BolsaTrabajo bolsa = jdbcTemplate.queryForObject(QUERY_GET_BOLSA_TRABAJO_BY_RFC, new BolsaTrabajoMapper(), rfc);
-		return bolsa;
+		try {
+			BolsaTrabajo bolsa = jdbcTemplate.queryForObject(QUERY_GET_BOLSA_TRABAJO_BY_RFC, 
+					new BolsaTrabajoMapper(), rfc);
+			return bolsa;
+		} catch (EmptyResultDataAccessException e) {
+		//catch (IncorrectResultSizeDataAccessException e) {
+			return null;
+		}
 	}
 
 	@Override
@@ -98,4 +105,18 @@ public class JdbcBolsaTrabajoRepository implements IBolsaTrabajoRepository {
 			return null;
 		}
 	}
+
+	@Override
+	public List<BolsaTrabajo> findForDeleg(String idDeleg) {
+		logger.info(QUERY_GET_BOLSA_TRABAJO_FOR_DELEG);
+
+		try {
+			List<BolsaTrabajo> elemento = jdbcTemplate.query(QUERY_GET_BOLSA_TRABAJO_FOR_DELEG,
+					new BolsaTrabajoMapper(), idDeleg);
+			return elemento;
+		} catch (IncorrectResultSizeDataAccessException e) {
+			return null;
+		}
+	}
+
 }

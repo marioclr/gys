@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.Empleado;
+import gob.issste.gys.model.HorarioEmpleado;
 import gob.issste.gys.model.Usuario;
 import gob.issste.gys.repository.IEmpleadoRepository;
 import gob.issste.gys.repository.UsuarioRepository;
@@ -80,15 +81,16 @@ public class EmpleadoController {
 
 			return ResponseHandler.generateResponse("Se encontro el empleado y pertenece a la Delegación del Usuario", HttpStatus.OK, empleado);
 		} catch (EmptyResultDataAccessException e) {
+
 			return ResponseHandler.generateResponse("No se encontró el empleado indicado", HttpStatus.NOT_FOUND, null);
 		} catch (Exception e) {
+
 			return ResponseHandler.generateResponse("Error al buscar al empleado indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Obtener porcentaje de riesgos profesionales del empleado en el Sistema", description = "Obtener porcentaje de riesgos profesionales del empleado en el Sistema", tags = { "Empleados" })
 	@GetMapping("/guardias/riesgos")
-	//public ResponseEntity<Integer> obtenerRiesgos(
 	public ResponseEntity<Object> obtenerRiesgos(
 			@Parameter(description = "Clave de empleado a consultar", required = true) @RequestParam(required = true) String empleado,
 			@Parameter(description = "Fecha de quincena para consultar", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena) {
@@ -96,17 +98,16 @@ public class EmpleadoController {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
 			int riesgos = empleadoRepository.ConsultaRiesgosEmp(empleado, strQuincena);
-			//return new ResponseEntity<>(riesgos, HttpStatus.CREATED);
+
 			return ResponseHandler.generateResponse("Se encontró el porcentaje de riesgos profesionales del empleado en el Sistema", HttpStatus.OK, riesgos);
 		} catch (Exception e) {
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al obtener porcentaje de riesgos profesionales del empleado en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Obtener el listado de empleados", description = "Obtener el listado de empleados", tags = { "Empleados" })
 	@GetMapping("/empleados")
-	//public ResponseEntity<List<Empleado>> getAllEmpleados(@RequestParam(required = false) String nombre) {
 	public ResponseEntity<Object> getAllEmpleados(@RequestParam(required = false) String nombre) {
 		try {
 			List<Empleado> empleados = new ArrayList<Empleado>();
@@ -117,30 +118,51 @@ public class EmpleadoController {
 				empleadoRepository.findByNombre(nombre).forEach(empleados::add);
 
 			if (empleados.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 				return ResponseHandler.generateResponse("No existen registros de empleados en el sistema", HttpStatus.NOT_FOUND, null);
 			}
 
-			//return new ResponseEntity<>(empleados, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontró el listado de empleados", HttpStatus.OK, empleados);
 		} catch (Exception e) {
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al obtener el listado de empleados", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Obtener un empleado mediante su ID", description = "Obtener un empleado mediante su ID", tags = { "Empleados" })
 	@GetMapping("/empleados/{id}")
-	//public ResponseEntity<Empleado> getOpcionById(@PathVariable("id") String id) {
 	public ResponseEntity<Object> getEmpleadoById(@PathVariable("id") String id) {
 		Empleado empleado= empleadoRepository.findById(id);
 
 		if (empleado != null) {
-			//return new ResponseEntity<>(empleado, HttpStatus.OK);
+
 			return ResponseHandler.generateResponse("Se encontró el empleado mediante su ID", HttpStatus.OK, empleado);
 		} else {
-			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 			return ResponseHandler.generateResponse("No se encontró el empleado mediante su ID", HttpStatus.NOT_FOUND, null);
 		}
 	}
+
+	@Operation(summary = "Validar horario de un empleado mediante su ID y fechas", description = "Obtener un empleado mediante su ID", tags = { "Empleados" })
+	@GetMapping("/empleados/valida_horario")
+	public ResponseEntity<Object> getHorarioEmpleado(
+			@Parameter(description = "Clave del empleado para obtener el importe de la guardia", required = true) @RequestParam(required = true) String empleado,
+			@Parameter(description = "Fecha de quincena para el cálculo del importe de la guardia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
+			@Parameter(description = "Clave del tipo de tabulador para obtener el importe de la guardia", required = true) @RequestParam(required = true) Integer inicio,
+			@Parameter(description = "Clave del tipo de tabulador para obtener el importe de la guardia", required = true) @RequestParam(required = true) Integer fin ) {
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String strQuincena = dateFormat.format(quincena);
+
+		HorarioEmpleado horario = empleadoRepository.valida_horario(empleado, strQuincena, inicio, fin);
+
+		if (horario != null) {
+
+			return ResponseHandler.generateResponse("El empleado cubre el horario indicado.", HttpStatus.OK, horario);
+		} else {
+
+			return ResponseHandler.generateResponse("No se encontró el empleado en el horario indicado.", HttpStatus.NOT_FOUND, null);
+		}
+	}
+
 }

@@ -114,4 +114,31 @@ public class JdbcPagaRepository implements IPagaRepository {
 		return jdbcTemplate.query(QUERY_GET_ACTIVE_PAGAS, BeanPropertyRowMapper.newInstance(Paga.class));
 	}
 
+	@Override
+	public List<Paga> findByStatus(int anio, int mes, int tipo, int status) {
+		logger.info(QUERY_GET_PAGAS_BY_STATUS);
+		return jdbcTemplate.query(QUERY_GET_PAGAS_BY_STATUS, BeanPropertyRowMapper.newInstance(Paga.class), anio, mes, tipo, status);
+	}
+
+	@Override
+	public int updateStatus(int status, int anio, int mes, int tipo) {
+		logger.info(STMT_UPDATE_STATUS);
+		return jdbcTemplate.update(STMT_UPDATE_STATUS,
+	            new Object[] { status, anio, mes, tipo });
+	}
+
+	@Override
+	public int existe_abierta(Paga paga) {
+		logger.info(QUERY_EXISTS_PAGA_ABIERTA);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_PAGA_ABIERTA, Integer.class,
+				new Object[] { paga.getAnio_ejercicio(), paga.getMes_ejercicio(), paga.getId_tipo_paga() } );
+	}
+
+	@Override
+	public int existe_abierta_al_cambiar(Paga paga) {
+		logger.info(QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR, Integer.class,
+				new Object[] { paga.getId(), paga.getAnio_ejercicio(), paga.getMes_ejercicio(), paga.getId_tipo_paga() } );
+	}
+
 }

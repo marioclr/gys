@@ -176,7 +176,7 @@ public interface GuardiaRepository {
 
 	public String QUERY_EXISTS_GUARDIA_INT_UPD  = "Select COUNT(*) \r\n"
 												+ "From gys_guardias_emp\r\n"
-												+ "Where id_empleado = ?\r\n"
+												+ "Where id_empleado = ? And fec_inicio = ?\r\n"
 												+ "  And id<>?\r\n"
 												+ "  And (((hora_inicio>=?) And (hora_inicio <= ?)) \r\n"
 												+ "    Or ((hora_fin>=?)    And (hora_fin <= ?))    \r\n"
@@ -193,7 +193,7 @@ public interface GuardiaRepository {
 
 	public String QUERY_EXISTS_GUARDIA_EXT_UPD  = "Select COUNT(*) \r\n"
 												+ "From gys_guardias_ext\r\n"
-												+ "Where rfc = ?\r\n"
+												+ "Where rfc = ? And fec_inicio = ?\r\n"
 												+ "  And id<>?\r\n"
 												+ "  And (((hora_inicio>=?) And (hora_inicio <= ?)) \r\n"
 												+ "    Or ((hora_fin>=?)    And (hora_fin <= ?))    \r\n"

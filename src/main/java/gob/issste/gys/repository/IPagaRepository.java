@@ -35,4 +35,33 @@ public interface IPagaRepository {
 
 	public String QUERY_GET_ACTIVE_PAGAS   = "SELECT * from gys_fechas_control WHERE estatus = 1";
 	List<Paga> findActivePagas();
+
+	public String QUERY_GET_PAGAS_BY_STATUS = "SELECT * From gys_fechas_control\r\n"
+											+ "WHERE anio_ejercicio = ?\r\n"
+											+ "  And mes_ejercicio = ?\r\n"
+											+ "  And id_tipo_paga = ?\r\n"
+											+ "  And estatus = ?";
+	List<Paga> findByStatus(int anio, int mes, int tipo, int status);
+
+	public String STMT_UPDATE_STATUS 		= "UPDATE gys_fechas_control Set estatus = ?\r\n"
+			   								+ "Where estatus = 2 And anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?";
+	int updateStatus(int status, int anio, int mes, int tipo);
+
+	public String QUERY_EXISTS_PAGA_ABIERTA         = "Select COUNT(*) \r\n"
+													+ "From gys_fechas_control\r\n"
+													+ "Where anio_ejercicio = ?\r\n"
+													+ "  And mes_ejercicio = ?\r\n"
+													+ "  And id_tipo_paga = ?\r\n"
+													+ "  And estatus IN (0,1)";
+	public int existe_abierta(Paga paga);
+
+	public String QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR = "Select COUNT(*) \r\n"
+													+ "From gys_fechas_control\r\n"
+													+ "Where id <> ?\r\n"
+													+ "  And anio_ejercicio = ?\r\n"
+													+ "  And mes_ejercicio = ?\r\n"
+													+ "  And id_tipo_paga = ?\r\n"
+													+ "  And estatus IN (0,1)";
+	public int existe_abierta_al_cambiar(Paga paga);
+
 }

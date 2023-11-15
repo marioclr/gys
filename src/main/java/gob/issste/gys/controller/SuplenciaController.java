@@ -69,7 +69,6 @@ public class SuplenciaController {
 
 	@Operation(summary = "Obtener el importe de una Suplencia conforme a los criterios establecidos", description = "Se calcula el importe de una Suplencia conforme a los criterios establecidos", tags = { "Suplencia" })
 	@GetMapping("/suplencias/importe")
-	//public ResponseEntity<BigDecimal> getImporteSuplencia(
 	public ResponseEntity<Object> getImporteSuplencia(
 			@Parameter(description = "Fecha de quincena para el cálculo del importe de la Suplencia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
 			@Parameter(description = "Clave del empleado para obtener el importe de la Suplencia", required = true) @RequestParam(required = true) String clave_empleado, 
@@ -87,90 +86,96 @@ public class SuplenciaController {
 
 			importe = suplenciaService.CalculaImporteSuplencia( strDate, empleado.getClave_empleado(), dias, tipo, riesgos );
 			BigDecimal importe2 = new BigDecimal(importe).setScale(2, RoundingMode.HALF_UP);
-			//return new ResponseEntity<>(importe2, HttpStatus.OK);
+
 			return ResponseHandler.generateResponse("Se encontró el importe de la suplencia conforme a los criterios establecidos", HttpStatus.OK, importe2);
 		} catch (Exception e) {
 			logger.info(e.toString());
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al consultar el importe de la suplencia conforme a los criterios establecidos", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Obtener los registros de Suplencias del empleado en el Sistema", description = "Obtener los registros de Suplencias del empleado en el Sistema", tags = { "Suplencia" })
 	@GetMapping("/suplencias")
-	//public ResponseEntity<List<DatosSuplencia>> getSuplenciasEmpleado(
 	public ResponseEntity<Object> getSuplenciasEmpleado(
 			@Parameter(description = "Número de empleado para obtener las guardidas del empleado", required = true) @RequestParam(required = true) String claveEmpleado,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String tipoSuplencia,
+			@Parameter(description = "Tipo para obtener las guardidas del empleado ('SI': Internas o 'SE': Externas)", required = true) @RequestParam(required = true) String tipoSuplencia,
 			@Parameter(description = "Boolean para indicar si se incluyen los datos de los empleados", required = true) @RequestParam(value = "conDatosEmpleados", required = true) Boolean conEmpleados ) {
 
 		try {
 			List<DatosSuplencia> suplencias = new ArrayList<DatosSuplencia>();
 			DatosEmpleado empleado, empleado_sup;
 
-			if (tipoSuplencia.equals(String.valueOf("SI"))) {
-				suplencias = suplenciaRepository.ConsultaSuplenciasInternas(claveEmpleado);
-				if (conEmpleados) {
-					for(DatosSuplencia suplencia:suplencias) {
-						logger.info("Emp: " + suplencia.getClave_empleado() + " Sup: " + suplencia.getClave_empleado() + " Fecha: " + suplencia.getFec_paga());
-						try {
-							empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado());
-						} catch (Exception ex) {
-							empleado = new DatosEmpleado();
+			switch (tipoSuplencia) {
+			
+				case "SI":
+					suplencias = suplenciaRepository.ConsultaSuplenciasInternas(claveEmpleado);
+					if (conEmpleados) {
+						for(DatosSuplencia suplencia:suplencias) {
+							logger.info("Emp: " + suplencia.getClave_empleado() + " Sup: " + suplencia.getClave_empleado() + " Fecha: " + suplencia.getFec_paga());
+							try {
+								empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado());
+							} catch (Exception ex) {
+								empleado = new DatosEmpleado();
+							}
+							suplencia.setEmpleado(empleado);
+							try {
+								empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
+							} catch (Exception ex) {
+								empleado_sup = new DatosEmpleado();
+							}
+							suplencia.setEmpleado_suplir(empleado_sup);
 						}
-						suplencia.setEmpleado(empleado);
-						try {
-							empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
-						} catch (Exception ex) {
-							empleado_sup = new DatosEmpleado();
-						}
-						suplencia.setEmpleado_suplir(empleado_sup);
 					}
-				}
-			} else {
-				suplencias = suplenciaRepository.ConsultaSuplenciasExternas(claveEmpleado);
-				if (conEmpleados) {
-					for(DatosSuplencia suplencia:suplencias) {
-						logger.info("Emp: " + suplencia.getClave_empleado() + " Sup: " + suplencia.getClave_empleado() + " Fecha: " + suplencia.getFec_paga());
-						try {
-							BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado());
-							empleado = new DatosEmpleado();
-							empleado.setClave_empleado(bolsa.getRfc());
-							empleado.setNombre(bolsa.getNombre());
-							empleado.setApellido_1(bolsa.getApellidoPat());
-							empleado.setApellido_2(bolsa.getApellidoMat());
-						} catch (Exception ex) {
-							empleado = new DatosEmpleado();
+					break;
+			
+				case "SE":
+					suplencias = suplenciaRepository.ConsultaSuplenciasExternas(claveEmpleado);
+					if (conEmpleados) {
+						for(DatosSuplencia suplencia:suplencias) {
+							logger.info("Emp: " + suplencia.getClave_empleado() + " Sup: " + suplencia.getClave_empleado() + " Fecha: " + suplencia.getFec_paga());
+							try {
+								BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado());
+								empleado = new DatosEmpleado();
+								empleado.setClave_empleado(bolsa.getRfc());
+								empleado.setNombre(bolsa.getNombre());
+								empleado.setApellido_1(bolsa.getApellidoPat());
+								empleado.setApellido_2(bolsa.getApellidoMat());
+							} catch (Exception ex) {
+								empleado = new DatosEmpleado();
+							}
+							suplencia.setEmpleado(empleado);
+							try {
+								empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
+							} catch (Exception ex) {
+								empleado_sup = new DatosEmpleado();
+							}
+							suplencia.setEmpleado_suplir(empleado_sup);
 						}
-						suplencia.setEmpleado(empleado);
-						try {
-							empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
-						} catch (Exception ex) {
-							empleado_sup = new DatosEmpleado();
-						}
-						suplencia.setEmpleado_suplir(empleado_sup);
 					}
-				}
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
 			}
 
 			if (suplencias.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 				return ResponseHandler.generateResponse("No existen Suplencias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 
-			//return new ResponseEntity<>(suplencias, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se encontraron los registros de Suplencias del empleado en el Sistema", HttpStatus.OK, suplencias);
 
 		} catch (Exception e) {
 			logger.info(e.toString());
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al obtener los registros de Suplencias del empleado en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Obtener una suplencia en el sistema mediante el ID", description = "Obtener una suplencia en el sistema mediante el ID", tags = { "Suplencia" })
 	@GetMapping("/suplenciaPorId")
-	//public ResponseEntity<DatosSuplencia> getSuplenciaById(
 	public ResponseEntity<Object> getSuplenciaById(
 			@Parameter(description = "ID de la guardia del empleado", required = true) @RequestParam(required = true) Integer idSuplencia,
 			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String tipoSuplencia) {
@@ -180,48 +185,56 @@ public class SuplenciaController {
 
 		try {
 
-			if (tipoSuplencia.equals(String.valueOf("SI"))) {
-				suplencia = suplenciaRepository.findById(idSuplencia);
-				suplencia.setTipo_suplencia("SI");
-				try {
-					empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado());
-				} catch (Exception ex) {
-					empleado = new DatosEmpleado();
-				}
-				suplencia.setEmpleado(empleado);
-				try {
-					empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
-				} catch (Exception ex) {
-					empleado_sup = new DatosEmpleado();
-				}
-				suplencia.setEmpleado_suplir(empleado_sup);
-			} else {
-				suplencia = suplenciaRepository.findByIdExt(idSuplencia);
-				suplencia.setTipo_suplencia("SE");
-				try {
-					BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado());
-					empleado = new DatosEmpleado();
-					empleado.setClave_empleado(bolsa.getRfc());
-					empleado.setNombre(bolsa.getNombre());
-					empleado.setApellido_1(bolsa.getApellidoPat());
-					empleado.setApellido_2(bolsa.getApellidoMat());
-				} catch (Exception ex) {
-					empleado = new DatosEmpleado();
-				}
-				suplencia.setEmpleado(empleado);
-				try {
-					empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
-				} catch (Exception ex) {
-					empleado_sup = new DatosEmpleado();
-				}
-				suplencia.setEmpleado_suplir(empleado_sup);
+			switch (tipoSuplencia) {
+
+				case "SI":
+					suplencia = suplenciaRepository.findById(idSuplencia);
+					suplencia.setTipo_suplencia("SI");
+					try {
+						empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado());
+					} catch (Exception ex) {
+						empleado = new DatosEmpleado();
+					}
+					suplencia.setEmpleado(empleado);
+					try {
+						empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
+					} catch (Exception ex) {
+						empleado_sup = new DatosEmpleado();
+					}
+					suplencia.setEmpleado_suplir(empleado_sup);
+					break;
+
+				case "SE":
+					suplencia = suplenciaRepository.findByIdExt(idSuplencia);
+					suplencia.setTipo_suplencia("SE");
+					try {
+						BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado());
+						empleado = new DatosEmpleado();
+						empleado.setClave_empleado(bolsa.getRfc());
+						empleado.setNombre(bolsa.getNombre());
+						empleado.setApellido_1(bolsa.getApellidoPat());
+						empleado.setApellido_2(bolsa.getApellidoMat());
+					} catch (Exception ex) {
+						empleado = new DatosEmpleado();
+					}
+					suplencia.setEmpleado(empleado);
+					try {
+						empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
+					} catch (Exception ex) {
+						empleado_sup = new DatosEmpleado();
+					}
+					suplencia.setEmpleado_suplir(empleado_sup);
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			
 			}
-	
-			//return new ResponseEntity<>(suplencia, HttpStatus.OK);
+
 			return ResponseHandler.generateResponse("Se encontró la suplencia en el sistema mediante el ID", HttpStatus.OK, suplencia);
 		} catch ( Exception ex ) {
 			logger.info(ex.toString());
-			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 			return ResponseHandler.generateResponse("No se encontró la suplencia en el sistema mediante el ID", HttpStatus.NOT_FOUND, null);
 		}
 	}
@@ -238,18 +251,30 @@ public class SuplenciaController {
 		double saldo=0;
 
 		if (tipoSuplencia != null) {
-			if (tipoSuplencia.equals(String.valueOf("SI")))
-				if (idCentroTrab == null) {
-					saldo = suplenciaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
-				} else {
-					saldo = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
-				}
-			else
-				if (idCentroTrab == null) {
-					saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
-				} else {
-					saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idDelegacion, anio_ejercicio, mes_ejercicio);
-				}
+
+			switch (tipoSuplencia) {
+
+				case "SI":
+					if (idCentroTrab == null) {
+						saldo = suplenciaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
+					} else {
+						saldo = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
+					}
+					break;
+
+				case "SE":
+					if (idCentroTrab == null) {
+						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
+					} else {
+						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idDelegacion, anio_ejercicio, mes_ejercicio);
+					}
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+			}
+
 		} else {
 			saldo = suplenciaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio) + suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio); 
 		}
@@ -281,7 +306,7 @@ public class SuplenciaController {
 					break;
 
 				default:
-					return ResponseHandler.generateResponse("No se identificó el tipo de la suplencia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
@@ -313,7 +338,7 @@ public class SuplenciaController {
 					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(), presup.getMes());
 					break;
 				default:
-					return ResponseHandler.generateResponse("No se identificó el tipo de la suplencia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			// Fin de las Validaciones presupuestales
@@ -380,7 +405,7 @@ public class SuplenciaController {
 					break;
 
 				default:
-					return ResponseHandler.generateResponse("No se identificó el tipo de la suplencia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
@@ -414,7 +439,7 @@ public class SuplenciaController {
 					break;
 
 				default:
-					return ResponseHandler.generateResponse("No se identificó el tipo de la suplencia indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			// Fin de las Validaciones presupuestales
 
@@ -436,23 +461,21 @@ public class SuplenciaController {
 
 	@Operation(summary = "Eliminar un registro de suplencia del Sistema", description = "Eliminar un registro de suplencia del Sistema", tags = { "Suplencia" })
 	@DeleteMapping("/suplencias")
-	//public ResponseEntity<String> eliminarSuplencia(
 	public ResponseEntity<Object> eliminarSuplencia(
 			@Parameter(description = "Número de ID para obtener la suplencia del empleado", required = true) @RequestParam(required = true) Integer idGuardia,
 			@Parameter(description = "Tipo para obtener la suplencia del empleado (I-Interna o E-Externa)", required = true) @RequestParam(required = true) String tipoGuardia) {
 		try {
 			suplenciaService.eliminarSuplencia(idGuardia, tipoGuardia);
-			//return new ResponseEntity<>("El un registro de suplencia fué eliminado exitosamente.", HttpStatus.OK);
+
 			return ResponseHandler.generateResponse("El un registro de suplencia fué eliminado exitosamente.", HttpStatus.OK, null);
 		} catch (Exception e) {
-			//return new ResponseEntity<>("No se borró el registro de suplencia.", HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al consultar el importe de la suplencia conforme a los criterios establecidos", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Actualizar importes de Suplencias en el Sistema", description = "Actualizar importes de Suplencias en el Sistema", tags = { "Suplencia" })
 	@PutMapping("/suplencias/actualiza2")
-	//public ResponseEntity<String> actualizaImportes2(
 	public ResponseEntity<Object> actualizaImportes2(
 			@Parameter(description = "Fecha de quincena para el cálculo del importe de la Suplencia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
 			@Parameter(description = "Tipo para obtener las guardidas del empleado ('I': Internas o 'E': Externas)", required = true) @RequestParam(required = true) String tipoSuplencia ) {
@@ -460,20 +483,52 @@ public class SuplenciaController {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = dateFormat.format(quincena);
 			suplenciaService.ActualizaImportesSuplencias2(strQuincena, tipoSuplencia);
-			//return new ResponseEntity<>("Los importes de las Suplencias se actualizaron de manera exitósa.", HttpStatus.OK);
+
 			return ResponseHandler.generateResponse("Los importes de las Suplencias se actualizaron de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al actualizar el importe de la suplencia", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Actualizar Estatus de Suplencias en el Sistema", description = "Actualizar Estatus de Suplencias en el Sistema", tags = { "Suplencia" })
+	@PutMapping("/suplencias/actualizaEstatus")
+	public ResponseEntity<Object> actualizaEstatus(
+			@Parameter(description = "ID de la Suplencia", required = true) @RequestParam(required = true) Integer idSuplencia,
+			@Parameter(description = "Estatus de la suplencia", required = true) @RequestParam(required = true) Integer estatus,
+			@Parameter(description = "Tipo de Suplencia para calcular el importe de la Suplencia", required = true) @RequestParam(required = true) String tipo) {
+
+		try {
+
+			switch (tipo) {
+
+				case "SI":
+
+					suplenciaRepository.updateStatusSuplencia(estatus, idSuplencia);
+					break;
+	
+				case "SE":
+
+					suplenciaRepository.updateStatusSuplenciaExt(estatus, idSuplencia);
+					break;
+	
+				default:
+					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+	
+			}
+
+			return ResponseHandler.generateResponse("Los importes de las Suplencias se actualizaron de manera exitósa", HttpStatus.OK, null);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Obtener los registros de suplencias del empleado en el Sistema", description = "Obtener los registros de suplencias del empleado en el Sistema", tags = { "Suplencia" })
 	@GetMapping("/suplencias/consulta")
-	//public ResponseEntity<List<DatosSuplencia>> getDynamicSuplencias(
 	public ResponseEntity<Object> getDynamicSuplencias(
 			@Parameter(description = "Fecha de quincena para la consulta de suplencias", required = false) @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
-			@Parameter(description = "Tipo para obtener las suplencias (I-Internas o E-Externas)", required = true) @RequestParam(required = true) String tipoSuplencia,
+			@Parameter(description = "Tipo para obtener las suplencias (SI-Internas o SE-Externas)", required = true) @RequestParam(required = true) String tipoSuplencia,
 			@Parameter(description = "ID de empleado o RFC para obtener las suplencias", required = false) @RequestParam(required = false) String claveEmpleado,
 			@Parameter(description = "Importe mínimo para obtener las suplencias", required = false) @RequestParam(required = false) Double importe_min,
 			@Parameter(description = "Importe máximo para obtener las suplencias", required = false) @RequestParam(required = false) Double importe_max,
@@ -481,7 +536,8 @@ public class SuplenciaController {
 			@Parameter(description = "ID del centro de trabajo para obtener las suplencias", required = false) @RequestParam(required = false) String idCentroTrab,
 			@Parameter(description = "Clave del servicio para obtener las suplencias", required = false) @RequestParam(required = false) String claveServicio,
 			@Parameter(description = "Clave del puesto para obtener las suplencias", required = false) @RequestParam(required = false) String puesto,
-			@Parameter(description = "Clave del empleado a suplir para obtener las suplencias", required = false) @RequestParam(required = false) String emp_suplir) {
+			@Parameter(description = "Clave del empleado a suplir para obtener las suplencias", required = false) @RequestParam(required = false) String emp_suplir,
+			@Parameter(description = "Clave del empleado a suplir para obtener las suplencias", required = false) @RequestParam(required = false) Integer estatus ) {
 
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -493,19 +549,18 @@ public class SuplenciaController {
 			List<DatosSuplencia> guardias = new ArrayList<DatosSuplencia>();
 
 			guardias = suplenciaRepository.ConsultaDynamicSuplencias(strQuincena, tipoSuplencia, claveEmpleado, importe_min, importe_max, 
-																idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir);
+																idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir, estatus);
 
 			if (guardias.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
 				return ResponseHandler.generateResponse("No se encontraron los registros de suplencias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 
-			//return new ResponseEntity<>(guardias, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se obtuvieron los registros de suplencias del empleado en el Sistema", HttpStatus.OK, guardias);
 
 		} catch (Exception e) {
 			logger.info(e.toString());
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+
 			return ResponseHandler.generateResponse("Error al consultar los registros de suplencias del empleado en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}

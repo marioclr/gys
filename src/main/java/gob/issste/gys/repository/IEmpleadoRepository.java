@@ -4,6 +4,7 @@ import java.util.List;
 
 import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.Empleado;
+import gob.issste.gys.model.HorarioEmpleado;
 
 public interface IEmpleadoRepository {
 
@@ -43,5 +44,19 @@ public interface IEmpleadoRepository {
 	List<Empleado> findAll();
 
 	List<Empleado> findByNombre(String nombre);
+
+	public String QUERY_VALIDA_HORARIO_EMPLEADO  	= "Select First 1 id_empleado, fec_inicio, fec_inicio, NVL(fec_fin, date(current)) fec_fin,\r\n"
+													+ "A.id_horario, n_horario, hora_entrada_to, hora_salida_to\r\n"
+													+ "From m4t_hist_horario_empleado A, m4t_horarios B\r\n"
+													+ "Where A.id_horario=B.id_horario\r\n"
+													+ "  And A.id_empleado = ?\r\n"
+													+ "  And (((fec_inicio                  >= ?) And (fec_inicio                  <= ?))\r\n"
+													+ "    Or ((NVL(fec_fin, date(current)) >= ?) And (NVL(fec_fin, date(current)) <= ?))\r\n"
+													+ "    Or ((NVL(fec_fin, date(current)) >= ?) And (fec_inicio                  <= ?)))\r\n"
+													+ "  And (((hora_entrada_to >= ?) And (hora_entrada_to <= ?))\r\n"
+													+ "    Or ((hora_salida_to  >= ?) And (hora_salida_to  <= ?))\r\n"
+													+ "    Or ((hora_salida_to  >= ?) And (hora_entrada_to <= ?)))\r\n"
+													+ "Order By fec_inicio Desc";
+	public HorarioEmpleado valida_horario(String empleado, String fec_pago, int inicio, int fin);
 
 }

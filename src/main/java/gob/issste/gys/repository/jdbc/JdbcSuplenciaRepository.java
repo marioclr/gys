@@ -393,8 +393,23 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
+	public int updateStatusSuplencia(int status, int id) {
+		logger.info(STMT_UPDATE_STATUS);
+		return jdbcTemplate.update(STMT_UPDATE_STATUS,
+	            new Object[] { status, id });
+	}
+
+	@Override
+	public int updateStatusSuplenciaExt(int status, int id) {
+		logger.info(STMT_UPDATE_STATUS_EXT);
+		return jdbcTemplate.update(STMT_UPDATE_STATUS_EXT,
+	            new Object[] { status, id });
+	}
+
+	@Override
 	public List<DatosSuplencia> ConsultaDynamicSuplencias(String fechaPago, String tipo, String clave_empleado,
-			Double importe_min, Double importe_max, String idDelegacion, String idCentroTrab, String claveServicio, String puesto, String emp_suplir) {
+			Double importe_min, Double importe_max, String idDelegacion, String idCentroTrab, String claveServicio, 
+			String puesto, String emp_suplir, Integer estatus) {
 
 		String QUERY_CONDITION  = "";
 		String EMPLOYEE_FIELD   = "";
@@ -459,9 +474,14 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 			objects.add(puesto);
 		}
 
+		if (estatus != null) { 
+			QUERY_CONDITION += "  And G.estatus = ?\r\n";
+			objects.add(estatus);
+		}
+
 		String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
-							 + "  G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment,\r\n"
-							 + "  G.importe, P.id_tipo_tabulador, G.fec_paga, C.id_zona, F.estatus, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario,\r\n"
+							 + "  G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
+							 + "  G.importe, P.id_tipo_tabulador, G.fec_paga, C.id_zona, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario,\r\n"
 							 + "  G.id_empleado_sup clave_empleado_suplir\r\n"
 							 + "From " + QUERY_TABLE_BASE + " G, gys_fechas_control F, m4t_puestos_plaza P, m4t_clave_servicio S, m4t_centros_trab C\r\n"
 							 + "Where G.fec_paga = F.fec_pago\r\n"
