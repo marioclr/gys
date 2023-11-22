@@ -1,5 +1,7 @@
 package gob.issste.gys.model;
 
+import java.util.List;
+
 public class Paga {
 
 	private int id;
@@ -11,13 +13,16 @@ public class Paga {
 	private int anio_ejercicio;
 	private int mes_ejercicio;
 	private int id_tipo_paga;
+	private int idnivelvisibilidad;
 	private String id_usuario;
+	private List<Delegacion> delegaciones;
 
 	public Paga() {
 		super();
 	}
 
-	public Paga(String fec_pago, String descripcion, int estatus, String fec_inicio, String fec_fin, int anio_ejercicio, int mes_ejercicio, int id_tipo_paga) {
+	public Paga(String fec_pago, String descripcion, int estatus, String fec_inicio, String fec_fin, 
+			int anio_ejercicio, int mes_ejercicio, int id_tipo_paga, List<Delegacion> delegaciones) {
 		super();
 		this.fec_pago = fec_pago;
 		this.descripcion = descripcion;
@@ -27,6 +32,7 @@ public class Paga {
 		this.anio_ejercicio = anio_ejercicio;
 		this.mes_ejercicio = mes_ejercicio;
 		this.id_tipo_paga = id_tipo_paga;
+		this.delegaciones = delegaciones;
 	}
 
 	public int getId() {
@@ -83,10 +89,23 @@ public class Paga {
 	public void setId_tipo_paga(int id_tipo_paga) {
 		this.id_tipo_paga = id_tipo_paga;
 	}
+	public int getIdnivelvisibilidad() {
+		return idnivelvisibilidad;
+	}
+	public void setIdnivelvisibilidad(int idnivelvisibilidad) {
+		this.idnivelvisibilidad = idnivelvisibilidad;
+	}
 	public String getId_usuario() {
 		return id_usuario;
 	}
 	public void setId_usuario(String id_usuario) {
 		this.id_usuario = id_usuario;
 	}
+	public List<Delegacion> getDelegaciones() {
+		return delegaciones;
+	}
+	public void setDelegaciones(List<Delegacion> delegaciones) {
+		this.delegaciones = delegaciones;
+	}
+
 }

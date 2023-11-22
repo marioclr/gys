@@ -65,7 +65,7 @@ public interface IAdminRepository {
 												+ "    And anio_ejercicio = ?\r\n"
 												+ "    And mes_ejercicio = ?\r\n"
 												+ "    And id_tipo_paga = 4\r\n"
-												+ "    And F.estatus = 2\r\n"
+												+ "    And F.estatus = 3\r\n"
 												+ "  Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc\r\n"
 												+ "  UNION ALL\r\n"
 												+ "  Select\r\n"
@@ -76,7 +76,7 @@ public interface IAdminRepository {
 												+ "    And anio_ejercicio = ?\r\n"
 												+ "    And mes_ejercicio = ?\r\n"
 												+ "    And id_tipo_paga = 4\r\n"
-												+ "    And F.estatus = 2\r\n"
+												+ "    And F.estatus = 3\r\n"
 												+ "  Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc\r\n"
 												+ ") Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc";
 
@@ -212,7 +212,8 @@ public interface IAdminRepository {
 	int elimina_cifras_impuesto(Integer anio, Integer mes, Integer tipoPaga);
 
 	public String STMT_ELIMINA_CALCULO_ISR_X_REC = "Delete From gys_externos_isr2 Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?\r\n"
-												+ " And fec_min = ? And fec_max = ?";
+												+ " And fec_min between ? And ?"
+												+ " And fec_max between ? And ?";
 
 	int elimina_cifras_impuesto_x_rec(Integer anio, Integer mes, Integer tipoPaga, String fec_min, String fec_max );
 

@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -379,9 +380,15 @@ public class PresupuestoController {
 			saldo = presupuestoRepository.getSaldoDistribuido(anio_ejercicio, mes_ejercicio, idDelegacion, claveTipoPresupuesto);
 
 			return ResponseHandler.generateResponse("Se obtuvo el saldo presupuestal distribuido para las condiciones indicadas", HttpStatus.OK, saldo);
+
+		} catch (EmptyResultDataAccessException e) {
+
+			return ResponseHandler.generateResponse("No existe presupuesto desglozado a la delegación seleccionada", HttpStatus.NOT_FOUND, 0);
+
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
 		}
 	}
 

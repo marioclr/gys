@@ -297,12 +297,16 @@ public class SuplenciaController {
 
 				case "SI":
 					if (suplenciaRepository.existe_suplencia(suplencia) > 0)
-						return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia del suplente, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					if (suplenciaRepository.existe_suplente(suplencia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia del empleado a suplir, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
 					break;
 
 				case "SE":
 					if (suplenciaRepository.existe_suplenciaExt(suplencia) > 0)
-						return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia del suplente, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					if (suplenciaRepository.existe_suplenteExt(suplencia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia del empleado a suplir, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
 					break;
 
 				default:

@@ -340,6 +340,14 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
+	public int existe_suplente(DatosSuplencia suplencia) {
+		logger.info(QUERY_EXISTS_SUPLENTE_INT);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPLENTE_INT, Integer.class,
+				new Object[] { suplencia.getClave_empleado_suplir() , suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), suplencia.getFec_inicio(), suplencia.getFec_fin() } );
+	}
+
+	@Override
 	public int updateSuplenciaIntVars(DatosSuplencia suplencia) {
 		return jdbcTemplate.update(QUERY_UPD_SUPLENCIA_INT_VARS, 
 				new Object[] { suplencia.getImporte(), suplencia.getRiesgos(),
@@ -367,6 +375,16 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 		logger.info(QUERY_EXISTS_SUPL_EXT);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPL_EXT, Integer.class,
 				new Object[] { suplencia.getClave_empleado(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin() } );
+	}
+
+	@Override
+	public int existe_suplenteExt(DatosSuplencia suplencia) {
+		logger.info(QUERY_EXISTS_SUPLENTE_EXT);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPLENTE_EXT, Integer.class,
+				new Object[] { suplencia.getClave_empleado_suplir(), 
 						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
 						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
 						suplencia.getFec_inicio(), suplencia.getFec_fin() } );

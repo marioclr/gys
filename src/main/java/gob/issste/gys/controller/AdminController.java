@@ -59,10 +59,10 @@ public class AdminController {
 				//adminRepository.calcula_isr_suplencia_par(anio, mes);
 			}
 
-			//Se cambia el estadus a las fechas a 3 (calculo ISR)
+			//Se cambia el estadus a las fechas a 4 (calculo ISR)
 
 			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
-			pagaRepository.updateStatus(3, anio, mes, tipoFechaControl);
+			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
 
 			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
@@ -93,15 +93,16 @@ public class AdminController {
 			adminRepository.elimina_cifras_impuesto_x_rec(anio, mes, tipoFechaControl, strMinDate, strMaxDate);
 
 			if (tipoFechaControl == 4) {
-				adminRepository.re_calcula_isr_guardia_non(anio, mes, strMinDate, strMaxDate);
-				adminRepository.calcula_isr_suplencia_non(anio, mes);
+				//adminRepository.re_calcula_isr_guardia_non(anio, mes, strMinDate, strMaxDate);
+				//adminRepository.calcula_isr_suplencia_non(anio, mes);
+				adminRepository.re_calcula_isr_non(anio, mes, strMinDate, strMaxDate);
 			} else {
 				adminRepository.calcula_isr_guardia_par(anio, mes);
 				adminRepository.calcula_isr_suplencia_par(anio, mes);
 			}
 
 			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
-			pagaRepository.updateStatus(2, anio, mes, tipoFechaControl);
+			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
 
 			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
@@ -152,7 +153,7 @@ public class AdminController {
 			}
 
 			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
-			pagaRepository.updateStatus(2, anio, mes, tipoFechaControl);
+			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
 
 			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
@@ -181,6 +182,11 @@ public class AdminController {
 				cifras = new ArrayList<CifrasDeImpuestos>();
 				return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifras);
 			}
+
+		} catch (EmptyResultDataAccessException e) {
+
+			cifras = new ArrayList<CifrasDeImpuestos>();
+			return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifras);
 
 		} catch (Exception e) {
 

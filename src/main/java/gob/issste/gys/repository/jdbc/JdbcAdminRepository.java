@@ -106,7 +106,7 @@ public class JdbcAdminRepository implements IAdminRepository {
 			String fec_min, String fec_max) {
 		logger.info(STMT_ELIMINA_CALCULO_ISR_X_REC);
 
-		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR_X_REC, anio, mes, tipoPaga, fec_min, fec_max );
+		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR_X_REC, anio, mes, tipoPaga, fec_min, fec_max, fec_min, fec_max );
 
 	}
 

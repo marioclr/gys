@@ -157,6 +157,14 @@ public interface ISuplenciaRepository {
 												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
 	public int existe_suplencia(DatosSuplencia suplencia);
 
+	public String QUERY_EXISTS_SUPLENTE_INT     = "Select COUNT(*) \r\n"
+												+ "From gys_suplencias_emp\r\n"
+												+ "Where id_empleado_sup = ?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int existe_suplente(DatosSuplencia suplencia);
+
 	public String QUERY_EXISTS_SUPL_EXT         = "Select COUNT(*) \r\n"
 												+ "From gys_suplencias_ext\r\n"
 												+ "Where rfc = ?\r\n"
@@ -164,6 +172,14 @@ public interface ISuplenciaRepository {
 												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
 												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
 	public int existe_suplenciaExt(DatosSuplencia suplencia);
+
+	public String QUERY_EXISTS_SUPLENTE_EXT     = "Select COUNT(*) \r\n"
+												+ "From gys_suplencias_ext\r\n"
+												+ "Where id_empleado_sup = ?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int existe_suplenteExt(DatosSuplencia suplencia);
 
 	public String QUERY_EXISTS_SUPL_INT_UPD     = "Select COUNT(*) \r\n"
 												+ "From gys_suplencias_emp\r\n"

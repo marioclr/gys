@@ -18,6 +18,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
+import gob.issste.gys.model.Delegacion;
 import gob.issste.gys.model.Paga;
 import gob.issste.gys.repository.IPagaRepository;
 
@@ -44,6 +45,7 @@ public class JdbcPagaRepository implements IPagaRepository {
             preparedStatement.setInt(6, paga.getAnio_ejercicio());
             preparedStatement.setInt(7, paga.getMes_ejercicio());
             preparedStatement.setInt(8, paga.getId_tipo_paga());
+            preparedStatement.setInt(9, paga.getIdnivelvisibilidad());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -62,7 +64,7 @@ public class JdbcPagaRepository implements IPagaRepository {
 		logger.info(QUERY_UPDATE_PAGAS);
 		return jdbcTemplate.update(QUERY_UPDATE_PAGAS,
 	            new Object[] { paga.getDescripcion(), paga.getEstatus(), paga.getFec_inicio(), paga.getFec_fin(), paga.getAnio_ejercicio(), 
-	            		paga.getMes_ejercicio(), paga.getId_tipo_paga(), paga.getId() });
+	            		paga.getMes_ejercicio(), paga.getId_tipo_paga(), paga.getIdnivelvisibilidad(), paga.getId() });
 	}
 
 	@Override
@@ -115,6 +117,12 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
+	public List<Paga> findActivePagasByUser(int idUser) {
+		logger.info(QUERY_GET_ACTIVE_PAGAS_BY_USR);
+		return jdbcTemplate.query(QUERY_GET_ACTIVE_PAGAS_BY_USR, BeanPropertyRowMapper.newInstance(Paga.class), idUser);
+	}
+
+	@Override
 	public List<Paga> findByStatus(int anio, int mes, int tipo, int status) {
 		logger.info(QUERY_GET_PAGAS_BY_STATUS);
 		return jdbcTemplate.query(QUERY_GET_PAGAS_BY_STATUS, BeanPropertyRowMapper.newInstance(Paga.class), anio, mes, tipo, status);
@@ -139,6 +147,29 @@ public class JdbcPagaRepository implements IPagaRepository {
 		logger.info(QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR, Integer.class,
 				new Object[] { paga.getId(), paga.getAnio_ejercicio(), paga.getMes_ejercicio(), paga.getId_tipo_paga() } );
+	}
+
+	@Override
+	public int saveDelegForFecha(int IdFecha, String IdDeleg, String id_usuario) {
+		logger.info(QUERY_ADD_DELEG_X_FECHA);
+		return jdbcTemplate.update(QUERY_ADD_DELEG_X_FECHA, IdFecha, IdDeleg, id_usuario);
+	}
+
+	@Override
+	public int removeDelegForFecha(int IdFecha) {
+		logger.info(QUERY_DEL_FOR_FECHA);
+		return jdbcTemplate.update(QUERY_DEL_FOR_FECHA, IdFecha);
+	}
+
+	@Override
+	public List<Delegacion> getDelegForFecha(int IdFecha) {
+		logger.info(QUERY_GET_DEL_FECHA);
+
+		List<Delegacion> delegacionList =
+				this.jdbcTemplate.query(QUERY_GET_DEL_FECHA,
+				BeanPropertyRowMapper.newInstance(Delegacion.class), IdFecha);
+
+		return delegacionList;
 	}
 
 }
