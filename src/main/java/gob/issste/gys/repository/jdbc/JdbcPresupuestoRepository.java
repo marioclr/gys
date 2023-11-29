@@ -10,6 +10,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -206,6 +208,21 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 	}
 
 	@Override
+	public Presupuesto getDatosPresup(String idDelegacion, String idTipoPresup, Integer anio, Integer mes) {
+		logger.info(QUERY_GET_DATOS_PRESUP);
+		Presupuesto presup = jdbcTemplate.queryForObject(QUERY_GET_DATOS_PRESUP, BeanPropertyRowMapper.newInstance(Presupuesto.class), new Object [] { idDelegacion, idTipoPresup, anio, mes } );
+		return presup;
+	}
+
+	@Override
+	public Presupuesto getDatosPresupCt(String idDelegacion, String idTipoPresup, Integer anio, Integer mes,
+			String idCentTrab) {
+		logger.info(QUERY_GET_DATOS_PRESUP_CT);
+		Presupuesto presup = jdbcTemplate.queryForObject(QUERY_GET_DATOS_PRESUP_CT, BeanPropertyRowMapper.newInstance(Presupuesto.class), new Object [] { idDelegacion, idTipoPresup, anio, mes, idCentTrab } );
+		return presup;
+	}
+
+	@Override
 	public double getSaldoDelegCt(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, String idCentTrab) {
 
 		String QUERY_CONDITION = "";
@@ -246,8 +263,14 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 	@Override
 	public double getSaldoDistribuido(Integer anio, Integer mes, String idDelegacion, String idTipoPresup) {
 		logger.info(QUERY_GET_SALDO_DISTRIBUIDO);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_DISTRIBUIDO, Double.class,
-				new Object[] { anio, mes, idDelegacion, idTipoPresup } );
+		
+		try {
+			double saldo = jdbcTemplate.queryForObject(QUERY_GET_SALDO_DISTRIBUIDO, Double.class,
+					new Object[] { anio, mes, idDelegacion, idTipoPresup } );
+			return saldo;
+		} catch (EmptyResultDataAccessException e) {
+			return 0.0;
+		}
 	}
 
 	@Override

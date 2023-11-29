@@ -117,7 +117,20 @@ public class JdbcAdminRepository implements IAdminRepository {
 		return jdbcTemplate.query(QUERY_GET_DETALLE_CIFRAS_ISR, 
 				BeanPropertyRowMapper.newInstance(DetalleCifrasDeImpuestos.class), 
 				new Object [] { anio, mes, tipoPaga, id_ordinal } );
+	}
 
+	@Override
+	public int elimina_cifras_impuesto_x_ord(Integer anio, Integer mes, Integer tipoPaga, Integer ord) {
+		logger.info(STMT_ELIMINA_CALCULO_ISR_X_ORD);
+
+		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR_X_ORD, anio, mes, tipoPaga, ord );
+	}
+
+	@Override
+	public int re_calcula_isr_ord_non(Integer anio, Integer mes, String fec_min, String fec_max, String ord) {
+		logger.info(STMT_RE_CALCULA_ISR_ORD_NON.replaceFirst("###", ord));
+
+		return jdbcTemplate.update(STMT_RE_CALCULA_ISR_ORD_NON.replaceFirst("###", ord), anio, mes, fec_min, fec_max, anio, mes, fec_min, fec_max );
 	}
 
 }

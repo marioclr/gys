@@ -36,7 +36,7 @@ public class AdminController {
 	@Autowired
 	IPagaRepository pagaRepository;
 
-	@Operation(summary = "Realiza el proceso de cálculo de impuestos a guardias o suplencias", description = "Realiza el proceso de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
+	@Operation(summary = "Realiza el proceso de cálculo de impuestos a guardias y suplencias", description = "Realiza el proceso de cálculo de impuestos a guardias y suplencias", tags = { "Admin" })
 	@PostMapping("/calculo_isr")
 	public ResponseEntity<Object> calculoISR(
 			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
@@ -74,7 +74,7 @@ public class AdminController {
 		}
 	}
 
-	@Operation(summary = "Realiza el proceso de cálculo de impuestos a guardias o suplencias", description = "Realiza el proceso de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
+	@Operation(summary = "Realiza el proceso de recálculo de impuestos a guardias y suplencias", description = "Realiza el proceso de recálculo de impuestos a guardias y suplencias", tags = { "Admin" })
 	@PostMapping("/re_calculo_isr")
 	public ResponseEntity<Object> re_calculoISR(
 			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
@@ -90,12 +90,12 @@ public class AdminController {
 
 		try {
 
-			adminRepository.elimina_cifras_impuesto_x_rec(anio, mes, tipoFechaControl, strMinDate, strMaxDate);
+			//adminRepository.elimina_cifras_impuesto_x_rec(anio, mes, tipoFechaControl, strMinDate, strMaxDate);
+			adminRepository.elimina_cifras_impuesto_x_ord(anio, mes, tipoFechaControl, 1);
 
 			if (tipoFechaControl == 4) {
-				//adminRepository.re_calcula_isr_guardia_non(anio, mes, strMinDate, strMaxDate);
-				//adminRepository.calcula_isr_suplencia_non(anio, mes);
-				adminRepository.re_calcula_isr_non(anio, mes, strMinDate, strMaxDate);
+				//adminRepository.re_calcula_isr_non(anio, mes, strMinDate, strMaxDate);
+				adminRepository.re_calcula_isr_ord_non(anio, mes, strMinDate, strMaxDate, "1");
 			} else {
 				adminRepository.calcula_isr_guardia_par(anio, mes);
 				adminRepository.calcula_isr_suplencia_par(anio, mes);

@@ -60,7 +60,7 @@ public interface IPagaRepository {
 			   								+ "Where estatus = 3 And anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?";
 	int updateStatus(int status, int anio, int mes, int tipo);
 
-	public String QUERY_EXISTS_PAGA_ABIERTA         = "Select COUNT(*) \r\n"
+	public String QUERY_EXISTS_PAGA_ABIERTA         = "Select COUNT(*)\r\n"
 													+ "From gys_fechas_control\r\n"
 													+ "Where anio_ejercicio = ?\r\n"
 													+ "  And mes_ejercicio = ?\r\n"
@@ -68,7 +68,7 @@ public interface IPagaRepository {
 													+ "  And estatus IN (0,1)";
 	public int existe_abierta(Paga paga);
 
-	public String QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR = "Select COUNT(*) \r\n"
+	public String QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR = "Select COUNT(*)\r\n"
 													+ "From gys_fechas_control\r\n"
 													+ "Where id <> ?\r\n"
 													+ "  And anio_ejercicio = ?\r\n"
@@ -76,6 +76,20 @@ public interface IPagaRepository {
 													+ "  And id_tipo_paga = ?\r\n"
 													+ "  And estatus IN (0,1)";
 	public int existe_abierta_al_cambiar(Paga paga);
+
+	public String QUERY_EXISTS_FECHA_EN_ISR         = "Select COUNT(*)\r\n"
+													+ "From gys_externos_isr2\r\n"
+													+ "Where (((fec_min                     >= ?) And (fec_min                     <= ?))\r\n"
+													+ "    Or ((NVL(fec_max, date(current)) >= ?) And (NVL(fec_max, date(current)) <= ?))\r\n"
+													+ "    Or ((NVL(fec_max, date(current)) >= ?) And (fec_min                     <= ?)))";
+	public int existe_fecha_en_isr(Paga paga);
+
+	public String QUERY_EXISTS_FECHA_EN_PAGAS       = "Select COUNT(*)\r\n"
+													+ "From gys_fechas_control\r\n"
+													+ "Where (((fec_inicio                  >= ?) And (fec_inicio                  <= ?))\r\n"
+													+ "    Or ((NVL(fec_fin, date(current)) >= ?) And (NVL(fec_fin, date(current)) <= ?))\r\n"
+													+ "    Or ((NVL(fec_fin, date(current)) >= ?) And (fec_inicio                  <= ?)))";
+	public int existe_fecha_en_pagas(Paga paga);
 
     public String QUERY_ADD_DELEG_X_FECHA	= "Insert Into gys_DelegacionesPorFecha ( IdFecha, IdDelegacion, id_usuario ) Values ( ?, ?, ? )";
     int saveDelegForFecha(int IdFecha, String IdDeleg, String id_usuario);
@@ -88,7 +102,5 @@ public interface IPagaRepository {
 								    		+ "Where F.IdDelegacion = D.id_div_geografica\r\n"
 								    		+ "  And IdFecha = ?";
     List<Delegacion> getDelegForFecha(int IdFecha);
-
-
 
 }

@@ -164,7 +164,7 @@ public interface GuardiaRepository {
 	int updateGuardiaExtVars(DatosGuardia guardia);
 
 	List<DatosGuardia> ConsultaDynamicGuardias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
-			String idDelegacion, String idCentroTrab, String claveServicio, String puesto);
+			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus);
 
 	public String QUERY_EXISTS_GUARDIA_INT      = "Select COUNT(*) \r\n"
 												+ "From gys_guardias_emp\r\n"
@@ -199,5 +199,13 @@ public interface GuardiaRepository {
 												+ "    Or ((hora_fin>=?)    And (hora_fin <= ?))    \r\n"
 												+ "    Or ((hora_fin>=?)    And (hora_inicio <= ?)))";
 	public int existe_guardia_ext_upd(DatosGuardia guardia);
+
+	public String STMT_UPDATE_STATUS 			= "UPDATE gys_guardias_emp Set estatus = ?\r\n"
+												+ "Where id = ?";
+	int updateStatusGuardia(int status, int id);
+
+	public String STMT_UPDATE_STATUS_EXT 		= "UPDATE gys_guardias_ext Set estatus = ?\r\n"
+												+ "Where id = ?";
+	int updateStatusGuardiaExt(int status, int id);
 
 }

@@ -510,18 +510,18 @@ public class SuplenciaController {
 
 					suplenciaRepository.updateStatusSuplencia(estatus, idSuplencia);
 					break;
-	
+
 				case "SE":
 
 					suplenciaRepository.updateStatusSuplenciaExt(estatus, idSuplencia);
 					break;
-	
+
 				default:
 					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
-	
+
 			}
 
-			return ResponseHandler.generateResponse("Los importes de las Suplencias se actualizaron de manera exitósa", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("El estatus de la suplencia se actualizó de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);

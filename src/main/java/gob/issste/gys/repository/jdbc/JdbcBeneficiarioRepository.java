@@ -43,7 +43,11 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
             preparedStatement.setString(5, beneficiario.getNumeroBenef());
             preparedStatement.setInt(6, beneficiario.getPorcentaje());
             preparedStatement.setString(7, beneficiario.getId_centro_trab());
-            preparedStatement.setString(8, beneficiario.getId_usuario());
+            preparedStatement.setString(8, beneficiario.getRfc());
+            preparedStatement.setString(9, beneficiario.getFec_inicio());
+            preparedStatement.setString(10, beneficiario.getFec_fin());
+            preparedStatement.setInt(11, beneficiario.getCons_benef());
+            preparedStatement.setString(12, beneficiario.getId_usuario());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -64,6 +68,7 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
 		return jdbcTemplate.update(STMT_UPDATE_BENEFICIARIO, 
 				new Object[] { beneficiario.getNombre(), beneficiario.getApellidoPaterno(), beneficiario.getApellidoMaterno(),
 						beneficiario.getNumeroBenef(), beneficiario.getPorcentaje(), beneficiario.getId_centro_trab(), 
+						beneficiario.getRfc(), beneficiario.getFec_inicio(), beneficiario.getFec_fin(), beneficiario.getCons_benef(),
 						beneficiario.getId_usuario(), beneficiario.getId() });
 	}
 
@@ -100,8 +105,14 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
 	@Override
 	public int suma_porc_beneficiario(Beneficiario beneficiario) {
 		logger.info(QUERY_SUMA_PORC_BENEFICIARIO);
-		return jdbcTemplate.queryForObject(QUERY_SUMA_PORC_BENEFICIARIO, Integer.class,
-				new Object[] { beneficiario.getIdBolsa() } );
+
+		try {
+			int suma = jdbcTemplate.queryForObject(QUERY_SUMA_PORC_BENEFICIARIO, Integer.class,
+					new Object[] { beneficiario.getIdBolsa() } );
+			return suma;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
 	}
 
 	@Override
@@ -119,8 +130,17 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
 	@Override
 	public int suma_porc_beneficiario_upd(Beneficiario beneficiario) {
 		logger.info(QUERY_SUMA_PORC_BENEFICIARIO_UPD);
-		return jdbcTemplate.queryForObject(QUERY_SUMA_PORC_BENEFICIARIO_UPD, Integer.class,
-				new Object[] { beneficiario.getIdBolsa(), beneficiario.getId() } );
+
+		try {
+
+			int suma = jdbcTemplate.queryForObject(QUERY_SUMA_PORC_BENEFICIARIO_UPD, Integer.class,
+					new Object[] { beneficiario.getIdBolsa(), beneficiario.getId() } ); 
+			return suma;
+
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+
 	}
 
 }

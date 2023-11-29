@@ -150,6 +150,24 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
+	public int existe_fecha_en_isr(Paga paga) {
+		logger.info(QUERY_EXISTS_FECHA_EN_ISR);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_FECHA_EN_ISR, Integer.class,
+				new Object[] { paga.getFec_pago(), paga.getFec_pago(),
+							   paga.getFec_pago(), paga.getFec_pago(),
+							   paga.getFec_pago(), paga.getFec_pago() } );
+	}
+
+	@Override
+	public int existe_fecha_en_pagas(Paga paga) {
+		logger.info(QUERY_EXISTS_FECHA_EN_PAGAS);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_FECHA_EN_PAGAS, Integer.class,
+				new Object[] { paga.getFec_pago(), paga.getFec_pago(),
+							   paga.getFec_pago(), paga.getFec_pago(), 
+							   paga.getFec_pago(), paga.getFec_pago() } );
+	}
+
+	@Override
 	public int saveDelegForFecha(int IdFecha, String IdDeleg, String id_usuario) {
 		logger.info(QUERY_ADD_DELEG_X_FECHA);
 		return jdbcTemplate.update(QUERY_ADD_DELEG_X_FECHA, IdFecha, IdDeleg, id_usuario);

@@ -145,7 +145,7 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_GET_SALDO_SUPLENCIA_EXT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_ext\r\n"
-												+ "Where id<>? And id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_delegacion = ?)\r\n"
+												+ "Where id<>? And id_centro_trabajo = ?\r\n"
 												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
 	double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio);
 

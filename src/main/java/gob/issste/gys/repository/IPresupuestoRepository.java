@@ -106,6 +106,30 @@ public interface IPresupuestoRepository {
 
 	public double getSaldoDelegCt(String idDelegacion, String idTipoPresup, Integer anio, Integer mes, String idCentTrab);
 
+	public String QUERY_GET_DATOS_PRESUP			= "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
+													+ "P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
+													+ "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
+													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
+													+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
+													+ "  And P.idDelegacion = ?\r\n"
+													+ "  And T.clave = ?\r\n"
+													+ "  And P.anio = ?\r\n"
+													+ "  And P.mes = ?\r\n"
+													+ "  And P.id_centro_trabajo IS NULL";
+	public Presupuesto getDatosPresup(String idDelegacion, String idTipoPresup, Integer anio, Integer mes);
+
+	public String QUERY_GET_DATOS_PRESUP_CT			= "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
+													+ "P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
+													+ "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
+													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
+													+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
+													+ "  And P.idDelegacion = ?\r\n"
+													+ "  And T.clave = ?\r\n"
+													+ "  And P.anio = ?\r\n"
+													+ "  And P.mes = ?\r\n"
+													+ "  And P.id_centro_trabajo = ?";
+	public Presupuesto getDatosPresupCt(String idDelegacion, String idTipoPresup, Integer anio, Integer mes, String idCentTrab);
+
 	public String QUERY_GET_SALDO_DISTRIBUIDO		= "Select NVL(SUM(saldo), 0) saldo\r\n"
 													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
 													+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"

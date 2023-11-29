@@ -259,7 +259,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 	@Override
 	public List<DatosGuardia> ConsultaDynamicGuardias(String fechaPago, String tipo, String clave_empleado, Double importe_min, Double importe_max,
-			String idDelegacion, String idCentroTrab, String claveServicio, String puesto ) {
+			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus ) {
 
 		String QUERY_CONDITION  = "";
 		String EMPLOYEE_FIELD   = "";
@@ -319,9 +319,14 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 			objects.add(puesto);
 		}
 
+		if (estatus != null) { 
+			QUERY_CONDITION += "  And G.estatus = ?\r\n";
+			objects.add(estatus);
+		}
+
 		String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, id_clave_servicio, G.id_puesto_plaza, '" + tipo + "' tipo_guardia,\r\n"
-							 + "id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment,\r\n"
-							 + "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, P.estatus, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
+							 + "id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
+							 + "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
 							 + "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU \r\n"
 							 + "Where G.fec_paga = P.fec_pago And \r\n"
 							 + "G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
@@ -377,6 +382,20 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 						guardia.getHora_inicio(), guardia.getHora_fin(),
 						guardia.getHora_inicio(), guardia.getHora_fin(),
 						guardia.getHora_inicio(), guardia.getHora_fin() } );
+	}
+
+	@Override
+	public int updateStatusGuardia(int status, int id) {
+		logger.info(STMT_UPDATE_STATUS);
+		return jdbcTemplate.update(STMT_UPDATE_STATUS,
+	            new Object[] { status, id });
+	}
+
+	@Override
+	public int updateStatusGuardiaExt(int status, int id) {
+		logger.info(STMT_UPDATE_STATUS_EXT);
+		return jdbcTemplate.update(STMT_UPDATE_STATUS_EXT,
+	            new Object[] { status, id });
 	}
 
 }

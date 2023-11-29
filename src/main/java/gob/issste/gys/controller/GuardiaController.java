@@ -445,6 +445,39 @@ public class GuardiaController {
 		}
 	}
 
+	@Operation(summary = "Actualizar Estatus de Guardias en el Sistema", description = "Actualizar Estatus de Suplencias en el Sistema", tags = { "Guardia" })
+	@PutMapping("/guardias/actualizaEstatus")
+	public ResponseEntity<Object> actualizaEstatus(
+			@Parameter(description = "ID de la Suplencia", required = true) @RequestParam(required = true) Integer idGuardia,
+			@Parameter(description = "Estatus de la suplencia", required = true) @RequestParam(required = true) Integer estatus,
+			@Parameter(description = "Tipo de Suplencia para calcular el importe de la Suplencia", required = true) @RequestParam(required = true) String tipo) {
+
+		try {
+
+			switch (tipo) {
+
+				case "GI":
+
+					guardiaRepository.updateStatusGuardia(estatus, idGuardia);
+					break;
+
+				case "GE":
+
+					guardiaRepository.updateStatusGuardiaExt(estatus, idGuardia);
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+			}
+
+			return ResponseHandler.generateResponse("El estatus de la guardia se actualizó de manera exitósa", HttpStatus.OK, null);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
 	@Operation(summary = "Obtener los registros de guardias del empleado en el Sistema", description = "Obtener los registros de guardias del empleado en el Sistema", tags = { "Guardia" })
 	@GetMapping("/guardias/consulta")
 	public ResponseEntity<Object> getDynamicGuardias(
@@ -456,7 +489,8 @@ public class GuardiaController {
 			@Parameter(description = "ID de la delegación para obtener las guardias", required = false) @RequestParam(required = false) String idDelegacion,
 			@Parameter(description = "ID del centro de trabajo para obtener las guardias", required = false) @RequestParam(required = false) String idCentroTrab,
 			@Parameter(description = "Clave del servicio para obtener las guardias", required = false) @RequestParam(required = false) String claveServicio,
-			@Parameter(description = "Clave del puesto para obtener las guardias", required = false) @RequestParam(required = false) String puesto) {
+			@Parameter(description = "Clave del puesto para obtener las guardias", required = false) @RequestParam(required = false) String puesto,
+			@Parameter(description = "Estatus de las guardias", required = false) @RequestParam(required = false) Integer estatus) {
 
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -468,7 +502,7 @@ public class GuardiaController {
 			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
 
 			guardias = guardiaRepository.ConsultaDynamicGuardias(strQuincena, tipoGuardia, claveEmpleado, importe_min,
-					importe_max, idDelegacion, idCentroTrab, claveServicio, puesto);
+					importe_max, idDelegacion, idCentroTrab, claveServicio, puesto, estatus);
 
 			if (guardias.isEmpty()) {
 

@@ -54,9 +54,17 @@ public class PagaController {
 
 			try {
 
+				if(pagaService.existe_fecha_en_paga(paga)) {
+					platformTransactionManager.rollback(status);
+					return ResponseHandler.generateResponse("LA fecha esta en un periodo entre fechas ya existentes", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				}
 				if(pagaService.validaPagasAlCrear(paga)) {
 					platformTransactionManager.rollback(status);
 					return ResponseHandler.generateResponse("Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				}
+				if(pagaService.existe_fecha_en_isr(paga)) {
+					platformTransactionManager.rollback(status);
+					return ResponseHandler.generateResponse("La fecha que se desea crear esta integrada en los cálculos de ISR y procesos posteriores.", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 				int idPaga = pagaRepository.save(paga);
 
@@ -182,9 +190,10 @@ public class PagaController {
 	public ResponseEntity<Object> deletePaga(@PathVariable("id") Integer id) {
 		try {
 
-			int result = pagaRepository.deleteById(id);
+			int result1 = pagaRepository.removeDelegForFecha(id);
+			int result2 = pagaRepository.deleteById(id);
 
-			if (result == 0) {
+			if (result2 == 0) {
 
 				return ResponseHandler.generateResponse("No se pudo encontrar la fecha de control de pagos de GyS con el ID =" + id, HttpStatus.NOT_FOUND, null);
 			}
@@ -266,7 +275,7 @@ public class PagaController {
 		}	
 	}
 
-	@Operation(summary = "Obtiene información de fechas de control de pagos de GyS activas en el Sistema", description = "Obtiene información de fechas de control de pagos de GyS activas en el Sistema", tags = { "Control de fechas de pago" })
+	@Operation(summary = "Obtiene información de fechas de control de pagos de GyS, filtradas por su estatus, en el Sistema", description = "Obtiene información de fechas de control de pagos de GyS, filtradas por su estatus, en el Sistema", tags = { "Control de fechas de pago" })
 	@GetMapping("/Paga/byStatus")
 	public ResponseEntity<Object> getPagas(
 			@Parameter(description = "Parámetro para indicar el Año del ejercicio de las fechas de control de pagos", required = true) @RequestParam(required = true) Integer anio,

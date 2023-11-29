@@ -50,7 +50,8 @@ public class BeneficiarioController {
 
 			idBenef = beneficiarioRepository.save(new Beneficiario( beneficiario.getIdBolsa(), beneficiario.getNombre(), beneficiario.getApellidoPaterno(),
 													beneficiario.getApellidoMaterno(), beneficiario.getPorcentaje(), beneficiario.getNumeroBenef(),
-													beneficiario.getId_centro_trab(), beneficiario.getId_usuario() ));
+													beneficiario.getId_centro_trab(), beneficiario.getRfc(), beneficiario.getFec_inicio(), beneficiario.getFec_fin(),
+													beneficiario.getCons_benef(), beneficiario.getId_usuario() ));
 
 			return ResponseHandler.generateResponse("El beneficiario de pensión alimenticia ha sido creado de manera exitosa, con ID " + idBenef, HttpStatus.OK, null);
 		} catch (Exception e) {
@@ -61,7 +62,7 @@ public class BeneficiarioController {
 
 	@Operation(summary = "Actualiza la información del beneficiario del Sistema", description = "Actualiza la información del beneficiario del Sistema", tags = { "Beneficiario" })
 	@PutMapping("/Beneficiario/{id}")
-	public ResponseEntity<Object> updatePaga(@PathVariable("id") Integer id, @RequestBody Beneficiario beneficiario) {
+	public ResponseEntity<Object> updateBenef(@PathVariable("id") Integer id, @RequestBody Beneficiario beneficiario) {
 		Beneficiario _beneficiario = beneficiarioRepository.findById(id);
 
 		if(beneficiarioRepository.suma_porc_beneficiario_upd(beneficiario) + beneficiario.getPorcentaje() > 100) {
@@ -75,6 +76,10 @@ public class BeneficiarioController {
 			_beneficiario.setNumeroBenef(beneficiario.getNumeroBenef());
 			_beneficiario.setPorcentaje(beneficiario.getPorcentaje());
 			_beneficiario.setId_centro_trab(beneficiario.getId_centro_trab());
+			_beneficiario.setRfc(beneficiario.getRfc());
+			_beneficiario.setFec_inicio(beneficiario.getFec_inicio());
+			_beneficiario.setFec_fin(beneficiario.getFec_fin());
+			_beneficiario.setCons_benef(beneficiario.getCons_benef());
 			_beneficiario.setId_usuario(beneficiario.getId_usuario());
 
 			beneficiarioRepository.update(_beneficiario);

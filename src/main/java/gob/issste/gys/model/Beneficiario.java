@@ -10,6 +10,10 @@ public class Beneficiario {
 	private int porcentaje;
 	private String numeroBenef;
 	private String id_centro_trab;
+	private String rfc;
+	private String fec_inicio;
+	private String fec_fin;
+	private int cons_benef;
 	private String id_usuario;
 
 	public Beneficiario() {
@@ -17,7 +21,7 @@ public class Beneficiario {
 	}
 
 	public Beneficiario(int idBolsa, String nombre, String apellidoPaterno, String apellidoMaterno, int porcentaje,
-			String numeroBenef, String id_centro_trab, String id_usuario) {
+			String numeroBenef, String id_centro_trab, String rfc, String fec_inicio, String fec_fin, int cons_benef, String id_usuario) {
 		super();
 		this.idBolsa = idBolsa;
 		this.nombre = nombre;
@@ -26,6 +30,10 @@ public class Beneficiario {
 		this.porcentaje = porcentaje;
 		this.numeroBenef = numeroBenef;
 		this.id_centro_trab = id_centro_trab;
+		this.rfc = rfc;
+		this.fec_inicio = fec_inicio;
+		this.fec_fin = fec_fin;
+		this.cons_benef = cons_benef;
 		this.id_usuario = id_usuario;
 	}
 
@@ -91,6 +99,38 @@ public class Beneficiario {
 
 	public void setId_centro_trab(String id_centro_trab) {
 		this.id_centro_trab = id_centro_trab;
+	}
+
+	public String getRfc() {
+		return rfc;
+	}
+
+	public void setRfc(String rfc) {
+		this.rfc = rfc;
+	}
+
+	public String getFec_inicio() {
+		return fec_inicio;
+	}
+
+	public void setFec_inicio(String fec_inicio) {
+		this.fec_inicio = fec_inicio;
+	}
+
+	public String getFec_fin() {
+		return fec_fin;
+	}
+
+	public void setFec_fin(String fec_fin) {
+		this.fec_fin = fec_fin;
+	}
+
+	public int getCons_benef() {
+		return cons_benef;
+	}
+
+	public void setCons_benef(int cons_benef) {
+		this.cons_benef = cons_benef;
 	}
 
 	public String getId_usuario() {

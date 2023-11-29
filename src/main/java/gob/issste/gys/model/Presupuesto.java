@@ -14,9 +14,18 @@ public class Presupuesto {
 
 	public Presupuesto() {
 	}
-
 	public Presupuesto(int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, TiposPresupuesto tipoPresup, Double saldo) {
 		super();
+		this.anio = anio;
+		this.mes = mes;
+		this.delegacion = delegacion;
+		this.centroTrabajo = centroTrabajo;
+		this.tipoPresup = tipoPresup;
+		this.saldo = saldo;
+	}
+	public Presupuesto(int id, int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, TiposPresupuesto tipoPresup, Double saldo) {
+		super();
+		this.id = id;
 		this.anio = anio;
 		this.mes = mes;
 		this.delegacion = delegacion;
@@ -75,7 +84,7 @@ public class Presupuesto {
 
 	@Override
 	public String toString() {
-		return "Presupuesto [anio=" + anio + ", mes=" + mes + ", delegacion=" + delegacion + ", tipoPresup="
+		return "Presupuesto [id=" + id + ", anio=" + anio + ", mes=" + mes + ", delegacion=" + delegacion + ", tipoPresup="
 				+ tipoPresup + ", saldo=" + saldo + ", centroTrabajo=" + centroTrabajo + "]";
 	}
 

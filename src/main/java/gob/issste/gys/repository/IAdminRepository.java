@@ -224,4 +224,43 @@ public interface IAdminRepository {
 												+ " And id_ordinal = ?\r\n";
 	List<DetalleCifrasDeImpuestos> getDetalleCifrasDeImpuestos(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal);
 
+
+	// Pruebas Cálculo
+	public String STMT_ELIMINA_CALCULO_ISR_X_ORD = "Delete From gys_externos_isr2\r\n"
+												+ "Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?\r\n"
+												+ "And id_ordinal = ?";
+
+	int elimina_cifras_impuesto_x_ord(Integer anio, Integer mes, Integer tipoPaga, Integer ord );
+
+	public String STMT_RE_CALCULA_ISR_ORD_NON	= "Insert Into gys_externos_isr2 ( anio_ejercicio, mes_ejercicio, id_tipo_paga, id_ordinal,\r\n"
+												+ "tipo, rfc, casos, percepciones, isr, id_clave_servicio, id_centro_trabajo, fec_min, fec_max )\r\n"
+												+ "Select anio_ejercicio, mes_ejercicio, id_tipo_paga,\r\n"
+												+ "### id_ordinal, 'DOS' tipo, rfc, SUM(casos) casos, SUM(importe) percep, _get_ispt_( SUM(importe) * 2 ) / 2 isr,\r\n"
+												+ "MAX(id_clave_servicio) id_clave_servicio, MAX(id_centro_trabajo) id_centro_trabajo, MIN(fec_min) fec_min,  MAX(fec_max) fec_max\r\n"
+												+ "From (\r\n"
+												+ "  Select\r\n"
+												+ "    anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, COUNT(*) casos, SUM(importe) importe,\r\n"
+												+ "    MAX(id_clave_servicio) id_clave_servicio, MAX(id_centro_trabajo) id_centro_trabajo, MIN(F.fec_pago) fec_min,  MAX(F.fec_pago) fec_max\r\n"
+												+ "  From gys_guardias_ext G, gys_fechas_control F\r\n"
+												+ "  Where G.fec_paga = F.fec_pago\r\n"
+												+ "    And anio_ejercicio = ?\r\n"
+												+ "    And mes_ejercicio = ?\r\n"
+												+ "    And id_tipo_paga = 4\r\n"
+												+ "    And F.fec_pago between ? And ?\r\n"
+												+ "  Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc\r\n"
+												+ "  UNION ALL\r\n"
+												+ "  Select\r\n"
+												+ "    anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, COUNT(*) casos, SUM(importe) importe,\r\n"
+												+ "    MAX(id_clave_servicio) id_clave_servicio, MAX(id_centro_trabajo) id_centro_trabajo, MIN(F.fec_pago) fec_min,  MAX(F.fec_pago) fec_max\r\n"
+												+ "  From gys_suplencias_ext S, gys_fechas_control F\r\n"
+												+ "  Where S.fec_paga = F.fec_pago\r\n"
+												+ "    And anio_ejercicio = ?\r\n"
+												+ "    And mes_ejercicio = ?\r\n"
+												+ "    And id_tipo_paga = 4\r\n"
+												+ "    And F.fec_pago between ? And ?\r\n"
+												+ "  Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc\r\n"
+												+ ") Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc";
+
+	int re_calcula_isr_ord_non(Integer anio, Integer mes, String fec_min, String fec_max, String ord);
+
 }
