@@ -77,10 +77,10 @@ public class BolsaTrabajoController {
 
 		try {
 
-			BolsaTrabajo bolsasDeTrabajo = bolsaTrabajoRepository.findByRFC(elemento.getRfc());
+			BolsaTrabajo bolsasDeTrabajo = bolsaTrabajoRepository.findByRFCDel(elemento.getRfc(), elemento.getDelegacion().getId_div_geografica());
 
 			if (bolsasDeTrabajo != null)
-				return ResponseHandler.generateResponse("Ya existe un elemento en la bolsa de trabajo del sistema con el RFC indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				return ResponseHandler.generateResponse("Ya existe un elemento en la bolsa de trabajo del sistema con el RFC y la Of. de representación indicados", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 			int idBolsa = bolsaTrabajoRepository.save(elemento);
 
@@ -144,6 +144,32 @@ public class BolsaTrabajoController {
 			}
 
 			return ResponseHandler.generateResponse("Existen elementos a la bolsa de trabajo en el Sistema", HttpStatus.OK, bolsa);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener elementos a la bolsa de trabajo en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Obtener elementos a la bolsa de trabajo en el Sistema", description = "Obtener elementos a la bolsa de trabajo en el Sistema", tags = { "Bolsa de Trabajo" })
+	@GetMapping("/bolsatrabajo/likeRfc")
+	public ResponseEntity<Object> getBolsaTrabajoLikeRfc(
+			@Parameter(description = "RFC o parte del RFC para filtrar elementos", required = true) @RequestParam(required = true) String rfc,
+			@Parameter(description = "Parámetro opcional para indicar la delegación del usuario", required = false) @RequestParam(required = false) String idDeleg) {
+
+		List<String> rfcs = new ArrayList<String>();
+
+		try {
+			if (idDeleg == null)
+				rfcs = bolsaTrabajoRepository.findLikeRFC(rfc);
+			else
+				rfcs = bolsaTrabajoRepository.findLikeRFC(rfc, idDeleg);
+
+			if (rfcs == null) {
+
+				return ResponseHandler.generateResponse("No existen elementos a la bolsa de trabajo en el Sistema", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Existen elementos a la bolsa de trabajo en el Sistema", HttpStatus.OK, rfcs);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al obtener elementos a la bolsa de trabajo en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);

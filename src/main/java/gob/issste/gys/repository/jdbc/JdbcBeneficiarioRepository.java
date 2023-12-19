@@ -37,17 +37,18 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
         PreparedStatementCreator statementCreator = (Connection connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement(STMT_ADD_NEW_BENEFICIARIO, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, beneficiario.getIdBolsa());
-            preparedStatement.setString(2, beneficiario.getNombre());
-            preparedStatement.setString(3, beneficiario.getApellidoPaterno());
-            preparedStatement.setString(4, beneficiario.getApellidoMaterno());
-            preparedStatement.setString(5, beneficiario.getNumeroBenef());
-            preparedStatement.setInt(6, beneficiario.getPorcentaje());
-            preparedStatement.setString(7, beneficiario.getId_centro_trab());
-            preparedStatement.setString(8, beneficiario.getRfc());
-            preparedStatement.setString(9, beneficiario.getFec_inicio());
-            preparedStatement.setString(10, beneficiario.getFec_fin());
-            preparedStatement.setInt(11, beneficiario.getCons_benef());
-            preparedStatement.setString(12, beneficiario.getId_usuario());
+            preparedStatement.setString(2, beneficiario.getRfc_bolsa());
+            preparedStatement.setString(3, beneficiario.getNombre());
+            preparedStatement.setString(4, beneficiario.getApellidoPaterno());
+            preparedStatement.setString(5, beneficiario.getApellidoMaterno());
+            preparedStatement.setString(6, beneficiario.getNumeroBenef());
+            preparedStatement.setInt(7, beneficiario.getPorcentaje());
+            preparedStatement.setString(8, beneficiario.getId_centro_trab());
+            preparedStatement.setString(9, beneficiario.getRfc());
+            preparedStatement.setString(10, beneficiario.getFec_inicio());
+            preparedStatement.setString(11, beneficiario.getFec_fin());
+            preparedStatement.setInt(12, beneficiario.getCons_benef());
+            preparedStatement.setString(13, beneficiario.getId_usuario());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -66,10 +67,10 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
 		logger.info(STMT_UPDATE_BENEFICIARIO);
 
 		return jdbcTemplate.update(STMT_UPDATE_BENEFICIARIO, 
-				new Object[] { beneficiario.getNombre(), beneficiario.getApellidoPaterno(), beneficiario.getApellidoMaterno(),
-						beneficiario.getNumeroBenef(), beneficiario.getPorcentaje(), beneficiario.getId_centro_trab(), 
-						beneficiario.getRfc(), beneficiario.getFec_inicio(), beneficiario.getFec_fin(), beneficiario.getCons_benef(),
-						beneficiario.getId_usuario(), beneficiario.getId() });
+				new Object[] { beneficiario.getRfc_bolsa(), beneficiario.getNombre(), beneficiario.getApellidoPaterno(),
+						beneficiario.getApellidoMaterno(), beneficiario.getNumeroBenef(), beneficiario.getPorcentaje(), 
+						beneficiario.getId_centro_trab(), beneficiario.getRfc(), beneficiario.getFec_inicio(), beneficiario.getFec_fin(), 
+						beneficiario.getCons_benef(), beneficiario.getId_usuario(), beneficiario.getId() });
 	}
 
 	@Override
@@ -141,6 +142,12 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
 			return 0;
 		}
 
+	}
+
+	@Override
+	public List<Beneficiario> findByRFC(String rfc) {
+		logger.info(QUERY_FIND_BENEFICIARIO_BY_RFC);
+		return jdbcTemplate.query(QUERY_FIND_BENEFICIARIO_BY_RFC, BeanPropertyRowMapper.newInstance(Beneficiario.class), "%" + rfc + "%");
 	}
 
 }

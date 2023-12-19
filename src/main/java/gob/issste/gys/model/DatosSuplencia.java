@@ -24,6 +24,14 @@ public class DatosSuplencia {
 	private String coment;
 	private String id_empresa;
 	private String estatus;
+	private String id_tipo_ausentismo;
+	private String id_puesto_plaza;
+	private String id_clave_servicio;
+	private String id_tipo_jornada;
+	private String id_nivel;
+	private String id_sub_nivel;
+	private String id_centro_trabajo;
+	private String id_turno;
 
 	// Para Validaciones
 	private Double sueldo;
@@ -162,7 +170,55 @@ public class DatosSuplencia {
 	public void setEstatus(String estatus) {
 		this.estatus = estatus;
 	}
+	public String getId_tipo_ausentismo() {
+		return id_tipo_ausentismo;
+	}
+	public void setId_tipo_ausentismo(String id_tipo_ausentismo) {
+		this.id_tipo_ausentismo = id_tipo_ausentismo;
+	}
 
+	public String getId_puesto_plaza() {
+		return id_puesto_plaza;
+	}
+	public void setId_puesto_plaza(String id_puesto_plaza) {
+		this.id_puesto_plaza = id_puesto_plaza;
+	}
+	public String getId_clave_servicio() {
+		return id_clave_servicio;
+	}
+	public void setId_clave_servicio(String id_clave_servicio) {
+		this.id_clave_servicio = id_clave_servicio;
+	}
+	public String getId_tipo_jornada() {
+		return id_tipo_jornada;
+	}
+	public void setId_tipo_jornada(String id_tipo_jornada) {
+		this.id_tipo_jornada = id_tipo_jornada;
+	}
+	public String getId_nivel() {
+		return id_nivel;
+	}
+	public void setId_nivel(String id_nivel) {
+		this.id_nivel = id_nivel;
+	}
+	public String getId_sub_nivel() {
+		return id_sub_nivel;
+	}
+	public void setId_sub_nivel(String id_sub_nivel) {
+		this.id_sub_nivel = id_sub_nivel;
+	}
+	public String getId_centro_trabajo() {
+		return id_centro_trabajo;
+	}
+	public void setId_centro_trabajo(String id_centro_trabajo) {
+		this.id_centro_trabajo = id_centro_trabajo;
+	}
+	public String getId_turno() {
+		return id_turno;
+	}
+	public void setId_turno(String id_turno) {
+		this.id_turno = id_turno;
+	}
 	@Override
 	public String toString() {
 		return "DatosSuplencia [id=" + id + ", empleado=" + empleado + ", empleado_suplir="
@@ -170,7 +226,7 @@ public class DatosSuplencia {
 				+ ", importe=" + importe + ", fec_paga=" + fec_paga + ", riesgos=" + riesgos + ", estado=" + estado
 				+ ", id_ordinal=" + id_ordinal + ", tipo_guardia=" + tipo_suplencia + ", userName=" + id_usuario
 				+ ", folio=" + folio + ", motivo=" + motivo + ", movimiento=" + id_clave_movimiento + ", coment=" + coment
-				+ ", id_empresa=" + id_empresa + "]";
+				+ ", id_empresa=" + id_empresa + ", id_tipo_ausentismo=" + id_tipo_ausentismo + "]";
 	}
 
 }

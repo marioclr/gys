@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.CifrasDeImpuestos;
 import gob.issste.gys.model.DetalleCifrasDeImpuestos;
+import gob.issste.gys.model.DetalleCifrasDeImpuestosConPA;
 import gob.issste.gys.repository.IAdminRepository;
 
 @Repository
@@ -36,7 +37,6 @@ public class JdbcAdminRepository implements IAdminRepository {
 		return jdbcTemplate.update(STMT_CALCULA_ISR_GUARIDAS_NON, anio, mes, anio, mes );
 	}
 
-
 	@Override
 	public int calcula_isr_non(Integer anio, Integer mes) {
 		logger.info(STMT_CALCULA_ISR_NON);
@@ -45,10 +45,24 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
+	public int calcula_isr_par(Integer anio, Integer mes) {
+		logger.info(STMT_CALCULA_ISR_PAR);
+
+		return jdbcTemplate.update(STMT_CALCULA_ISR_PAR, anio, mes, anio, mes, anio, mes );
+	}
+
+	@Override
 	public int re_calcula_isr_non(Integer anio, Integer mes, String fec_min, String fec_max) {
 		logger.info(STMT_RE_CALCULA_ISR_NON);
 
 		return jdbcTemplate.update(STMT_RE_CALCULA_ISR_NON, anio, mes, anio, mes, fec_min, fec_max, anio, mes, fec_min, fec_max );
+	}
+
+	@Override
+	public int re_calcula_isr_par(Integer anio, Integer mes, String fec_min, String fec_max) {
+		logger.info(STMT_RE_CALCULA_ISR_PAR);
+
+		return jdbcTemplate.update(STMT_RE_CALCULA_ISR_PAR, anio, mes, anio, mes, fec_min, fec_max, anio, mes, fec_min, fec_max );
 	}
 
 	@Override
@@ -120,6 +134,16 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
+	public List<DetalleCifrasDeImpuestosConPA> getDetalleCifrasDeImpuestosPA(Integer anio, Integer mes,
+			Integer tipoPaga, Integer id_ordinal) {
+		logger.info(QUERY_GET_DETALLE_CIFRAS_ISR_PA);
+
+		return jdbcTemplate.query(QUERY_GET_DETALLE_CIFRAS_ISR_PA,
+				BeanPropertyRowMapper.newInstance(DetalleCifrasDeImpuestosConPA.class), 
+				new Object [] { anio, mes, tipoPaga, id_ordinal } );
+	}
+
+	@Override
 	public int elimina_cifras_impuesto_x_ord(Integer anio, Integer mes, Integer tipoPaga, Integer ord) {
 		logger.info(STMT_ELIMINA_CALCULO_ISR_X_ORD);
 
@@ -127,10 +151,24 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
-	public int re_calcula_isr_ord_non(Integer anio, Integer mes, String fec_min, String fec_max, String ord) {
-		logger.info(STMT_RE_CALCULA_ISR_ORD_NON.replaceFirst("###", ord));
+	public int re_calcula_isr_ord_non(Integer anio, Integer mes, String fec_min, String fec_max, Integer ord) {
+		logger.info(STMT_RE_CALCULA_ISR_ORD_NON.replaceFirst("###", ord.toString()));
 
-		return jdbcTemplate.update(STMT_RE_CALCULA_ISR_ORD_NON.replaceFirst("###", ord), anio, mes, fec_min, fec_max, anio, mes, fec_min, fec_max );
+		return jdbcTemplate.update(STMT_RE_CALCULA_ISR_ORD_NON.replaceFirst("###", ord.toString()), anio, mes, fec_min, fec_max, anio, mes, fec_min, fec_max );
+	}
+
+	@Override
+	public int re_calcula_isr_ord_par(Integer anio, Integer mes, String fec_min, String fec_max, Integer ord) {
+		logger.info(STMT_RE_CALCULA_ISR_ORD_PAR.replaceFirst("###", ord.toString()));
+
+		return jdbcTemplate.update(STMT_RE_CALCULA_ISR_ORD_NON.replaceFirst("###", ord.toString()), anio, mes, fec_min, fec_max, anio, mes, fec_min, fec_max );
+	}
+
+	@Override
+	public int calculaPensionAlimenticia(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal) {
+		logger.info( "execute procedure " + STMT_EXECUTE_SP_PA);
+
+		return jdbcTemplate.update( "execute procedure " + STMT_EXECUTE_SP_PA, anio, mes, tipoPaga, id_ordinal);
 	}
 
 }

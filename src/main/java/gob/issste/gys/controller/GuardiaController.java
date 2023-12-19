@@ -450,20 +450,24 @@ public class GuardiaController {
 	public ResponseEntity<Object> actualizaEstatus(
 			@Parameter(description = "ID de la Suplencia", required = true) @RequestParam(required = true) Integer idGuardia,
 			@Parameter(description = "Estatus de la suplencia", required = true) @RequestParam(required = true) Integer estatus,
-			@Parameter(description = "Tipo de Suplencia para calcular el importe de la Suplencia", required = true) @RequestParam(required = true) String tipo) {
+			@Parameter(description = "Tipo de Suplencia para actualizar el estatus", required = true) @RequestParam(required = true) String tipo,
+			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario,
+			@Parameter(description = "Comentarios correspondientes a la actualización del estatus", required = false) @RequestParam(required = false) String comentarios) {
+
+		if (comentarios == null) comentarios = "";
 
 		try {
 
-			switch (tipo) {
+			switch (estatus) {
 
-				case "GI":
+				case 1, 2:
 
-					guardiaRepository.updateStatusGuardia(estatus, idGuardia);
+					guardiaRepository.updateAuthStatusGuardia1(estatus, idGuardia, tipo, comentarios, idUsuario);
 					break;
 
-				case "GE":
+				case 3, 4:
 
-					guardiaRepository.updateStatusGuardiaExt(estatus, idGuardia);
+					guardiaRepository.updateAuthStatusGuardia2(estatus, idGuardia, tipo, comentarios, idUsuario);
 					break;
 
 				default:
@@ -503,6 +507,44 @@ public class GuardiaController {
 
 			guardias = guardiaRepository.ConsultaDynamicGuardias(strQuincena, tipoGuardia, claveEmpleado, importe_min,
 					importe_max, idDelegacion, idCentroTrab, claveServicio, puesto, estatus);
+
+			if (guardias.isEmpty()) {
+
+				return ResponseHandler.generateResponse(
+						"No se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.NOT_FOUND,
+						null);
+			}
+
+			return ResponseHandler.generateResponse(
+					"Se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.OK, guardias);
+
+		} catch (Exception e) {
+			logger.info(e.toString());
+
+			return ResponseHandler.generateResponse("Error al consultar guardias bajo las condiciones indicadas.",
+					HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Obtener los registros de guardias del empleado en el Sistema", description = "Obtener los registros de guardias del empleado en el Sistema", tags = { "Guardia" })
+	@GetMapping("/guardias/consulta_x_auth")
+	public ResponseEntity<Object> getDynamicGuardiasAuth(
+			@Parameter(description = "Fecha de quincena para la consulta de guardias", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
+			@Parameter(description = "Tipo para obtener las guardias (GI-Internas o GE-Externas)", required = true) @RequestParam(required = true) String tipoGuardia,
+			@Parameter(description = "ID de la delegación para obtener las guardias", required = false) @RequestParam(required = false) String idDelegacion,
+			@Parameter(description = "ID del centro de trabajo para obtener las guardias", required = false) @RequestParam(required = false) String idCentroTrab,
+			@Parameter(description = "Estatus de las guardias", required = false) @RequestParam(required = false) Integer estatus) {
+
+		try {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			String strQuincena = null;
+
+			if (quincena != null)
+				strQuincena = dateFormat.format(quincena);
+
+			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
+
+			guardias = guardiaRepository.ConsultaDynamicAuthGuardias(strQuincena, tipoGuardia, idDelegacion, idCentroTrab, estatus);
 
 			if (guardias.isEmpty()) {
 

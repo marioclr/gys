@@ -7,12 +7,12 @@ import gob.issste.gys.model.Beneficiario;
 
 public interface IBeneficiarioRepository {
 
-	public String STMT_ADD_NEW_BENEFICIARIO			= "INSERT INTO gys_beneficiarios ( idBolsa, nombre, apellidoPaterno, apellidoMaterno, "
+	public String STMT_ADD_NEW_BENEFICIARIO			= "INSERT INTO gys_beneficiarios ( idBolsa, rfc_bolsa, nombre, apellidoPaterno, apellidoMaterno, "
 													+ "numeroBenef, porcentaje, id_centro_trab, rfc, fec_inicio, fec_fin, cons_benef, id_usuario )\r\n"
-													+ "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+													+ "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 	int save(Beneficiario beneficiario) throws SQLException;
 
-	public String STMT_UPDATE_BENEFICIARIO			= "UPDATE gys_beneficiarios Set nombre = ?, apellidoPaterno = ?, apellidoMaterno = ?,\r\n"
+	public String STMT_UPDATE_BENEFICIARIO			= "UPDATE gys_beneficiarios Set rfc_bolsa=?, nombre = ?, apellidoPaterno = ?, apellidoMaterno = ?,\r\n"
 													+ "numeroBenef = ?, porcentaje = ?, id_centro_trab = ?, rfc = ?, fec_inicio = ?, fec_fin = ?,\r\n"
 													+ "cons_benef = ?, id_usuario = ?\r\n"
 													+ "Where id = ?";
@@ -33,6 +33,9 @@ public interface IBeneficiarioRepository {
 
 	public String QUERY_FIND_BENEFICIARIO_BY_TRAB	= "SELECT * from gys_beneficiarios WHERE idBolsa = ?";
 	List<Beneficiario> findByTrab(Integer idTrab);
+
+	public String QUERY_FIND_BENEFICIARIO_BY_RFC	= "SELECT * from gys_beneficiarios WHERE rfc like ?";
+	List<Beneficiario> findByRFC(String rfc);
 
 	public String QUERY_SUMA_PORC_BENEFICIARIO      = "Select SUM(porcentaje)\r\n"
 													+ "From gys_beneficiarios\r\n"

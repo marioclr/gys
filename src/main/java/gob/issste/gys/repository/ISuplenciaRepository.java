@@ -68,7 +68,7 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_GET_SUPLENCIA_INTERNA   = "Select G.id, G.id_empleado As Clave_empleado, G.id_empleado_sup As Clave_empleado_suplir, \r\n"
 												+ "G.dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
-												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_empresa \r\n"
+												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_empresa, G.id_tipo_ausentismo \r\n"
 												+ "From gys_suplencias_emp G, gys_fechas_control P \r\n"
 												+ "Where G.fec_paga = P.fec_pago \r\n"
 												+ "And id_empleado = ? \r\n"
@@ -77,7 +77,7 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_GET_SUPLENCIAS_X_FECHA  = "Select G.id, G.id_empleado As Clave_empleado, G.id_empleado_sup As Clave_empleado_suplir, \r\n"
 												+ "G.dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
-												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_empresa \r\n"
+												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_empresa, G.id_tipo_ausentismo \r\n"
 												+ "From gys_suplencias_emp G, gys_fechas_control P \r\n"
 												+ "Where G.fec_paga = P.fec_pago\r\n"
 												+ "And G.fec_paga = ?\r\n"
@@ -86,7 +86,7 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_GET_SUPLENCIA_EXTERNA   = "Select G.id, G.rfc As Clave_empleado, G.id_empleado_sup As Clave_empleado_suplir, \r\n"
 												+ "G.dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
-												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario \r\n"
+												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_tipo_ausentismo \r\n"
 												+ "From gys_suplencias_ext G, gys_fechas_control P \r\n"
 												+ "Where G.fec_paga = P.fec_pago \r\n"
 												+ "And rfc = ? \r\n"
@@ -95,7 +95,7 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_GET_SUPL_EXT_X_FECHA  	= "Select G.id, G.rfc As Clave_empleado, G.id_empleado_sup As Clave_empleado_suplir, \r\n"
 												+ "G.dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
-												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario \r\n"
+												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_tipo_ausentismo \r\n"
 												+ "From gys_suplencias_ext G, gys_fechas_control P \r\n"
 												+ "Where G.fec_paga = P.fec_pago \r\n"
 												+ "And G.fec_paga = ?\r\n"
@@ -109,7 +109,7 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_GET_SUPLENCIA_BY_ID     = "Select G.id, G.id_empleado As Clave_empleado, G.id_empleado_sup As Clave_empleado_suplir, \r\n"
 												+ "G.dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
-												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_empresa \r\n"
+												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_empresa, G.id_tipo_ausentismo \r\n"
 												+ "From gys_suplencias_emp G, gys_fechas_control P \r\n"
 												+ "Where G.fec_paga = P.fec_pago \r\n"
 												+ "And G.id = ? \r\n"
@@ -118,7 +118,7 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_GET_SUPLENCIA_EXT_BY_ID = "Select G.id, G.rfc As Clave_empleado, G.id_empleado_sup As Clave_empleado_suplir, \r\n"
 												+ "G.dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
-												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario \r\n"
+												+ "G.importe, G.fec_paga, G.id_ordinal, NVL(riesgos, 0) riesgos, G.id_usuario, G.id_tipo_ausentismo \r\n"
 												+ "From gys_suplencias_ext G, gys_fechas_control P \r\n"
 												+ "Where G.fec_paga = P.fec_pago \r\n"
 												+ "And G.id = ? \r\n"
@@ -207,13 +207,13 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_UPD_SUPLENCIA_INT_VARS	= "Update gys_suplencias_emp Set importe = ?, riesgos = ?,\r\n"
 											   + "  id_puesto_plaza = ?, id_clave_servicio = ?, id_nivel = ?, id_sub_nivel = ?,\r\n"
-											   + "  id_tipo_jornada = ?, id_centro_trabajo = ?, id_turno = ?\r\n"
+											   + "  id_tipo_jornada = ?, id_centro_trabajo = ?, id_turno = ?, id_tipo_ausentismo = ?\r\n"
 											   + "Where id_empleado = ? And fec_paga = ? And fec_inicio = ? And id_ordinal = ?";
 	int updateSuplenciaIntVars(DatosSuplencia suplencia);
 
 	public String QUERY_UPD_SUPLENCIA_EXT_VARS = "Update gys_suplencias_ext Set importe = ?, riesgos = ?,\r\n"
 											   + "  id_puesto_plaza = ?, id_clave_servicio = ?, id_nivel = ?, id_sub_nivel = ?,\r\n"
-											   + "  id_tipo_jornada = ?, id_centro_trabajo = ?, id_turno = ?, sueldo = ?\r\n"
+											   + "  id_tipo_jornada = ?, id_centro_trabajo = ?, id_turno = ?, sueldo = ?, id_tipo_ausentismo = ?\r\n"
 											   + "Where rfc = ? And fec_paga = ? And fec_inicio = ? And id_ordinal = ?";
 	int updateSuplenciaExtVars(DatosSuplencia suplencia);
 
@@ -225,7 +225,17 @@ public interface ISuplenciaRepository {
 												+ "Where id = ?";
 	int updateStatusSuplenciaExt(int status, int id);
 
+	public String STMT_UPDATE_AUTH_STATUS_1		= "UPDATE gys_autorizacion_suplencias Set estatus1 = ?, comentarios1 = ?, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND\r\n"
+												+ "Where id_suplencia = ? And id_tipo = ?";
+	int updateAuthStatusSuplencia1(int status, int id, String tipo, String comentarios, int idUsuario);
+
+	public String STMT_UPDATE_AUTH_STATUS_2		= "UPDATE gys_autorizacion_suplencias Set estatus2 = ?, comentarios2 = ?, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND\r\n"
+												+ "Where id_suplencia = ? And id_tipo = ?";
+	int updateAuthStatusSuplencia2(int status, int id, String tipo, String comentarios, int idUsuario);
+
 	List<DatosSuplencia> ConsultaDynamicSuplencias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
 			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, String emp_suplir, Integer estatus);
+
+	List<DatosSuplencia> ConsultaDynamicAuthSuplencias(String fechaPago, String tipo, String idDelegacion, String idCentroTrab, Integer estatus);
 
 }

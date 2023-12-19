@@ -83,7 +83,42 @@ public class JdbcBolsaTrabajoRepository implements IBolsaTrabajoRepository {
 					new BolsaTrabajoMapper(), rfc);
 			return bolsa;
 		} catch (EmptyResultDataAccessException e) {
-		//catch (IncorrectResultSizeDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public BolsaTrabajo findByRFCDel(String rfc, String idDeleg) {
+		logger.info(QUERY_GET_BOLSA_TRABAJO_BY_RFC);
+		try {
+			BolsaTrabajo bolsa = jdbcTemplate.queryForObject(QUERY_GET_BOLSA_TRABAJO_BY_RFC, 
+					new BolsaTrabajoMapper(), rfc, idDeleg);
+			return bolsa;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> findLikeRFC(String rfc) {
+		logger.info(QUERY_GET_BOLSA_TRABAJO_LIKE_RFC);
+		
+		try {
+			List<String> rfcs = jdbcTemplate.queryForList(QUERY_GET_BOLSA_TRABAJO_LIKE_RFC, String.class, "%" + rfc + "%");
+			return rfcs;
+		} catch (IncorrectResultSizeDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> findLikeRFC(String rfc, String idDeleg) {
+		logger.info(QUERY_GET_BOLSA_TRAB_LIKE_RFC_DEL);
+		
+		try {
+			List<String> rfcs = jdbcTemplate.queryForList(QUERY_GET_BOLSA_TRAB_LIKE_RFC_DEL, String.class, "%" + rfc + "%", idDeleg);
+			return rfcs;
+		} catch (IncorrectResultSizeDataAccessException e) {
 			return null;
 		}
 	}

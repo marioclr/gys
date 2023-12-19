@@ -398,4 +398,103 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	            new Object[] { status, id });
 	}
 
+	@Override
+	public int updateAuthStatusGuardia1(int status, int id, String tipo, String comentarios, int idUsuario) {
+		logger.info(STMT_UPDATE_AUTH_STATUS_1);
+		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_1,
+	            new Object[] { status, comentarios, idUsuario, id, tipo });
+	}
+
+	@Override
+	public int updateAuthStatusGuardia2(int status, int id, String tipo, String comentarios, int idUsuario) {
+		logger.info(STMT_UPDATE_AUTH_STATUS_2);
+		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_2,
+	            new Object[] { status, comentarios, idUsuario, id, tipo });
+	}
+
+	@Override
+	public List<DatosGuardia> ConsultaDynamicAuthGuardias(String fechaPago, String tipo, String idDelegacion,
+			String idCentroTrab, Integer estatus) {
+		String QUERY_CONDITION  = "";
+		String EMPLOYEE_FIELD   = "";
+		String QUERY_TABLE_BASE = "";
+		List<Object> objects = new ArrayList<Object>();
+
+		switch (tipo) {
+
+			case "GI":
+
+				QUERY_TABLE_BASE = "gys_autorizacion_guardias A, gys_guardias_emp";
+				EMPLOYEE_FIELD   = "id_empleado";
+				break;
+
+			case "GE":
+
+				QUERY_TABLE_BASE = "gys_autorizacion_guardias A, gys_guardias_ext";
+				EMPLOYEE_FIELD   = "rfc";
+				break;
+
+		}
+
+		if (fechaPago != null) { 
+			QUERY_CONDITION += "And G.fec_paga = ?\r\n";
+			objects.add(fechaPago);
+		}
+
+		if (idDelegacion != null) { 
+			QUERY_CONDITION += "And C.id_delegacion = ?\r\n";
+			objects.add(idDelegacion);
+		}
+
+		if (idCentroTrab != null) { 
+			QUERY_CONDITION += "And C.id_centro_trabajo = ?\r\n";
+			objects.add(idCentroTrab);
+		}
+
+		if (estatus != null) {
+
+			switch (estatus) {
+
+				case 0:
+
+					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+					objects.add(estatus);
+					break;
+
+				case 1,2:
+
+					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+					objects.add(estatus);
+					break;
+
+				case 3,4:
+
+					QUERY_CONDITION += "  And A.estatus2 = ?\r\n";
+					objects.add(estatus);
+					break;
+
+			}
+
+		}
+
+		String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, id_clave_servicio, G.id_puesto_plaza, '" + tipo + "' tipo_guardia,\r\n"
+							 + "  id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, "
+							 + "  Case When A.estatus2 = 0 Then A.estatus1 Else A.estatus2 End estatus,\r\n"
+							 + "  G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
+							 + "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU \r\n"
+							 + "Where A.id_guardia = G.id And\r\n"
+							 + "G.fec_paga = P.fec_pago And\r\n"
+							 + "G.id_centro_trabajo = C.id_centro_trabajo And\r\n"
+							 + "G.id_puesto_plaza = PU.id_puesto_plaza And\r\n"
+							 + "PU.id_sociedad = '01' And PU.id_empresa = '01'\r\n"
+							 + QUERY_CONDITION
+							 + "Order by G.fec_paga desc, G.fec_inicio";
+
+		logger.info(DYNAMIC_QUERY);
+		List<DatosGuardia> guardias = jdbcTemplate.query(DYNAMIC_QUERY, BeanPropertyRowMapper.newInstance(DatosGuardia.class), objects.toArray() );
+
+		return guardias;
+	}
+
+
 }

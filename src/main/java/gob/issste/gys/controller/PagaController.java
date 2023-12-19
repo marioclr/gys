@@ -1,9 +1,13 @@
 package gob.issste.gys.controller;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -56,15 +60,19 @@ public class PagaController {
 
 				if(pagaService.existe_fecha_en_paga(paga)) {
 					platformTransactionManager.rollback(status);
-					return ResponseHandler.generateResponse("LA fecha esta en un periodo entre fechas ya existentes", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("Existen fechas posteriores a la fecha ya indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
-				if(pagaService.validaPagasAlCrear(paga)) {
+				if(pagaService.validaPagasAbiertasAlCrear(paga)) {
 					platformTransactionManager.rollback(status);
-					return ResponseHandler.generateResponse("Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("Existen fechas de control del mismo tipo, que no han sido cerradas. Se sugiere realizar los registros en alguna de estas.", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 				if(pagaService.existe_fecha_en_isr(paga)) {
 					platformTransactionManager.rollback(status);
 					return ResponseHandler.generateResponse("La fecha que se desea crear esta integrada en los cálculos de ISR y procesos posteriores.", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				}
+				if (pagaService.existe_anterior_sin_terminar(paga)) {
+					platformTransactionManager.rollback(status);
+					return ResponseHandler.generateResponse("Existe por lo menos una fecha anterior, sin concluir el proceso completo. Por lo que primero se tienen que terminar esos procesos.", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 				int idPaga = pagaRepository.save(paga);
 
@@ -108,6 +116,21 @@ public class PagaController {
 				pagaRepository.saveDelegForFecha(id, deleg.getId_div_geografica(), paga.getId_usuario());
 			}
 
+			switch (paga.getEstatus()) {
+
+				case 2: // Cambio a estatus de abierta a cerrada 
+
+					pagaRepository.BorraAuthGuardias(paga);
+					pagaRepository.AuthGuardiasInt(paga);
+					pagaRepository.AuthGuardiasExt(paga);
+
+					pagaRepository.BorraAuthSuplencias(paga);
+					pagaRepository.AuthSuplenciasInt(paga);
+					pagaRepository.AuthSuplenciasExt(paga);
+
+					break;
+
+			}
 			return ResponseHandler.generateResponse("La fecha de control de pagos de GyS ha sido modificado de manera exitosa", HttpStatus.OK, null);
 		} else {
 
@@ -115,17 +138,17 @@ public class PagaController {
 		}
 	}
 
-	@Operation(summary = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", description = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", tags = { "Control de fechas de pago" })
+	@Operation(summary = "Realiza la apertura de la fecha de control de pagos de GyS del Sistema", description = "Realiza la apertura de la fecha de control de pagos de GyS del Sistema", tags = { "Control de fechas de pago" })
 	@PutMapping("/Paga/open/{id}")
 	public ResponseEntity<Object> openPaga(@PathVariable("id") Integer id) {
 		Paga _paga = pagaRepository.findById(id);
 
 		if (pagaService.validaPagasAlAbrir(_paga)) {
 
-			return ResponseHandler.generateResponse("Existen fechas de control abiertas en este mismo periodo", HttpStatus.OK, false);
+			return ResponseHandler.generateResponse("No se puede abrir la fecha ya que existen fechas de control abiertas con estos mismos criterios", HttpStatus.NOT_FOUND, false);
 		} else {
 
-			return ResponseHandler.generateResponse("No Existen fechas de control abiertas en este mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, true);
+			return ResponseHandler.generateResponse("Se puede abrir la fecha, ya que no existen fechas de control abiertas con estos mismos criterios", HttpStatus.OK, true);
 		}
 	}
 
@@ -136,10 +159,24 @@ public class PagaController {
 
 		if (pagaService.validaPagasAlCerrar(_paga)) {
 
-			return ResponseHandler.generateResponse("Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.OK, false);
+			return ResponseHandler.generateResponse("Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.NOT_FOUND, false);
 		} else {
 
-			return ResponseHandler.generateResponse("No Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.INTERNAL_SERVER_ERROR, true);
+			return ResponseHandler.generateResponse("No Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.OK, true);
+		}
+	}
+
+	@Operation(summary = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", description = "Actualiza la información de la fecha de control de pagos de GyS del Sistema", tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/validate/{id}")
+	public ResponseEntity<Object> validatePaga(@PathVariable("id") Integer id) {
+		Paga _paga = pagaRepository.findById(id);
+
+		if (pagaService.validaPagasAlCerrar(_paga)) {
+
+			return ResponseHandler.generateResponse("Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.NOT_FOUND, false);
+		} else {
+
+			return ResponseHandler.generateResponse("No Existen fechas de control en este mismo periodo, que no han sido cerradas", HttpStatus.OK, true);
 		}
 	}
 
@@ -190,7 +227,7 @@ public class PagaController {
 	public ResponseEntity<Object> deletePaga(@PathVariable("id") Integer id) {
 		try {
 
-			int result1 = pagaRepository.removeDelegForFecha(id);
+			pagaRepository.removeDelegForFecha(id);
 			int result2 = pagaRepository.deleteById(id);
 
 			if (result2 == 0) {
@@ -297,5 +334,21 @@ public class PagaController {
 			return ResponseHandler.generateResponse("Error al obtener la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}	
 	}
+
+	@Operation(summary = "Validar si una Fecha de control se encuantra en estatus de cerrada", description = "Validar si una Fecha de control se encuantra en estatus de cerrada", tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/is_closed")
+	public ResponseEntity<Object> validatePagaIsClosed(@Parameter(description = "Fecha de control que se valida si estatus esta cerrado", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fecha) {
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String strQuincena = dateFormat.format(fecha);
+
+		if (!pagaService.validaSigueAbierta(strQuincena)) {
+
+			return ResponseHandler.generateResponse("La Fecha de control se encuantra en estatus de cerrada u otro estatus posterior", HttpStatus.NOT_FOUND, true);
+		} else {
+
+			return ResponseHandler.generateResponse("La Fecha de control no se encuantra en estatus de cerrada u otro estatus posterior", HttpStatus.OK, false);
+		}
+	}	
 
 }

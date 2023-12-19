@@ -354,7 +354,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 						suplencia.getEmpleado_suplir().getId_puesto_plaza(), suplencia.getEmpleado_suplir().getId_clave_servicio(),
 						suplencia.getEmpleado_suplir().getId_nivel(), suplencia.getEmpleado_suplir().getId_sub_nivel(), 
 						suplencia.getEmpleado_suplir().getId_tipo_jornada(), suplencia.getEmpleado_suplir().getId_centro_trabajo(),
-						suplencia.getEmpleado_suplir().getId_turno(),
+						suplencia.getEmpleado_suplir().getId_turno(), suplencia.getId_tipo_ausentismo(),
 						suplencia.getClave_empleado(), suplencia.getFec_paga(), suplencia.getFec_inicio(), suplencia.getId_ordinal() });
 	}
 
@@ -366,7 +366,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 						suplencia.getEmpleado_suplir().getId_puesto_plaza(), suplencia.getEmpleado_suplir().getId_clave_servicio(),
 						suplencia.getEmpleado_suplir().getId_nivel(), suplencia.getEmpleado_suplir().getId_sub_nivel(), 
 						suplencia.getEmpleado_suplir().getId_tipo_jornada(), suplencia.getEmpleado_suplir().getId_centro_trabajo(),
-						suplencia.getEmpleado_suplir().getId_turno(), suplencia.getSueldo(),
+						suplencia.getEmpleado_suplir().getId_turno(), suplencia.getSueldo(), suplencia.getId_tipo_ausentismo(),
 						suplencia.getClave_empleado(), suplencia.getFec_paga(), suplencia.getFec_inicio(), suplencia.getId_ordinal() });
 	}
 
@@ -425,6 +425,20 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
+	public int updateAuthStatusSuplencia1(int status, int id, String tipo, String comentarios, int idUsuario) {
+		logger.info(STMT_UPDATE_AUTH_STATUS_1);
+		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_1,
+	            new Object[] { status, comentarios, idUsuario, id, tipo });
+	}
+
+	@Override
+	public int updateAuthStatusSuplencia2(int status, int id, String tipo, String comentarios, int idUsuario) {
+		logger.info(STMT_UPDATE_AUTH_STATUS_2);
+		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_2,
+	            new Object[] { status, comentarios, idUsuario, id, tipo });
+	}
+
+	@Override
 	public List<DatosSuplencia> ConsultaDynamicSuplencias(String fechaPago, String tipo, String clave_empleado,
 			Double importe_min, Double importe_max, String idDelegacion, String idCentroTrab, String claveServicio, 
 			String puesto, String emp_suplir, Integer estatus) {
@@ -436,34 +450,34 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 
 		if (tipo.equals(String.valueOf("SI"))) {
 			QUERY_TABLE_BASE = "gys_suplencias_emp";
-			EMPLOYEE_FIELD   = "G.id_empleado";
+			EMPLOYEE_FIELD   = "S.id_empleado";
 		} else {
 			QUERY_TABLE_BASE = "gys_suplencias_ext";
-			EMPLOYEE_FIELD   = "G.rfc";
+			EMPLOYEE_FIELD   = "S.rfc";
 		}
 
 		if (fechaPago != null) { 
-			QUERY_CONDITION += "  And G.fec_paga = ?\r\n";
+			QUERY_CONDITION += "  And S.fec_paga = ?\r\n";
 			objects.add(fechaPago);
 		}
 
 		if (clave_empleado != null) {
 			if (tipo.equals(String.valueOf("SI"))) {
-				QUERY_CONDITION += "And G.id_empleado = ?\r\n";
+				QUERY_CONDITION += "And S.id_empleado = ?\r\n";
 				objects.add(clave_empleado);
 			} else {
-				QUERY_CONDITION += "And G.rfc = ?\r\n";
+				QUERY_CONDITION += "And S.rfc = ?\r\n";
 				objects.add(clave_empleado);
 			}
 		}
 
 		if (importe_min != null) {
-			QUERY_CONDITION += "  And G.importe >= ?\r\n";
+			QUERY_CONDITION += "  And S.importe >= ?\r\n";
 			objects.add(importe_min.toString());
 		}
 
 		if (importe_max != null) {
-			QUERY_CONDITION += "  And G.importe <= ?\r\n";
+			QUERY_CONDITION += "  And S.importe <= ?\r\n";
 			objects.add(importe_max.toString());
 		}
 
@@ -478,7 +492,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 		}
 
 		if (claveServicio != null) { 
-			QUERY_CONDITION += "  And S.id_clave_servicio = ?\r\n";
+			QUERY_CONDITION += "  And SE.id_clave_servicio = ?\r\n";
 			objects.add(claveServicio);
 		}
 
@@ -488,34 +502,121 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 		}
 
 		if (emp_suplir != null) { 
-			QUERY_CONDITION += "  And G.id_empleado_sup = ?\r\n";
+			QUERY_CONDITION += "  And S.id_empleado_sup = ?\r\n";
 			objects.add(puesto);
 		}
 
 		if (estatus != null) { 
-			QUERY_CONDITION += "  And G.estatus = ?\r\n";
+			QUERY_CONDITION += "  And S.estatus = ?\r\n";
 			objects.add(estatus);
 		}
 
-		String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
-							 + "  G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, dias, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
-							 + "  G.importe, P.id_tipo_tabulador, G.fec_paga, C.id_zona, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario,\r\n"
-							 + "  G.id_empleado_sup clave_empleado_suplir\r\n"
-							 + "From " + QUERY_TABLE_BASE + " G, gys_fechas_control F, m4t_puestos_plaza P, m4t_clave_servicio S, m4t_centros_trab C\r\n"
-							 + "Where G.fec_paga = F.fec_pago\r\n"
-							 + "  And G.id_puesto_plaza = P.id_puesto_plaza\r\n"
+		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, S.id_clave_servicio, S.id_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
+							 + "  S.id_nivel, S.id_sub_nivel, S.id_tipo_jornada, S.id_turno, dias, S.fec_inicio, S.fec_fin, S.folio, S.motivo, S.id_clave_movimiento, S.coment, S.estatus,\r\n"
+							 + "  S.importe, P.id_tipo_tabulador, S.fec_paga, C.id_zona, S.id_ordinal, NVL(riesgos,0) riesgos, S.id_usuario,\r\n"
+							 + "  S.id_empleado_sup clave_empleado_suplir\r\n"
+							 + "From " + QUERY_TABLE_BASE + " S, gys_fechas_control F, m4t_puestos_plaza P, m4t_clave_servicio SE, m4t_centros_trab C\r\n"
+							 + "Where S.fec_paga = F.fec_pago\r\n"
+							 + "  And S.id_puesto_plaza = P.id_puesto_plaza\r\n"
 							 + "  And P.id_empresa='01'\r\n"
-							 + "  And G.id_clave_servicio = S.id_clave_servicio\r\n"
-							 + "  And S.id_empresa='01'\r\n"
-							 + "  And G.id_centro_trabajo = C.id_centro_trabajo\r\n"
+							 + "  And S.id_clave_servicio = SE.id_clave_servicio\r\n"
+							 + "  And SE.id_empresa='01'\r\n"
+							 + "  And S.id_centro_trabajo = C.id_centro_trabajo\r\n"
 							 + QUERY_CONDITION
-							 + "Order by G.fec_paga desc, G.fec_inicio";
+							 + "Order by S.fec_paga desc, S.fec_inicio";
 
 		logger.info(DYNAMIC_QUERY);
 		List<DatosSuplencia> suplencias = jdbcTemplate.query(DYNAMIC_QUERY, BeanPropertyRowMapper.newInstance(DatosSuplencia.class), objects.toArray() );
 
 		return suplencias;
 
+	}
+
+	@Override
+	public List<DatosSuplencia> ConsultaDynamicAuthSuplencias(String fechaPago, String tipo, String idDelegacion,
+			String idCentroTrab, Integer estatus) {
+		String QUERY_CONDITION  = "";
+		String EMPLOYEE_FIELD   = "";
+		String QUERY_TABLE_BASE = "";
+		List<Object> objects = new ArrayList<Object>();
+
+		switch (tipo) {
+
+			case "SI":
+
+				QUERY_TABLE_BASE = "gys_autorizacion_suplencias A, gys_suplencias_emp";
+				EMPLOYEE_FIELD   = "S.id_empleado";
+				break;
+
+			case "SE":
+
+				QUERY_TABLE_BASE = "gys_autorizacion_suplencias A, gys_suplencias_ext";
+				EMPLOYEE_FIELD   = "S.rfc";
+				break;
+
+		}
+
+		if (fechaPago != null) { 
+			QUERY_CONDITION += "  And S.fec_paga = ?\r\n";
+			objects.add(fechaPago);
+		}
+
+		if (idDelegacion != null) { 
+			QUERY_CONDITION += "  And C.id_delegacion = ?\r\n";
+			objects.add(idDelegacion);
+		}
+
+		if (idCentroTrab != null) { 
+			QUERY_CONDITION += "  And C.id_centro_trabajo = ?\r\n";
+			objects.add(idCentroTrab);
+		}
+
+		if (estatus != null) {
+
+			switch (estatus) {
+
+				case 0:
+
+					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+					objects.add(estatus);
+					break;
+
+				case 1,2:
+
+					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+					objects.add(estatus);
+					break;
+
+				case 3,4:
+
+					QUERY_CONDITION += "  And A.estatus2 = ?\r\n";
+					objects.add(estatus);
+					break;
+
+			}
+
+		}
+
+		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, S.id_clave_servicio, S.id_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
+							 + "  S.id_nivel, S.id_sub_nivel, S.id_tipo_jornada, S.id_turno, dias, S.fec_inicio, S.fec_fin, S.folio, S.motivo, S.id_clave_movimiento, S.coment,\r\n"
+							 + "  Case When A.estatus2 = 0 Then A.estatus1 Else A.estatus2 End estatus,\r\n"
+							 + "  S.importe, P.id_tipo_tabulador, S.fec_paga, C.id_zona, S.id_ordinal, NVL(riesgos,0) riesgos, S.id_usuario,\r\n"
+							 + "  S.id_empleado_sup clave_empleado_suplir\r\n"
+							 + "From " + QUERY_TABLE_BASE + " S, gys_fechas_control F, m4t_puestos_plaza P, m4t_clave_servicio SE, m4t_centros_trab C\r\n"
+							 + "Where A.id_suplencia = S.id\r\n"
+							 + "  And S.fec_paga = F.fec_pago\r\n"
+							 + "  And S.id_puesto_plaza = P.id_puesto_plaza\r\n"
+							 + "  And P.id_empresa='01'\r\n"
+							 + "  And S.id_clave_servicio = SE.id_clave_servicio\r\n"
+							 + "  And SE.id_empresa='01'\r\n"
+							 + "  And S.id_centro_trabajo = C.id_centro_trabajo\r\n"
+							 + QUERY_CONDITION
+							 + "Order by S.fec_paga desc, S.fec_inicio";
+
+		logger.info(DYNAMIC_QUERY);
+		List<DatosSuplencia> suplencias = jdbcTemplate.query(DYNAMIC_QUERY, BeanPropertyRowMapper.newInstance(DatosSuplencia.class), objects.toArray() );
+
+		return suplencias;
 	}
 
 }

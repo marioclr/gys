@@ -48,9 +48,10 @@ public class BeneficiarioController {
 				return ResponseHandler.generateResponse("La suma de porcentajes a beneficiarios del títular en bolsa de trabajo excede el 100 %", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			idBenef = beneficiarioRepository.save(new Beneficiario( beneficiario.getIdBolsa(), beneficiario.getNombre(), beneficiario.getApellidoPaterno(),
-													beneficiario.getApellidoMaterno(), beneficiario.getPorcentaje(), beneficiario.getNumeroBenef(),
-													beneficiario.getId_centro_trab(), beneficiario.getRfc(), beneficiario.getFec_inicio(), beneficiario.getFec_fin(),
+			idBenef = beneficiarioRepository.save(new Beneficiario( beneficiario.getIdBolsa(), beneficiario.getRfc(), beneficiario.getNombre(), 
+													beneficiario.getApellidoPaterno(), beneficiario.getApellidoMaterno(), beneficiario.getPorcentaje(), 
+													beneficiario.getNumeroBenef(), beneficiario.getId_centro_trab(), beneficiario.getRfc(), 
+													beneficiario.getFec_inicio(), beneficiario.getFec_fin(),
 													beneficiario.getCons_benef(), beneficiario.getId_usuario() ));
 
 			return ResponseHandler.generateResponse("El beneficiario de pensión alimenticia ha sido creado de manera exitosa, con ID " + idBenef, HttpStatus.OK, null);
@@ -70,6 +71,7 @@ public class BeneficiarioController {
 		}
 
 		if (_beneficiario != null) {
+			_beneficiario.setRfc_bolsa(beneficiario.getRfc_bolsa());
 			_beneficiario.setNombre(beneficiario.getNombre());
 			_beneficiario.setApellidoPaterno(beneficiario.getApellidoPaterno());
 			_beneficiario.setApellidoMaterno(beneficiario.getApellidoMaterno());
@@ -141,6 +143,27 @@ public class BeneficiarioController {
 			List<Beneficiario> benef = new ArrayList<Beneficiario>();
 
 			beneficiarioRepository.findByTrab(id).forEach(benef::add);
+
+			if (benef.isEmpty()) {
+
+				return ResponseHandler.generateResponse("No se encontró la información del beneficiario en el Sistema", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Se pudo obtener la información del beneficiario en el Sistema de manera exitosa", HttpStatus.OK, benef);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener la información del beneficiario en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Obtiene información de los beneficiario del Sistema", description = "Obtiene información de fechas de control de pagos de GyS en el Sistema", tags = { "Beneficiario" })
+	@GetMapping("/Beneficiario/rfc")
+	public ResponseEntity<Object> getBenefByRFC(
+			@Parameter(description = "Parámetro requerido para indicar el RFC del beneficiario del que se desea obtener la información", required = true) @RequestParam(required = true) String rfc) {
+		try {
+			List<Beneficiario> benef = new ArrayList<Beneficiario>();
+
+			beneficiarioRepository.findByRFC(rfc).forEach(benef::add);
 
 			if (benef.isEmpty()) {
 

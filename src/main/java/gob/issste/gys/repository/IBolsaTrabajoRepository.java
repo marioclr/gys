@@ -27,9 +27,30 @@ public interface IBolsaTrabajoRepository {
 	public String QUERY_GET_BOLSA_TRABAJO_BY_RFC	= "Select b.id id, b.rfc rfc, b.nombre nombre, b.apellidopat apellidopat, b.apellidomat apellidomat, d.id_div_geografica, n_div_geografica,\r\n"
 													+ "codigo_postal, curp, id_beneficiario\r\n"
 													+ "From gys_bolsatrabajo b, m4t_delegaciones d\r\n"
-													+ "Where b.idDelegacion=d.id_div_geografica And rfc = ?\r\n"
+													+ "Where b.idDelegacion=d.id_div_geografica\r\n"
+													+ "	And rfc = ?\r\n"
+													+ " And id_div_geografica = ?\r\n"
 													+ "Order by id";
 	BolsaTrabajo findByRFC(String rfc);
+
+	public String QUERY_GET_BOLSA_TRABAJO_BY_RFC_DEL = "Select b.id id, b.rfc rfc, b.nombre nombre, b.apellidopat apellidopat, b.apellidomat apellidomat, d.id_div_geografica, n_div_geografica,\r\n"
+													+ "codigo_postal, curp, id_beneficiario\r\n"
+													+ "From gys_bolsatrabajo b, m4t_delegaciones d\r\n"
+													+ "Where b.idDelegacion=d.id_div_geografica And rfc = ?\r\n"
+													+ "Order by id";
+	BolsaTrabajo findByRFCDel(String rfc, String idDeleg);
+
+	public String QUERY_GET_BOLSA_TRABAJO_LIKE_RFC  = "Select Distinct b.rfc || '-' || d.id_div_geografica || '-' || b.id rfc\r\n"
+													+ "From gys_bolsatrabajo b, m4t_delegaciones d\r\n"
+													+ "Where b.idDelegacion=d.id_div_geografica And rfc like ?\r\n"
+													+ "Order by 1";
+	List<String> findLikeRFC(String rfc);
+	
+	public String QUERY_GET_BOLSA_TRAB_LIKE_RFC_DEL = "Select Distinct b.rfc || '-' || d.id_div_geografica || '-' || b.id rfc\r\n"
+													+ "From gys_bolsatrabajo b, m4t_delegaciones d\r\n"
+													+ "Where b.idDelegacion=d.id_div_geografica And rfc like ? And id_div_geografica = ?\r\n"
+													+ "Order by 1";
+	List<String> findLikeRFC(String rfc, String idDeleg);
 
 	public String QUERY_DEL_BOLSA_TRABAJO			= "Delete gys_bolsatrabajo Where id = ?";
 	int deleteById(int id);

@@ -136,6 +136,13 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
+	public int updateStatus(int status, int anio, int mes, int tipo, String fec_min, String fec_max) {
+		logger.info(STMT_UPDATE_STATUS_REC);
+		return jdbcTemplate.update(STMT_UPDATE_STATUS_REC,
+	            new Object[] { status, anio, mes, tipo, fec_min, fec_max });
+	}
+
+	@Override
 	public int existe_abierta(Paga paga) {
 		logger.info(QUERY_EXISTS_PAGA_ABIERTA);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_PAGA_ABIERTA, Integer.class,
@@ -159,12 +166,37 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
-	public int existe_fecha_en_pagas(Paga paga) {
-		logger.info(QUERY_EXISTS_FECHA_EN_PAGAS);
-		return jdbcTemplate.queryForObject(QUERY_EXISTS_FECHA_EN_PAGAS, Integer.class,
-				new Object[] { paga.getFec_pago(), paga.getFec_pago(),
-							   paga.getFec_pago(), paga.getFec_pago(), 
-							   paga.getFec_pago(), paga.getFec_pago() } );
+	public int existe_anterior_sin_terminar_non(Paga paga) {
+		logger.info(QUERY_EXISTS_ANT_SIN_TERM_NON);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_ANT_SIN_TERM_NON, Integer.class,
+				new Object[] { paga.getAnio_ejercicio(), paga.getMes_ejercicio(),
+							   paga.getAnio_ejercicio(), paga.getMes_ejercicio(),
+							   paga.getAnio_ejercicio() } );
+	}
+
+	@Override
+	public int existe_anterior_sin_terminar_par(Paga paga) {
+		logger.info(QUERY_EXISTS_ANT_SIN_TERM_PAR);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_ANT_SIN_TERM_PAR, Integer.class,
+				new Object[] { paga.getAnio_ejercicio(), paga.getMes_ejercicio(),
+							   paga.getAnio_ejercicio(), paga.getMes_ejercicio(),
+							   paga.getAnio_ejercicio() } );
+	}
+
+	@Override
+	public int existe_fecha_post_en_pagas(Paga paga) {
+		logger.info(QUERY_EXISTS_FECHA_POSTERIOR);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_FECHA_POSTERIOR, Integer.class,
+				new Object[] { paga.getFec_pago() } );
+	}
+
+	@Override
+	public int existe_fecha_en_calculo_isr(String fecPaga, Integer anio, Integer mes, Integer tipoFechaControl,
+			Integer id_ordinal) {
+		logger.info(QUERY_EXISTS_FECHA_EN_CALCULO_ISR);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_FECHA_EN_CALCULO_ISR, Integer.class,
+				new Object[] { anio, mes, tipoFechaControl, id_ordinal,
+						fecPaga, fecPaga, fecPaga, fecPaga, fecPaga, fecPaga } );
 	}
 
 	@Override
@@ -188,6 +220,49 @@ public class JdbcPagaRepository implements IPagaRepository {
 				BeanPropertyRowMapper.newInstance(Delegacion.class), IdFecha);
 
 		return delegacionList;
+	}
+
+	@Override
+	public int AuthGuardiasInt(Paga paga) {
+		logger.info(STMT_INSERT_GUARD_INT_AUT);
+		return jdbcTemplate.update(STMT_INSERT_GUARD_INT_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int AuthGuardiasExt(Paga paga) {
+		logger.info(STMT_INSERT_GUARD_EXT_AUT);
+		return jdbcTemplate.update(STMT_INSERT_GUARD_EXT_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int AuthSuplenciasInt(Paga paga) {
+		logger.info(STMT_INSERT_SUPLE_INT_AUT);
+		return jdbcTemplate.update(STMT_INSERT_SUPLE_INT_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int AuthSuplenciasExt(Paga paga) {
+		logger.info(STMT_INSERT_SUPLE_EXT_AUT);
+		return jdbcTemplate.update(STMT_INSERT_SUPLE_EXT_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int BorraAuthGuardias(Paga paga) {
+		logger.info(STMT_DELETE_GUARDIAS_AUT);
+		return jdbcTemplate.update(STMT_DELETE_GUARDIAS_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int BorraAuthSuplencias(Paga paga) {
+		logger.info(STMT_DELETE_SUPLENCIAS_AUT);
+		return jdbcTemplate.update(STMT_DELETE_SUPLENCIAS_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int verifica_paga_cerrada(String fecha) {
+		logger.info(QUERY_VERIFY_PAGA_CERRADA);
+		return jdbcTemplate.queryForObject(QUERY_VERIFY_PAGA_CERRADA, Integer.class,
+				fecha );
 	}
 
 }

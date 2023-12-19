@@ -8,6 +8,10 @@ import gob.issste.gys.model.Paga;
 
 public interface IPagaRepository {
 
+	/*
+	 * Bloque de operaciones del Repositorio de Fechas de Control de pagos para las
+	 * Operaciones básicas del CRUD
+	 */
 	public String QUERY_ADD_NEW_PAGAS      = "INSERT INTO gys_fechas_control ( fec_pago, descripcion, estatus, fec_inicio, fec_fin, "
 										   + "anio_ejercicio, mes_ejercicio, id_tipo_paga, idnivelvisibilidad ) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 	int save(Paga tipMovPresup) throws SQLException;
@@ -60,6 +64,15 @@ public interface IPagaRepository {
 			   								+ "Where estatus = 3 And anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?";
 	int updateStatus(int status, int anio, int mes, int tipo);
 
+	public String STMT_UPDATE_STATUS_REC    = "UPDATE gys_fechas_control Set estatus = ?\r\n"
+											+ "Where estatus = 3 And anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?\r\n"
+											+ "  And fec_pago >= ? And fec_pago <= ?";
+	int updateStatus(int status, int anio, int mes, int tipo, String fec_min, String fec_max);
+
+	/*
+	 * Bloque de operaciones del Repositorio de Fechas de Control de pagos
+	 * para realizar las Validaciones necesarias para la gestión de fechas de control
+	 */
 	public String QUERY_EXISTS_PAGA_ABIERTA         = "Select COUNT(*)\r\n"
 													+ "From gys_fechas_control\r\n"
 													+ "Where anio_ejercicio = ?\r\n"
@@ -84,13 +97,37 @@ public interface IPagaRepository {
 													+ "    Or ((NVL(fec_max, date(current)) >= ?) And (fec_min                     <= ?)))";
 	public int existe_fecha_en_isr(Paga paga);
 
-	public String QUERY_EXISTS_FECHA_EN_PAGAS       = "Select COUNT(*)\r\n"
-													+ "From gys_fechas_control\r\n"
-													+ "Where (((fec_inicio                  >= ?) And (fec_inicio                  <= ?))\r\n"
-													+ "    Or ((NVL(fec_fin, date(current)) >= ?) And (NVL(fec_fin, date(current)) <= ?))\r\n"
-													+ "    Or ((NVL(fec_fin, date(current)) >= ?) And (fec_inicio                  <= ?)))";
-	public int existe_fecha_en_pagas(Paga paga);
+	public String QUERY_EXISTS_FECHA_EN_CALCULO_ISR = "Select COUNT(*)\r\n"
+													+ "From gys_externos_isr2\r\n"
+													+ "Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ? And id_ordinal <> ?\r\n"
+													+ "  And (((fec_min                     >= ?) And (fec_min                     <= ?))\r\n"
+													+ "    Or ((NVL(fec_max, date(current)) >= ?) And (NVL(fec_max, date(current)) <= ?))\r\n"
+													+ "    Or ((NVL(fec_max, date(current)) >= ?) And (fec_min                     <= ?)))";
+	public int existe_fecha_en_calculo_isr(String fecPaga, Integer anio, Integer mes, Integer tipoFechaControl, Integer id_ordinal);
 
+	public String QUERY_EXISTS_ANT_SIN_TERM_NON		= "Select COUNT(*)\r\n"
+													+ "From gys_fechas_control\r\n"
+													+ "Where ( ( anio_ejercicio = ? And mes_ejercicio < ? And id_tipo_paga = 1 And estatus <> 7 )\r\n"
+													+ "    Or ( anio_ejercicio = ? And mes_ejercicio < ? And estatus <> 7 )\r\n"
+													+ "    Or ( anio_ejercicio < ? And estatus <> 7 ) )";
+	public int existe_anterior_sin_terminar_non(Paga paga);
+
+	public String QUERY_EXISTS_ANT_SIN_TERM_PAR		= "Select COUNT(*)\r\n"
+													+ "From gys_fechas_control\r\n"
+													+ "Where ( ( anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = 4 And estatus <> 7 )\r\n"
+													+ "    Or ( anio_ejercicio = ? And mes_ejercicio < ? And estatus <> 7 )\r\n"
+													+ "    Or ( anio_ejercicio < ? And estatus <> 7 ) )";
+	public int existe_anterior_sin_terminar_par(Paga paga);
+
+	public String QUERY_EXISTS_FECHA_POSTERIOR		= "Select COUNT(*)\r\n"
+													+ "From gys_fechas_control\r\n"
+													+ "Where fec_pago > ?";
+	public int existe_fecha_post_en_pagas(Paga paga);
+
+	/* 
+	 * Bloque de operaciones del Repositorio de Fechas de Control de pagos para gestionar la Visibilidad
+	 * de cada fecha de control, creada dentro del sistema.
+	 */
     public String QUERY_ADD_DELEG_X_FECHA	= "Insert Into gys_DelegacionesPorFecha ( IdFecha, IdDelegacion, id_usuario ) Values ( ?, ?, ? )";
     int saveDelegForFecha(int IdFecha, String IdDeleg, String id_usuario);
 
@@ -102,5 +139,63 @@ public interface IPagaRepository {
 								    		+ "Where F.IdDelegacion = D.id_div_geografica\r\n"
 								    		+ "  And IdFecha = ?";
     List<Delegacion> getDelegForFecha(int IdFecha);
+
+    /*
+     * Bloque de operaciones del Repositorio de Fechas de Control de pagos, para gestionar la fase de
+     * Validación de guardias y suplencias para la autorización y confirmación de cada registro de
+     * Guardias y Suplecias 
+     */
+	public String STMT_INSERT_GUARD_INT_AUT	= "Insert Into gys_autorizacion_guardias\r\n"
+											+ "(id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
+											+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
+											+ "Select id, fec_paga, 'GI' id_tipo,\r\n"
+											+ "  0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, \r\n"
+											+ "  0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
+											+ "From gys_guardias_emp\r\n"
+											+ "Where fec_paga = ?";
+	int AuthGuardiasInt(Paga paga);
+
+	public String STMT_INSERT_GUARD_EXT_AUT	= "Insert Into gys_autorizacion_guardias\r\n"
+											+ "(id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
+											+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
+											+ "Select id, fec_paga, 'GE' id_tipo,\r\n"
+											+ "  0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, \r\n"
+											+ "  0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
+											+ "From gys_guardias_ext\r\n"
+											+ "Where fec_paga = ?";
+	int AuthGuardiasExt(Paga paga);
+
+	public String STMT_INSERT_SUPLE_INT_AUT = "Insert Into gys_autorizacion_suplencias\r\n"
+											+ "(id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
+											+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
+											+ "Select id, fec_paga, 'SI' id_tipo,\r\n"
+											+ "  0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, \r\n"
+											+ "  0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
+											+ "From gys_suplencias_emp\r\n"
+											+ "Where fec_paga = ?";
+	int AuthSuplenciasInt(Paga paga);
+
+	public String STMT_INSERT_SUPLE_EXT_AUT = "Insert Into gys_autorizacion_suplencias\r\n"
+											+ "(id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
+											+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
+											+ "Select id, fec_paga, 'SE' id_tipo,\r\n"
+											+ "  0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, \r\n"
+											+ "  0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
+											+ "From gys_suplencias_ext\r\n"
+											+ "Where fec_paga = ?";
+	int AuthSuplenciasExt(Paga paga);
+
+	public String STMT_DELETE_GUARDIAS_AUT	= "Delete From gys_autorizacion_guardias\r\n"
+											+ "Where fec_pago = ?";
+	int BorraAuthGuardias(Paga paga);
+
+	public String STMT_DELETE_SUPLENCIAS_AUT = "Delete From gys_autorizacion_suplencias\r\n"
+											+ "Where fec_pago = ?";
+	int BorraAuthSuplencias(Paga paga);
+
+	public String QUERY_VERIFY_PAGA_CERRADA = "Select COUNT(*)\r\n"
+											+ "From gys_fechas_control\r\n"
+											+ "Where fec_pago = ? And estatus >= 2";
+	public int verifica_paga_cerrada(String fecha);
 
 }

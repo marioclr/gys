@@ -4,6 +4,7 @@ public class Beneficiario {
 
 	private int id;
 	private int idBolsa;
+	private String rfc_bolsa;
 	private String nombre;
 	private String apellidoPaterno;
 	private String apellidoMaterno;
@@ -20,10 +21,11 @@ public class Beneficiario {
 		super();
 	}
 
-	public Beneficiario(int idBolsa, String nombre, String apellidoPaterno, String apellidoMaterno, int porcentaje,
+	public Beneficiario(int idBolsa, String rfc_bolsa, String nombre, String apellidoPaterno, String apellidoMaterno, int porcentaje,
 			String numeroBenef, String id_centro_trab, String rfc, String fec_inicio, String fec_fin, int cons_benef, String id_usuario) {
 		super();
 		this.idBolsa = idBolsa;
+		this.rfc_bolsa = rfc_bolsa;
 		this.nombre = nombre;
 		this.apellidoPaterno = apellidoPaterno;
 		this.apellidoMaterno = apellidoMaterno;
@@ -51,6 +53,14 @@ public class Beneficiario {
 
 	public void setIdBolsa(int idBolsa) {
 		this.idBolsa = idBolsa;
+	}
+
+	public String getRfc_bolsa() {
+		return rfc_bolsa;
+	}
+
+	public void setRfc_bolsa(String rfc_bolsa) {
+		this.rfc_bolsa = rfc_bolsa;
 	}
 
 	public String getNombre() {

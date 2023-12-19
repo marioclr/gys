@@ -208,4 +208,14 @@ public interface GuardiaRepository {
 												+ "Where id = ?";
 	int updateStatusGuardiaExt(int status, int id);
 
+	public String STMT_UPDATE_AUTH_STATUS_1		= "UPDATE gys_autorizacion_guardias Set estatus1 = ?, comentarios1 = ?, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND\r\n"
+												+ "Where id_guardia = ? And id_tipo = ?";
+	int updateAuthStatusGuardia1(int status, int id, String tipo, String comentarios, int idUsuario);
+
+	public String STMT_UPDATE_AUTH_STATUS_2		= "UPDATE gys_autorizacion_guardias Set estatus2 = ?, comentarios2 = ?, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND\r\n"
+												+ "Where id_guardia = ? And id_tipo = ?";
+	int updateAuthStatusGuardia2(int status, int id, String tipo, String comentarios, int idUsuario);
+
+	List<DatosGuardia> ConsultaDynamicAuthGuardias(String fechaPago, String tipo, String idDelegacion, String idCentroTrab, Integer estatus);
+
 }

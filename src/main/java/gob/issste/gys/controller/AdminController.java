@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.model.CifrasDeImpuestos;
 import gob.issste.gys.model.DetalleCifrasDeImpuestos;
+import gob.issste.gys.model.DetalleCifrasDeImpuestosConPA;
 import gob.issste.gys.repository.IAdminRepository;
 import gob.issste.gys.repository.IPagaRepository;
 import gob.issste.gys.response.ResponseHandler;
+import gob.issste.gys.service.PagaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
@@ -35,6 +37,8 @@ public class AdminController {
 	IAdminRepository adminRepository;
 	@Autowired
 	IPagaRepository pagaRepository;
+	@Autowired
+	PagaService pagaService;
 
 	@Operation(summary = "Realiza el proceso de cálculo de impuestos a guardias y suplencias", description = "Realiza el proceso de cálculo de impuestos a guardias y suplencias", tags = { "Admin" })
 	@PostMapping("/calculo_isr")
@@ -55,6 +59,8 @@ public class AdminController {
 			if (tipoFechaControl == 4) {
 				adminRepository.calcula_isr_non(anio, mes);
 			} else {
+				adminRepository.calcula_isr_par(anio, mes);
+
 				//adminRepository.calcula_isr_guardia_par(anio, mes);
 				//adminRepository.calcula_isr_suplencia_par(anio, mes);
 			}
@@ -81,7 +87,8 @@ public class AdminController {
 			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
 			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl,
 			@Parameter(description = "Fecha mínima del cálculo de ISR a recalcular", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaMin,
-			@Parameter(description = "Fecha máxima del cálculo de ISR a recalcular", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaMax) {
+			@Parameter(description = "Fecha máxima del cálculo de ISR a recalcular", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaMax,
+			@Parameter(description = "Parámetro para indicar el ID ordinal a complementar en el cálculo de ISR", required = false) @RequestParam(required = false) Integer id_ordinal) {
 
 		List<CifrasDeImpuestos> cifras;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -91,21 +98,31 @@ public class AdminController {
 		try {
 
 			//adminRepository.elimina_cifras_impuesto_x_rec(anio, mes, tipoFechaControl, strMinDate, strMaxDate);
-			adminRepository.elimina_cifras_impuesto_x_ord(anio, mes, tipoFechaControl, 1);
+			if (id_ordinal != null)
+				adminRepository.elimina_cifras_impuesto_x_ord(anio, mes, tipoFechaControl, id_ordinal);
 
 			if (tipoFechaControl == 4) {
-				//adminRepository.re_calcula_isr_non(anio, mes, strMinDate, strMaxDate);
-				adminRepository.re_calcula_isr_ord_non(anio, mes, strMinDate, strMaxDate, "1");
+				if (id_ordinal != null)
+					adminRepository.re_calcula_isr_ord_non(anio, mes, strMinDate, strMaxDate, id_ordinal);
+				else
+					adminRepository.re_calcula_isr_non(anio, mes, strMinDate, strMaxDate);
 			} else {
-				adminRepository.calcula_isr_guardia_par(anio, mes);
-				adminRepository.calcula_isr_suplencia_par(anio, mes);
+				//adminRepository.calcula_isr_guardia_par(anio, mes);
+				//adminRepository.calcula_isr_suplencia_par(anio, mes);
+
+				if (id_ordinal != null)
+					adminRepository.re_calcula_isr_ord_par(anio, mes, strMinDate, strMaxDate, id_ordinal);
+				else
+					adminRepository.re_calcula_isr_par(anio, mes, strMinDate, strMaxDate);
 			}
 
 			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
-			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
+
+			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl, strMinDate, strMaxDate);
 
 			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
+
 			cifras = new ArrayList<CifrasDeImpuestos>();
 			return ResponseHandler.generateResponse("No se generó calculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, null);
 		} catch (Exception e) {
@@ -142,18 +159,25 @@ public class AdminController {
 				return ResponseHandler.generateResponse("La fecha que quiere complementar al cálculo de ISR es menor o igual a las del cálculo, no es posible complementar sus registros", HttpStatus.NOT_FOUND, null);
 			}
 
-			adminRepository.elimina_cifras_impuesto_x_rec(anio, mes, tipoFechaControl, cifra.getFec_min(), cifra.getFec_max());
+			if(pagaService.validaPagasAlComplementar(strPagoDate, anio, mes, tipoFechaControl, id_ordinal)) {
+				return ResponseHandler.generateResponse("LA fecha esta en un periodo entre fechas ya existentes", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+
+			//adminRepository.elimina_cifras_impuesto_x_rec(anio, mes, tipoFechaControl, cifra.getFec_min(), cifra.getFec_max());
+			adminRepository.elimina_cifras_impuesto_x_ord(anio, mes, tipoFechaControl, id_ordinal);
 
 			if (tipoFechaControl == 4) {
-				adminRepository.re_calcula_isr_non(anio, mes, cifra.getFec_min(), strPagoDate);
-				//adminRepository.calcula_isr_suplencia_non(anio, mes);
+				//adminRepository.re_calcula_isr_non(anio, mes, cifra.getFec_min(), strPagoDate);
+				adminRepository.re_calcula_isr_ord_non(anio, mes, cifra.getFec_min(), strPagoDate, id_ordinal);
+
 			} else {
 				//adminRepository.calcula_isr_guardia_par(anio, mes);
-				//adminRepository.calcula_isr_suplencia_par(anio, mes);
+
 			}
 
 			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
-			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
+
+			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl, cifra.getFec_min(), strPagoDate);
 
 			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
@@ -223,6 +247,33 @@ public class AdminController {
 		return ResponseHandler.generateResponse("Se obtubieron las cifras de ISR de manera exitosa", HttpStatus.OK, cifras);
 	}
 
+	@Operation(summary = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", description = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
+	@GetMapping("/detalle_cifras_pa")
+	public ResponseEntity<Object> getDetalleCifrasPA(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para obtener el detalle del ISR", required = false) @RequestParam(required = false) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para obtener el detalle del ISR", required = false) @RequestParam(required = false) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = false) @RequestParam(required = false) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para indicar el ID ordinal para obtener el detalle del ISR", required = false) @RequestParam(required = false) Integer id_ordinal ) {
+
+		List<DetalleCifrasDeImpuestosConPA> cifras = new ArrayList<DetalleCifrasDeImpuestosConPA>();
+
+		try {
+
+			cifras = adminRepository.getDetalleCifrasDeImpuestosPA( anio, mes, tipoFechaControl, id_ordinal );
+
+			if (cifras.isEmpty()) {
+				cifras = new ArrayList<DetalleCifrasDeImpuestosConPA>();
+				return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifras);
+			}
+
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener las cifras de ISR del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+
+		return ResponseHandler.generateResponse("Se obtubieron las cifras de ISR de manera exitosa", HttpStatus.OK, cifras);
+	}
+
 	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
 	@GetMapping("/spep")
 	public ResponseEntity<Object> archivoSPEP(
@@ -255,6 +306,31 @@ public class AdminController {
 		try {
 
 			return ResponseHandler.generateResponse("La fecha de control de pagos ha sido creado de manera exitosa con ID ", HttpStatus.OK, null);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+
+
+	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
+	@PostMapping("/pension")
+	public ResponseEntity<Object> calculo_pa(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para indicar el ID ordinal a complementar en el cálculo de ISR", required = true) @RequestParam(required = true) Integer id_ordinal ) {
+
+		//List<String> layout;
+
+		try {
+
+			int i = adminRepository.calculaPensionAlimenticia(anio, mes, tipoFechaControl, id_ordinal);
+			//pagaRepository.updateStatus(4);
+
+			return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, i);
+
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);

@@ -178,7 +178,7 @@ public class SuplenciaController {
 	@GetMapping("/suplenciaPorId")
 	public ResponseEntity<Object> getSuplenciaById(
 			@Parameter(description = "ID de la guardia del empleado", required = true) @RequestParam(required = true) Integer idSuplencia,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String tipoSuplencia) {
+			@Parameter(description = "Tipo para obtener las guardidas del empleado ('SI': Internas o 'SE': Externas)", required = true) @RequestParam(required = true) String tipoSuplencia) {
 
 		DatosSuplencia suplencia = null;
 		DatosEmpleado empleado, empleado_sup;
@@ -500,24 +500,28 @@ public class SuplenciaController {
 	public ResponseEntity<Object> actualizaEstatus(
 			@Parameter(description = "ID de la Suplencia", required = true) @RequestParam(required = true) Integer idSuplencia,
 			@Parameter(description = "Estatus de la suplencia", required = true) @RequestParam(required = true) Integer estatus,
-			@Parameter(description = "Tipo de Suplencia para calcular el importe de la Suplencia", required = true) @RequestParam(required = true) String tipo) {
+			@Parameter(description = "Tipo de Suplencia para calcular el importe de la Suplencia", required = true) @RequestParam(required = true) String tipo,
+			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario,
+			@Parameter(description = "Comentarios correspondientes a la actualización del estatus", required = false) @RequestParam(required = false) String comentarios) {
+
+		if (comentarios == null) comentarios = "";
 
 		try {
 
-			switch (tipo) {
+			switch (estatus) {
 
-				case "SI":
+				case 1, 2:
 
-					suplenciaRepository.updateStatusSuplencia(estatus, idSuplencia);
+					suplenciaRepository.updateAuthStatusSuplencia1(estatus, idSuplencia, tipo, comentarios, idUsuario);
 					break;
 
-				case "SE":
+				case 3, 4:
 
-					suplenciaRepository.updateStatusSuplenciaExt(estatus, idSuplencia);
+					suplenciaRepository.updateAuthStatusSuplencia2(estatus, idSuplencia, tipo, comentarios, idUsuario);
 					break;
 
 				default:
-					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 			}
 
@@ -541,7 +545,7 @@ public class SuplenciaController {
 			@Parameter(description = "Clave del servicio para obtener las suplencias", required = false) @RequestParam(required = false) String claveServicio,
 			@Parameter(description = "Clave del puesto para obtener las suplencias", required = false) @RequestParam(required = false) String puesto,
 			@Parameter(description = "Clave del empleado a suplir para obtener las suplencias", required = false) @RequestParam(required = false) String emp_suplir,
-			@Parameter(description = "Clave del empleado a suplir para obtener las suplencias", required = false) @RequestParam(required = false) Integer estatus ) {
+			@Parameter(description = "Estatus de las suplencias", required = false) @RequestParam(required = false) Integer estatus ) {
 
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -568,4 +572,39 @@ public class SuplenciaController {
 			return ResponseHandler.generateResponse("Error al consultar los registros de suplencias del empleado en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
+
+	@Operation(summary = "Obtener los registros de suplencias del empleado en el Sistema", description = "Obtener los registros de suplencias del empleado en el Sistema", tags = { "Suplencia" })
+	@GetMapping("/suplencias/consulta_x_auth")
+	public ResponseEntity<Object> getDynamicSuplenciasAuth(
+			@Parameter(description = "Fecha de quincena para la consulta de suplencias", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
+			@Parameter(description = "Tipo para obtener las suplencias (SI-Internas o SE-Externas)", required = true) @RequestParam(required = true) String tipoSuplencia,
+			@Parameter(description = "ID de la delegación para obtener las suplencias", required = false) @RequestParam(required = false) String idDelegacion,
+			@Parameter(description = "ID del centro de trabajo para obtener las suplencias", required = false) @RequestParam(required = false) String idCentroTrab,
+			@Parameter(description = "Estatus de las suplencias", required = false) @RequestParam(required = false) Integer estatus ) {
+
+		try {
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			String strQuincena = null;
+
+			if (quincena != null)
+				strQuincena = dateFormat.format(quincena);
+
+			List<DatosSuplencia> guardias = new ArrayList<DatosSuplencia>();
+
+			guardias = suplenciaRepository.ConsultaDynamicAuthSuplencias(strQuincena, tipoSuplencia, idDelegacion, idCentroTrab, estatus);
+
+			if (guardias.isEmpty()) {
+
+				return ResponseHandler.generateResponse("No se encontraron los registros de suplencias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Se obtuvieron los registros de suplencias del empleado en el Sistema", HttpStatus.OK, guardias);
+
+		} catch (Exception e) {
+			logger.info(e.toString());
+
+			return ResponseHandler.generateResponse("Error al consultar los registros de suplencias del empleado en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
 }
