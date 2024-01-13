@@ -1,7 +1,9 @@
 package gob.issste.gys.model;
 
-public class CifrasDeImpuestos {
+public class CifrasDeImpuestosPorRepresentacion {
 
+	private String id_representacion;
+	private String n_representacion;
 	private String id_tipo_paga;
 	private int anio_ejercicio;
 	private int mes_ejercicio;
@@ -12,6 +14,18 @@ public class CifrasDeImpuestos {
 	private String fec_min;
 	private String fec_max;
 
+	public String getId_representacion() {
+		return id_representacion;
+	}
+	public void setId_representacion(String id_representacion) {
+		this.id_representacion = id_representacion;
+	}
+	public String getN_representacion() {
+		return n_representacion;
+	}
+	public void setN_representacion(String n_representacion) {
+		this.n_representacion = n_representacion;
+	}
 	public String getId_tipo_paga() {
 		return id_tipo_paga;
 	}

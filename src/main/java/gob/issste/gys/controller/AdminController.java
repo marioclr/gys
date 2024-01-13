@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.model.CifrasDeImpuestos;
+import gob.issste.gys.model.CifrasDeImpuestosPorRepresentacion;
 import gob.issste.gys.model.DetalleCifrasDeImpuestos;
 import gob.issste.gys.model.DetalleCifrasDeImpuestosConPA;
+import gob.issste.gys.model.DetalleCifrasDeImpuestosPorRep;
+import gob.issste.gys.model.LayoutSpep;
 import gob.issste.gys.repository.IAdminRepository;
 import gob.issste.gys.repository.IPagaRepository;
 import gob.issste.gys.response.ResponseHandler;
@@ -194,7 +197,7 @@ public class AdminController {
 	public ResponseEntity<Object> getCifrasISR(
 			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
 			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
-			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl ) {
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl) {
 
 		List<CifrasDeImpuestos> cifras = new ArrayList<CifrasDeImpuestos>();
 
@@ -221,6 +224,37 @@ public class AdminController {
 	}
 
 	@Operation(summary = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", description = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
+	@GetMapping("/cifras_isr_represent")
+	public ResponseEntity<Object> getCifrasISRXRepres(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl ) {
+
+		List<CifrasDeImpuestosPorRepresentacion> cifrasPorRepresentacion = new ArrayList<CifrasDeImpuestosPorRepresentacion>();
+
+		try {
+
+			cifrasPorRepresentacion = adminRepository.consultaCifrasDeImpuestosPorRep(anio, mes, tipoFechaControl);
+
+			if (cifrasPorRepresentacion.isEmpty()) {
+				cifrasPorRepresentacion = new ArrayList<CifrasDeImpuestosPorRepresentacion>();
+				return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifrasPorRepresentacion);
+			}
+
+		} catch (EmptyResultDataAccessException e) {
+
+			cifrasPorRepresentacion = new ArrayList<CifrasDeImpuestosPorRepresentacion>();
+			return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifrasPorRepresentacion);
+
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener las cifras de ISR del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+
+		return ResponseHandler.generateResponse("Se obtubieron las cifras de ISR de manera exitosa", HttpStatus.OK, cifrasPorRepresentacion);
+	}
+
+	@Operation(summary = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", description = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
 	@GetMapping("/detalle_cifras_isr")
 	public ResponseEntity<Object> getDetalleCifrasISR(
 			@Parameter(description = "Parámetro para indicar el Año del ejercicio para obtener el detalle del ISR", required = false) @RequestParam(required = false) Integer anio,
@@ -236,6 +270,34 @@ public class AdminController {
 
 			if (cifras.isEmpty()) {
 				cifras = new ArrayList<DetalleCifrasDeImpuestos>();
+				return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifras);
+			}
+
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener las cifras de ISR del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+
+		return ResponseHandler.generateResponse("Se obtubieron las cifras de ISR de manera exitosa", HttpStatus.OK, cifras);
+	}
+
+	@Operation(summary = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", description = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
+	@GetMapping("/detalle_cifras_isr_rep")
+	public ResponseEntity<Object> getDetalleCifrasISRXrep(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para obtener el detalle del ISR", required = false) @RequestParam(required = false) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para obtener el detalle del ISR", required = false) @RequestParam(required = false) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = false) @RequestParam(required = false) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para indicar el ID ordinal para obtener el detalle del ISR", required = false) @RequestParam(required = false) Integer id_ordinal,
+			@Parameter(description = "ID de la representación para obtener las adscripciones asociadas", required = false) @RequestParam(required = false) String idRepresentacion ) {
+
+		List<DetalleCifrasDeImpuestosPorRep> cifras = new ArrayList<DetalleCifrasDeImpuestosPorRep>();
+
+		try {
+
+			cifras = adminRepository.getDetalleCifrasDeImpuestosXRep( anio, mes, tipoFechaControl, id_ordinal, idRepresentacion );
+
+			if (cifras.isEmpty()) {
+				cifras = new ArrayList<DetalleCifrasDeImpuestosPorRep>();
 				return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifras);
 			}
 
@@ -286,7 +348,7 @@ public class AdminController {
 
 		try {
 
-			layout = adminRepository.consultaLayoutSPEP(strDate, tipoConcepto);
+			layout = adminRepository.consultaLayoutSPEP(strDate, tipoConcepto); 
 			//pagaRepository.updateStatus(4);
 
 			return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, layout);
@@ -295,6 +357,81 @@ public class AdminController {
 
 			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
+	}
+
+	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
+	@GetMapping("/layout_spep")
+	public ResponseEntity<Object> archivoSPEP(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para indicar el ID ordinal a complementar en el cálculo de ISR", required = true) @RequestParam(required = true) Integer id_ordinal ) {
+
+		List<LayoutSpep> layout = new ArrayList<LayoutSpep>();
+		//List<String> layoutStr = new ArrayList<String>();
+
+		try {
+
+			layout = adminRepository.consultaLayoutSPEP(anio, mes, tipoFechaControl, id_ordinal);
+//			for (LayoutSpep reg : layout) {
+//				layoutStr.add(reg.toString());
+//			}
+
+			if (layout.isEmpty()) {
+				layout = new ArrayList<LayoutSpep>();
+				return ResponseHandler.generateResponse("No existen registros con las condiciones seleccionadas", HttpStatus.NOT_FOUND, layout);
+			}
+
+		} catch (EmptyResultDataAccessException e) {
+
+			layout = new ArrayList<LayoutSpep>();
+			return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, layout);
+
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+
+		return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, layout);
+
+	}
+
+	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
+	@GetMapping("/layout_spep_rep")
+	public ResponseEntity<Object> archivoSPEPxRep(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para indicar el ID ordinal a complementar en el cálculo de ISR", required = true) @RequestParam(required = true) Integer id_ordinal,
+			@Parameter(description = "ID de la representación para obtener las adscripciones asociadas", required = true) @RequestParam(required = true) String idRepresentacion ) {
+
+		List<LayoutSpep> layout;
+		//List<String> layoutStr = new ArrayList<String>();
+
+		try {
+
+			layout = adminRepository.consultaLayoutSPEP_X_Rep(anio, mes, tipoFechaControl, id_ordinal, idRepresentacion);
+
+//			for (LayoutSpep reg : layout) {
+//				layoutStr.add(reg.toString());
+//			}
+
+			if (layout.isEmpty()) {
+				layout = new ArrayList<LayoutSpep>();
+				return ResponseHandler.generateResponse("No existen registros con las condiciones seleccionadas", HttpStatus.NOT_FOUND, layout);
+			}
+
+		} catch (EmptyResultDataAccessException e) {
+
+			layout = new ArrayList<LayoutSpep>();
+			return ResponseHandler.generateResponse("No existen registros con las condiciones seleccionadas", HttpStatus.NOT_FOUND, layout);
+
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al obtener registros con las condiciones seleccionadas en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+
+		return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, layout);
 	}
 
 	@Operation(summary = "Realiza el proceso de generación de archivo de timbrado para guardias o suplencias", description = "Realiza el proceso de generación de archivo de timbrado para guardias o suplencias", tags = { "Admin" })
@@ -308,13 +445,11 @@ public class AdminController {
 			return ResponseHandler.generateResponse("La fecha de control de pagos ha sido creado de manera exitosa con ID ", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al obtener registros con las condiciones seleccionadas en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
-
-
-	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
+	@Operation(summary = "Realiza el proceso de cálculo de pensión alimenticia para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
 	@PostMapping("/pension")
 	public ResponseEntity<Object> calculo_pa(
 			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
@@ -322,18 +457,15 @@ public class AdminController {
 			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl,
 			@Parameter(description = "Parámetro para indicar el ID ordinal a complementar en el cálculo de ISR", required = true) @RequestParam(required = true) Integer id_ordinal ) {
 
-		//List<String> layout;
-
 		try {
 
-			int i = adminRepository.calculaPensionAlimenticia(anio, mes, tipoFechaControl, id_ordinal);
-			//pagaRepository.updateStatus(4);
+			int a = adminRepository.calculaPensionAlimenticia(anio, mes, tipoFechaControl, id_ordinal);
 
-			return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, i);
+			return ResponseHandler.generateResponse("Ejecución del proceso de cálculo de pensión alimenticia para guardias o suplencias de manera exitósa", HttpStatus.OK, a);
 
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error del proceso de cálculo de pensión alimenticia para guardias o suplencias", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 

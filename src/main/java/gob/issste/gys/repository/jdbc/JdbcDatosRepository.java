@@ -1,5 +1,6 @@
 package gob.issste.gys.repository.jdbc;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -13,6 +14,7 @@ import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.DatosAdscripcion;
 import gob.issste.gys.model.DatosGuardia;
 import gob.issste.gys.model.DatosJornada;
+import gob.issste.gys.model.DatosMatrizPuestos;
 import gob.issste.gys.model.DatosNivel;
 import gob.issste.gys.model.DatosPuesto;
 import gob.issste.gys.model.DatosServicio;
@@ -177,6 +179,61 @@ public class JdbcDatosRepository implements IDatosRepository {
 	public Delegacion getDatosDelegacionById(String idDelegacion) {
 		logger.info(QUERY_GET_DELEGACION_BY_ID);
 		return jdbcTemplate.queryForObject(QUERY_GET_DELEGACION_BY_ID, BeanPropertyRowMapper.newInstance(Delegacion.class), idDelegacion);
+	}
+
+	@Override
+	public List<DatosMatrizPuestos> ConsultaPuestoAutorizado(String tipo_ct, String clave_servicio, String puesto,
+			String nivel, String sub_nivel, String tipo_jornada, String tipo_guardia) {
+		String QUERY_CONDITION  = "";
+		List<Object> objects = new ArrayList<Object>();
+
+		if (tipo_ct != null) { 
+			QUERY_CONDITION += "And id_tipo_ct = ?\r\n";
+			objects.add(tipo_ct);
+		}
+
+		if (clave_servicio != null) { 
+			QUERY_CONDITION += "And id_clave_servicio = ?\r\n";
+			objects.add(clave_servicio);
+		}
+
+		if (puesto != null) { 
+			QUERY_CONDITION += "And id_puesto_plaza = ?\r\n";
+			objects.add(puesto);
+		}
+
+		if (nivel != null) { 
+			QUERY_CONDITION += "And id_nivel = ?\r\n";
+			objects.add(nivel);
+		}
+
+		if (sub_nivel != null) { 
+			QUERY_CONDITION += "And id_sub_nivel = ?\r\n";
+			objects.add(sub_nivel);
+		}
+
+		if (tipo_jornada != null) { 
+			QUERY_CONDITION += "And id_tipo_jornada = ?\r\n";
+			objects.add(tipo_jornada);
+		}
+
+		if (tipo_guardia != null) { 
+			QUERY_CONDITION += "And id_tipo_per = ?\r\n";
+			objects.add(tipo_guardia);
+		}
+
+		String DYNAMIC_QUERY = "Select id_tipo_ct, id_clave_servicio, n_des_servicio, \r\n"
+							 + "  id_puesto_plaza, n_puesto, id_nivel, id_sub_nivel, \r\n"
+							 + "  id_tipo_jornada, id_tipo_per tipo \r\n"
+							 + "From m4t_gys_matriz_puestos \r\n"
+							 + "Where 1=1 \r\n"
+							 + QUERY_CONDITION
+							 + "Order By 1";
+
+		logger.info(DYNAMIC_QUERY);
+		List<DatosMatrizPuestos> matrix = jdbcTemplate.query(DYNAMIC_QUERY, BeanPropertyRowMapper.newInstance(DatosMatrizPuestos.class), objects.toArray() );
+
+		return matrix;
 	}
 
 }

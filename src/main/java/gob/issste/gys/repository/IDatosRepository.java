@@ -14,20 +14,22 @@ public interface IDatosRepository {
 	public String QUERY_GET_ADSCRIPCIONES_FOR_DEL   = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona\r\n"
 													+ "From m4t_centros_trab \r\n"
 													+ "Where id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
-													+ "	And id_delegacion = ?";
+													+ "	And id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )";
 	List<DatosAdscripcion> getDatosAdscForDeleg(String idDeleg);
 
 	public String QUERY_GET_ADSCRIPCIONES_BY_USER   = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona\r\n"
 													+ "From m4t_centros_trab\r\n"
-													+ "Where id_delegacion IN (Select IdDelegacion From gys_Usuarios Where IdUsuario = ?)\r\n"
-													+ "And id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)";
+													+ "Where id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
+													+ "  And id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = (\r\n"
+													+ "    Select IdDelegacion From gys_Usuarios Where IdUsuario = ?) )";
 	List<DatosAdscripcion> getDatosAdscripciones(int idUsuario);
 
 	public String QUERY_GET_ADSCRIPCIONES_BY_USER_CT = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona\r\n"
 													+ "From m4t_centros_trab\r\n"
-													+ "Where id_delegacion IN (Select IdDelegacion From gys_Usuarios Where IdUsuario = ?)\r\n"
-													+ "And id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)"
-													+ "And id_centro_trabajo IN (Select IdCentroTrab From gys_Usuarios_Centros_Trab Where IdUsuario=?)";
+													+ "Where id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
+													+ "  And id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = (\r\n"
+													+ "    Select IdDelegacion From gys_Usuarios Where IdUsuario = ?) ) \r\n"
+													+ "  And id_centro_trabajo IN (Select IdCentroTrab From gys_Usuarios_Centros_Trab Where IdUsuario=?)";
 	List<DatosAdscripcion> getDatosAdscripciones_ct(int idUsuario);
 
 	public String QUERY_GET_PUESTOS_GUARDIA         = "Select Distinct TRIM(P.id_puesto_plaza) Clave , n_puesto Descripcion, id_tipo_tabulador tipotabulador\r\n"
@@ -89,6 +91,14 @@ public interface IDatosRepository {
 													+ "  And id_sub_nivel = ? And id_tipo_jornada = ? \r\n"
 													+ "  And id_tipo_per = ?";
 	long ValidaPuestoAutorizado(String tipo_ct, String clave_servicio, String puesto, String nivel, String sub_nivel, String tipo_jornada, String tipo_guardia);
+
+	public String QUERY_CONSULTA_PUESTO_AUTORIZADO  = "Select * \r\n"
+													+ "From m4t_gys_matriz_puestos \r\n"
+													+ "Where id_tipo_ct = ?  And id_clave_servicio = ? \r\n"
+													+ "  And TRIM(id_puesto_plaza) = ? And id_nivel = ? \r\n"
+													+ "  And id_sub_nivel = ? And id_tipo_jornada = ? \r\n"
+													+ "  And id_tipo_per = ?";
+	List<DatosMatrizPuestos> ConsultaPuestoAutorizado(String tipo_ct, String clave_servicio, String puesto, String nivel, String sub_nivel, String tipo_jornada, String tipo_guardia);
 
 	public String QUERY_CONSULTA_GUARDIAS_INTERNAS  = "Select G.id_empleado As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, "
 													+ "G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, G.horas, G.fec_inicio, G.fec_fin, "

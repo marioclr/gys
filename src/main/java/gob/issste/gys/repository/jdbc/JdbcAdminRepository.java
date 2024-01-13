@@ -11,8 +11,11 @@ import org.springframework.stereotype.Repository;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.CifrasDeImpuestos;
+import gob.issste.gys.model.CifrasDeImpuestosPorRepresentacion;
 import gob.issste.gys.model.DetalleCifrasDeImpuestos;
 import gob.issste.gys.model.DetalleCifrasDeImpuestosConPA;
+import gob.issste.gys.model.DetalleCifrasDeImpuestosPorRep;
+import gob.issste.gys.model.LayoutSpep;
 import gob.issste.gys.repository.IAdminRepository;
 
 @Repository
@@ -28,6 +31,22 @@ public class JdbcAdminRepository implements IAdminRepository {
 		logger.info(QUERY_CONSULTA_LAYOUT_SPEP);
 
 		return jdbcTemplate.queryForList(QUERY_CONSULTA_LAYOUT_SPEP, String.class, fec_pago, tipo, fec_pago, tipo );
+	}
+
+	@Override
+	public List<LayoutSpep> consultaLayoutSPEP(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal) {
+		logger.info(QUERY_CONSULTA_LAYOUT_SPEP_ORD);
+
+		return jdbcTemplate.query(QUERY_CONSULTA_LAYOUT_SPEP_ORD, BeanPropertyRowMapper.newInstance(LayoutSpep.class), anio, mes, tipoPaga, id_ordinal );
+
+	}
+
+	@Override
+	public List<LayoutSpep> consultaLayoutSPEP_X_Rep(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal, String id_rep) {
+		logger.info(QUERY_CONSULTA_LAYOUT_SPEP_REP);
+
+		List<LayoutSpep> layout = jdbcTemplate.query(QUERY_CONSULTA_LAYOUT_SPEP_REP, BeanPropertyRowMapper.newInstance(LayoutSpep.class), anio, mes, tipoPaga, id_ordinal, id_rep );
+		return layout;
 	}
 
 	@Override
@@ -87,6 +106,13 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
+	public List<CifrasDeImpuestosPorRepresentacion> consultaCifrasDeImpuestosPorRep(Integer anio, Integer mes, Integer tipoPaga) {
+		logger.info(QUERY_GET_CIFRAS_ISR_REP);
+
+		return jdbcTemplate.query(QUERY_GET_CIFRAS_ISR_REP, BeanPropertyRowMapper.newInstance(CifrasDeImpuestosPorRepresentacion.class), new Object [] { anio, mes, tipoPaga } );
+	}
+
+	@Override
 	public CifrasDeImpuestos consultaCifrasDeImpuestosByOrdinal(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal) {
 		logger.info(QUERY_GET_CIFRAS_ISR_BY_ORDINAL);
 
@@ -134,6 +160,15 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
+	public List<DetalleCifrasDeImpuestosPorRep> getDetalleCifrasDeImpuestosXRep(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal, String id_rep) {
+		logger.info(QUERY_GET_DETALLE_CIFRAS_ISR_REP);
+
+		return jdbcTemplate.query(QUERY_GET_DETALLE_CIFRAS_ISR_REP, 
+				BeanPropertyRowMapper.newInstance(DetalleCifrasDeImpuestosPorRep.class),
+				new Object [] { anio, mes, tipoPaga, id_ordinal, id_rep } );
+	}
+
+	@Override
 	public List<DetalleCifrasDeImpuestosConPA> getDetalleCifrasDeImpuestosPA(Integer anio, Integer mes,
 			Integer tipoPaga, Integer id_ordinal) {
 		logger.info(QUERY_GET_DETALLE_CIFRAS_ISR_PA);
@@ -169,6 +204,8 @@ public class JdbcAdminRepository implements IAdminRepository {
 		logger.info( "execute procedure " + STMT_EXECUTE_SP_PA);
 
 		return jdbcTemplate.update( "execute procedure " + STMT_EXECUTE_SP_PA, anio, mes, tipoPaga, id_ordinal);
+		//return jdbcTemplate.update( "execute procedure mclr_sp_prueba(" + mes + ")" );
+
 	}
 
 }
