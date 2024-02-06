@@ -28,10 +28,10 @@ public interface IBolsaTrabajoRepository {
 													+ "codigo_postal, curp, id_beneficiario\r\n"
 													+ "From gys_bolsatrabajo b, m4t_delegaciones d\r\n"
 													+ "Where b.idDelegacion=d.id_div_geografica\r\n"
-													+ "	And rfc = ?\r\n"
-													+ " And id_div_geografica = ?\r\n"
+													+ " And rfc = ?\r\n"
+													+ "	And id_div_geografica = ?\r\n"
 													+ "Order by id";
-	BolsaTrabajo findByRFC(String rfc);
+	BolsaTrabajo findByRFC(String rfc, String idDeleg);
 
 	public String QUERY_GET_BOLSA_TRABAJO_BY_RFC_DEL = "Select b.id id, b.rfc rfc, b.nombre nombre, b.apellidopat apellidopat, b.apellidomat apellidomat, d.id_div_geografica, n_div_geografica,\r\n"
 													+ "codigo_postal, curp, id_beneficiario\r\n"

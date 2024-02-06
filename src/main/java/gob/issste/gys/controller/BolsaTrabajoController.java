@@ -134,10 +134,11 @@ public class BolsaTrabajoController {
 	@Operation(summary = "Obtener elementos a la bolsa de trabajo en el Sistema", description = "Obtener elementos a la bolsa de trabajo en el Sistema", tags = { "Bolsa de Trabajo" })
 	@GetMapping("/bolsatrabajo/rfc")
 	public ResponseEntity<Object> getBolsaTrabajoXRfc(
-			@Parameter(description = "RFC o parte del RFC para filtrar elementos", required = true) @RequestParam(required = true) String rfc) {
+			@Parameter(description = "RFC o parte del RFC para filtrar elementos", required = true) @RequestParam(required = true) String rfc,
+			@Parameter(description = "Parámetro para indicar la delegación del usuario", required = true) @RequestParam(required = true) String idDeleg) {
 
 		try {
-			BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(rfc);
+			BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(rfc, idDeleg);
 			if (bolsa == null) {			
 
 				return ResponseHandler.generateResponse("No existen elementos a la bolsa de trabajo en el Sistema", HttpStatus.NOT_FOUND, null);
@@ -179,10 +180,11 @@ public class BolsaTrabajoController {
 	@Operation(summary = "Obtener elementos a la bolsa de trabajo en el Sistema", description = "Obtener elementos a la bolsa de trabajo en el Sistema", tags = { "Bolsa de Trabajo" })
 	@GetMapping("/bolsatrabajo/rfcDisponible")
 	public ResponseEntity<Object> validaRfcDisponible(
-			@Parameter(description = "RFC o parte del RFC para filtrar elementos", required = true) @RequestParam(required = true) String rfc) {
+			@Parameter(description = "RFC o parte del RFC para filtrar elementos", required = true) @RequestParam(required = true) String rfc,
+			@Parameter(description = "Parámetro para indicar la delegación del usuario", required = true) @RequestParam(required = true) String idDeleg) {
 
 		try {
-			BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(rfc);
+			BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(rfc, idDeleg);
 			if (bolsa == null) {			
 
 				return ResponseHandler.generateResponse("El RFC está disponible para registrarse en el sistema.", HttpStatus.OK, false);

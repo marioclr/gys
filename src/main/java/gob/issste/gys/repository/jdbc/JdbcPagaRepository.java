@@ -177,10 +177,11 @@ public class JdbcPagaRepository implements IPagaRepository {
 	@Override
 	public int existe_anterior_sin_terminar_par(Paga paga) {
 		logger.info(QUERY_EXISTS_ANT_SIN_TERM_PAR);
-		return jdbcTemplate.queryForObject(QUERY_EXISTS_ANT_SIN_TERM_PAR, Integer.class,
+		int cuenta = jdbcTemplate.queryForObject(QUERY_EXISTS_ANT_SIN_TERM_PAR, Integer.class,
 				new Object[] { paga.getAnio_ejercicio(), paga.getMes_ejercicio(),
-							   paga.getAnio_ejercicio(), paga.getMes_ejercicio(),
-							   paga.getAnio_ejercicio() } );
+						   paga.getAnio_ejercicio(), paga.getMes_ejercicio(),
+						   paga.getAnio_ejercicio() } );
+		return cuenta;
 	}
 
 	@Override

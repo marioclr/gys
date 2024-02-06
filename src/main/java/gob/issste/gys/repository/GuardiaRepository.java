@@ -87,7 +87,7 @@ public interface GuardiaRepository {
 
 	public String QUERY_GET_SALDO_GUARDIA_INT   = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_guardias_emp\r\n"
-												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_delegacion = ?)\r\n"
+												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? ) )\r\n"
 												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
 	double ObtenerSaldoUtilizado(String idDelegacion, int anio_ejercicio, int mes_ejercicio);
 
@@ -99,7 +99,7 @@ public interface GuardiaRepository {
 
 	public String QUERY_GET_SALDO_GUARDIA_EXT   = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_guardias_ext\r\n"
-												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_delegacion = ?)\r\n"
+												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? ) )\r\n"
 												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
 	double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio, int mes_ejercicio);
 
@@ -163,9 +163,6 @@ public interface GuardiaRepository {
 											   + "Where rfc = ? And fec_paga = ? And fec_inicio = ? And id_ordinal = ?";
 	int updateGuardiaExtVars(DatosGuardia guardia);
 
-	List<DatosGuardia> ConsultaDynamicGuardias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
-			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus);
-
 	public String QUERY_EXISTS_GUARDIA_INT      = "Select COUNT(*) \r\n"
 												+ "From gys_guardias_emp\r\n"
 												+ "Where id_empleado = ? And fec_inicio = ?\r\n"
@@ -200,6 +197,83 @@ public interface GuardiaRepository {
 												+ "    Or ((hora_fin>=?)    And (hora_inicio <= ?)))";
 	public int existe_guardia_ext_upd(DatosGuardia guardia);
 
+	/*
+	 * 
+	 * Consultas para validar los topes de las horas/días de guardias
+	 * 
+	 */
+
+	public String QUERY_GET_HORAS_GUARDIA_INT   = "Select SUM(horas) \r\n"
+												+ "From gys_guardias_emp\r\n"
+												+ "Where id_empleado = ? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_horas_guardia(String clave_empleado, String inicio, String fin);
+
+	public String QUERY_GET_HORAS_GUARDIA_INT_UPD = "Select SUM(horas) \r\n"
+												+ "From gys_guardias_emp\r\n"
+												+ "Where id_empleado = ? \r\n"
+												+ "  And id<>? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_horas_guardia_upd(String clave_empleado, Integer id, String inicio, String fin);
+
+	public String QUERY_GET_HORAS_GUARDIA_EXT   = "Select SUM(horas) \r\n"
+												+ "From gys_guardias_ext\r\n"
+												+ "Where rfc = ? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_horas_guardia_ext(String clave_empleado, String inicio, String fin);
+
+	public String QUERY_GET_HORAS_GUARDIA_EXT_UPD = "Select SUM(horas) \r\n"
+												+ "From gys_guardias_ext\r\n"
+												+ "Where rfc = ? \r\n"
+												+ "  And id<>? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_horas_guardia_ext_upd(String clave_empleado, Integer id, String inicio, String fin);
+
+	public String QUERY_GET_DIAS_GUARDIA_INT   = "Select Count(Distinct fec_inicio) \r\n"
+												+ "From gys_guardias_emp\r\n"
+												+ "Where id_empleado = ?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?))\r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))   \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))\r\n"
+												+ "  And fec_inicio <> ?";
+	public int get_dias_guardia(String clave_empleado, String inicio, String fin, String inicio1);
+
+	public String QUERY_GET_DIAS_GUARDIA_INT_UPD = "Select Count(Distinct fec_inicio) \r\n"
+												+ "From gys_guardias_emp\r\n"
+												+ "Where id_empleado = ?\r\n"
+												+ "  And id<>? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?))\r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))   \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))\r\n"
+												+ "  And fec_inicio <> ?";
+	public int get_dias_guardia_upd(String clave_empleado, Integer id, String inicio, String fin, String inicio1);
+
+	public String QUERY_GET_DIAS_GUARDIA_EXT    = "Select Count(Distinct fec_inicio) \r\n"
+												+ "From gys_guardias_ext\r\n"
+												+ "Where rfc = ?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?))\r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))   \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))\r\n"
+												+ "  And fec_inicio <> ?";
+	public int get_dias_guardia_ext(String clave_empleado, String inicio, String fin, String inicio1);
+
+	public String QUERY_GET_DIAS_GUARDIA_EXT_UPD = "Select Count(Distinct fec_inicio) \r\n"
+												+ "From gys_guardias_ext\r\n"
+												+ "Where rfc = ?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?))\r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))   \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))\r\n"
+												+ "  And fec_inicio <> ?";
+	public int get_dias_guardia_ext_upd(String clave_empleado, Integer id, String inicio, String fin, String inicio1);
+
 	public String STMT_UPDATE_STATUS 			= "UPDATE gys_guardias_emp Set estatus = ?\r\n"
 												+ "Where id = ?";
 	int updateStatusGuardia(int status, int id);
@@ -215,6 +289,45 @@ public interface GuardiaRepository {
 	public String STMT_UPDATE_AUTH_STATUS_2		= "UPDATE gys_autorizacion_guardias Set estatus2 = ?, comentarios2 = ?, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND\r\n"
 												+ "Where id_guardia = ? And id_tipo = ?";
 	int updateAuthStatusGuardia2(int status, int id, String tipo, String comentarios, int idUsuario);
+
+	public String STMT_UPDATES_AUTH_STATUS_1	= "Merge Into gys_autorizacion_guardias A\r\n"
+												+ "Using gys_guardias_emp S\r\n"
+												+ "  ON  A.id_guardia = S.id\r\n"
+												+ "  And A.estatus1 = 0 And id_tipo = ?\r\n"
+												+ "  And S.fec_paga = ?\r\n"
+												+ "WHEN MATCHED THEN\r\n"
+												+ "    UPDATE SET estatus1 = 1, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusGuardias1(String tipo, String fec_pago, int idUsuario);
+
+	public String STMT_UPDATES_AUTH_STATUS_1ext	= "Merge Into gys_autorizacion_guardias A\r\n"
+												+ "Using gys_guardias_ext S\r\n"
+												+ "  ON  A.id_guardia = S.id\r\n"
+												+ "  And A.estatus1 = 0 And id_tipo = ?\r\n"
+												+ "  And S.fec_paga = ?\r\n"
+												+ "WHEN MATCHED THEN\r\n"
+												+ "    UPDATE SET estatus1 = 1, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusGuardias1Ext(String tipo, String fec_pago, int idUsuario);
+
+	public String STMT_UPDATES_AUTH_STATUS_2	= "Merge Into gys_autorizacion_guardias A\r\n"
+												+ "Using gys_guardias_emp S\r\n"
+												+ "  ON  A.id_guardia = S.id\r\n"
+												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"
+												+ "  And id_tipo = ? And S.fec_paga = ?\r\n"
+												+ "WHEN MATCHED THEN\r\n"
+												+ "    UPDATE SET estatus2 = 3, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusGuardias2(String tipo, String fec_pago, int idUsuario);
+
+	public String STMT_UPDATES_AUTH_STATUS_2ext	= "Merge Into gys_autorizacion_guardias A\r\n"
+												+ "Using gys_guardias_ext S\r\n"
+												+ "  ON  A.id_guardia = S.id\r\n"
+												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"
+												+ "  And id_tipo = ? And S.fec_paga = ?\r\n"
+												+ "WHEN MATCHED THEN\r\n"
+												+ "    UPDATE SET estatus2 = 3, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusGuardias2Ext(String tipo, String fec_pago, int idUsuario);
+
+	List<DatosGuardia> ConsultaDynamicGuardias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
+			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus);
 
 	List<DatosGuardia> ConsultaDynamicAuthGuardias(String fechaPago, String tipo, String idDelegacion, String idCentroTrab, Integer estatus);
 

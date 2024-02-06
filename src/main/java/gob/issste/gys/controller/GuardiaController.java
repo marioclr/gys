@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.DatosGuardia;
+import gob.issste.gys.model.Paga;
 import gob.issste.gys.model.Presupuesto;
 import gob.issste.gys.repository.GuardiaRepository;
 import gob.issste.gys.repository.IPagaRepository;
@@ -219,11 +220,27 @@ public class GuardiaController {
 		try {
 
 			int id = 0, anio, mes;
+			int horasEnDiaInt = 0,    horasEnDiaExt = 0,
+				maxHorasEnQnaInt = 0, maxHorasEnQnaExt = 0, 
+				maxDiasEnQnaInt = 0,  maxDiasEnQnaExt = 0;
 			double saldo_utilizado = 0, saldo = 0;
 			Presupuesto presup;
+			Paga paga;
 
 			String idCentroTrab = guardia.getId_centro_trabajo();
 			String fec_pago = guardia.getFec_paga();
+			String inicio, fin;
+
+			try {
+				paga   = pagaRepository.findByFecha(fec_pago);
+				anio   = paga.getAnio_ejercicio();
+				mes    = paga.getMes_ejercicio();
+				inicio = paga.getFec_inicio();
+				fin    = paga.getFec_fin();
+			} catch (EmptyResultDataAccessException e) {
+				return ResponseHandler.generateResponse("No existe la fecha de pago indicada",
+						HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
 
 			switch (guardia.getTipo_guardia()) {
 
@@ -231,24 +248,108 @@ public class GuardiaController {
 					if (guardiaRepository.existe_guardia(guardia) > 0)
 						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario",
 								HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					horasEnDiaInt    = guardiaRepository.get_horas_guardia(guardia.getClave_empleado(), guardia.getFec_inicio(), guardia.getFec_fin());
+					maxHorasEnQnaInt = guardiaRepository.get_horas_guardia(guardia.getClave_empleado(), inicio, fin);
+					maxDiasEnQnaInt  = guardiaRepository.get_dias_guardia(guardia.getClave_empleado(), inicio, fin, guardia.getFec_inicio());
+
+					switch (guardia.getId_clave_movimiento()) {
+
+						case "06", "08", "09":
+							// Valida horas día
+							if (horasEnDiaInt + guardia.getHoras() > 11)
+								return ResponseHandler.generateResponse("No se puede exceder de 11 horas al día en el registro de guardias. Acualmente cuenta con " + horasEnDiaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + guardia.getHoras() > 121)
+								return ResponseHandler.generateResponse("No se puede exceder de 121 horas a la quincena en el registro de guardias. Acualmente cuenta con " + maxHorasEnQnaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + 1 > 11)
+								return ResponseHandler.generateResponse("No se puede exceder de 11 días a la quincena en el registro de guardias. Acualmente cuenta con " + maxDiasEnQnaInt
+										+ " más el del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "07":
+							// Valida horas día
+							if (horasEnDiaInt + guardia.getHoras() > 24)
+								return ResponseHandler.generateResponse("No se puede exceder de 24 horas al día en el registro de guardias. Acualmente cuenta con " + horasEnDiaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + guardia.getHoras() > 144)
+								return ResponseHandler.generateResponse("No se puede exceder de 144 horas a la quincena en el registro de guardias. Acualmente cuenta con " + maxHorasEnQnaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + 1 > 6)
+								return ResponseHandler.generateResponse("No se puede exceder de 6 días a la quincena en el registro de guardias. Acualmente cuenta con " + maxDiasEnQnaInt
+										+ " más el del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
 					break;
 
 				case "GE":
 					if (guardiaRepository.existe_guardia_ext(guardia) > 0)
 						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario",
 								HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					horasEnDiaExt    = guardiaRepository.get_horas_guardia_ext(guardia.getClave_empleado(), guardia.getFec_inicio(), guardia.getFec_fin());
+					maxHorasEnQnaExt = guardiaRepository.get_horas_guardia_ext(guardia.getClave_empleado(), inicio, fin);
+					maxDiasEnQnaExt  = guardiaRepository.get_dias_guardia_ext(guardia.getClave_empleado(), inicio, fin, guardia.getFec_inicio());
+
+					switch (guardia.getId_clave_movimiento()) {
+
+						case "06", "08", "09":
+							// Valida horas por día
+							if (horasEnDiaExt + guardia.getHoras() > 11)
+								return ResponseHandler.generateResponse("No se puede exceder de 11 horas al día en el registro de guardias. Acualmente cuenta con " + horasEnDiaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + guardia.getHoras() > 121)
+								return ResponseHandler.generateResponse("No se puede exceder de 121 horas a la quincena en el registro de guardias. Acualmente cuenta con " + maxHorasEnQnaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + 1 > 11)
+								return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario. Acualmente cuenta con " + maxDiasEnQnaExt
+										+ " más el del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);	
+							break;
+
+						case "07":
+							// Valida horas por día
+							if (horasEnDiaExt + guardia.getHoras() > 24)
+								return ResponseHandler.generateResponse("No se puede exceder de 24 horas al día en el registro de guardias. Acualmente cuenta con " + horasEnDiaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + guardia.getHoras() > 144)
+								return ResponseHandler.generateResponse("No se puede exceder de 144 horas a la quincena en el registro de guardias. Acualmente cuenta con " + maxHorasEnQnaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + 1 > 6)
+								return ResponseHandler.generateResponse("No se puede exceder de 6 días a la quincena en el registro de guardias. Acualmente cuenta con " + maxDiasEnQnaExt
+										+ " más el del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
 					break;
 
 				default:
 					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			}
-
-			try {
-				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
-				mes = pagaRepository.findByFecha(fec_pago).getMes_ejercicio();
-			} catch (EmptyResultDataAccessException e) {
-				return ResponseHandler.generateResponse("No existe la fecha de pago indicada",
-						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			try {
@@ -309,34 +410,134 @@ public class GuardiaController {
 		try {
 
 			int anio, mes;
+			int horasEnDiaInt = 0,    horasEnDiaExt = 0,
+					maxHorasEnQnaInt = 0, maxHorasEnQnaExt = 0, 
+					maxDiasEnQnaInt = 0,  maxDiasEnQnaExt = 0;
 			double saldo_utilizado = 0, saldo = 0;
 			Presupuesto presup;
+			Paga paga;
 
 			String idCentroTrab = guardia.getId_centro_trabajo();
 			String fec_pago = guardia.getFec_paga();
+			String inicio, fin;
+
+			try {
+				paga   = pagaRepository.findByFecha(fec_pago);
+				anio   = paga.getAnio_ejercicio();
+				mes    = paga.getMes_ejercicio();
+				inicio = paga.getFec_inicio();
+				fin    = paga.getFec_fin();
+			} catch (EmptyResultDataAccessException e) {
+				return ResponseHandler.generateResponse("No existe la fecha de pago indicada",
+						HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
 
 			switch (guardia.getTipo_guardia()) {
 
 				case "GI":
 					if (guardiaRepository.existe_guardia_upd(guardia)>0)
 						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					horasEnDiaInt    = guardiaRepository.get_horas_guardia_upd(guardia.getClave_empleado(), guardia.getId(), guardia.getFec_inicio(), guardia.getFec_fin());
+					maxHorasEnQnaInt = guardiaRepository.get_horas_guardia_upd(guardia.getClave_empleado(), guardia.getId(), inicio, fin);
+					maxDiasEnQnaInt  = guardiaRepository.get_dias_guardia_upd(guardia.getClave_empleado(), guardia.getId(), inicio, fin, guardia.getFec_inicio());
+
+					switch (guardia.getId_clave_movimiento()) {
+
+						case "06", "08", "09":
+							// Valida horas por día
+							if (horasEnDiaInt + guardia.getHoras() > 11)
+								return ResponseHandler.generateResponse("No se puede exceder de 11 horas al día en el registro de guardias. Acualmente cuenta con " + horasEnDiaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + guardia.getHoras() > 121)
+								return ResponseHandler.generateResponse("No se puede exceder de 121 horas a la quincena en el registro de guardias. Acualmente cuenta con " + maxHorasEnQnaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + 1 > 11)
+								return ResponseHandler.generateResponse("No se puede exceder de 11 días a la quincena en el registro de guardias. Acualmente cuenta con " + maxDiasEnQnaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);	
+							break;
+
+						case "07":
+							// Valida horas por día
+							if (horasEnDiaInt + guardia.getHoras() > 24)
+								return ResponseHandler.generateResponse("No se puede exceder de 24 horas al día en el registro de guardias. Acualmente cuenta con " + horasEnDiaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + guardia.getHoras() > 144)
+								return ResponseHandler.generateResponse("No se puede exceder de 144 horas a la quincena en el registro de guardias. Acualmente cuenta con " + maxHorasEnQnaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + 1 > 6)
+								return ResponseHandler.generateResponse("No se puede exceder de 6 días a la quincena en el registro de guardias. Acualmente cuenta con " + maxDiasEnQnaInt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
 					break;
 
 				case "GE":
 					if (guardiaRepository.existe_guardia_ext_upd(guardia)>0)
 						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					horasEnDiaExt    = guardiaRepository.get_horas_guardia_ext_upd(guardia.getClave_empleado(), guardia.getId(), guardia.getFec_inicio(), guardia.getFec_fin());
+					maxHorasEnQnaExt = guardiaRepository.get_horas_guardia_ext_upd(guardia.getClave_empleado(), guardia.getId(), inicio, fin);
+					maxDiasEnQnaExt  = guardiaRepository.get_dias_guardia_ext_upd(guardia.getClave_empleado(), guardia.getId(), inicio, fin, guardia.getFec_inicio());
+
+					switch (guardia.getId_clave_movimiento()) {
+
+						case "06", "08", "09":
+							// Valida horas por día
+							if (horasEnDiaExt + guardia.getHoras() > 11)
+								return ResponseHandler.generateResponse("No se puede exceder de 11 horas al día en el registro de guardias. Acualmente cuenta con " + horasEnDiaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + guardia.getHoras() > 121)
+								return ResponseHandler.generateResponse("No se puede exceder de 121 horas a la quincena en el registro de guardias. Acualmente cuenta con " + maxHorasEnQnaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + 1 > 11)
+								return ResponseHandler.generateResponse("No se puede exceder de 11 días a la quincena en el registro de guardias. Acualmente cuenta con " + maxDiasEnQnaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);	
+							break;
+
+						case "07":
+							// Valida horas por día
+							if (horasEnDiaExt + guardia.getHoras() > 24)
+								return ResponseHandler.generateResponse("No se puede exceder de 24 horas al día en el registro de guardias. Acualmente cuenta con " + horasEnDiaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + guardia.getHoras() > 144)
+								return ResponseHandler.generateResponse("No se puede exceder de 144 horas a la quincena en el registro de guardias. Acualmente cuenta con " + maxHorasEnQnaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + 1 > 6)
+								return ResponseHandler.generateResponse("No se puede exceder de 6 días a la quincena en el registro de guardias. Acualmente cuenta con " + maxDiasEnQnaExt
+										+ " más " + guardia.getHoras() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
 					break;
 
 				default:
 					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			}
-
-			try {
-				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
-				mes = pagaRepository.findByFecha(fec_pago).getMes_ejercicio();
-			} catch (EmptyResultDataAccessException e) {
-				return ResponseHandler.generateResponse("No existe la fecha de pago indicada",
-						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			try {
@@ -476,6 +677,61 @@ public class GuardiaController {
 			}
 
 			return ResponseHandler.generateResponse("El estatus de la guardia se actualizó de manera exitósa", HttpStatus.OK, null);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Actualizar Estatus de Guardias en el Sistema", description = "Actualizar Guardias de Suplencias en el Sistema", tags = { "Guardia" })
+	@PutMapping("/guardias/validacion_guardias")
+	public ResponseEntity<Object> validacionGuardias(
+			@Parameter(description = "Fecha de control para validar las guardias", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fec_pago,
+			@Parameter(description = "Estatus a actualizar de las guardias (1 - Autorización, 3 - Confirmación)", required = true) @RequestParam(required = true) Integer estatus,
+			@Parameter(description = "Tipo de Guardias para realizar la validación", required = true) @RequestParam(required = true) String tipo,
+			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario ) {
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String strFecha = dateFormat.format(fec_pago);
+
+		try {
+
+			switch (estatus) {
+
+				case 1:
+
+					switch (tipo) {
+					
+						case "GI":
+							guardiaRepository.updateAuthStatusGuardias1(tipo, strFecha, idUsuario);
+							break;
+
+						case "GE":
+							guardiaRepository.updateAuthStatusGuardias1Ext(tipo, strFecha, idUsuario);
+							break;
+					}
+					break;
+
+				case 3:
+
+					switch (tipo) {
+					
+						case "GI":
+							guardiaRepository.updateAuthStatusGuardias2(tipo, strFecha, idUsuario);
+							break;
+	
+						case "GE":
+							guardiaRepository.updateAuthStatusGuardias2Ext(tipo, strFecha, idUsuario);
+							break;
+					}
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+			}
+
+			return ResponseHandler.generateResponse("El estatus de las guardias se actualizó de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);

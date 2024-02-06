@@ -5,8 +5,11 @@ public class DatosGuardia {
 	private Integer id; // 1
 	private String clave_empleado;
 	private String id_centro_trabajo;
+	private String n_centro_trabajo;
 	private String id_clave_servicio;
+	private String n_clave_servicio;
 	private String id_puesto_plaza;
+	private String n_puesto_plaza;
 	private String id_nivel;
 	private String id_sub_nivel;
 	private String id_tipo_jornada;
@@ -49,17 +52,35 @@ public class DatosGuardia {
 	public void setId_centro_trabajo(String id_centro_trabajo) {
 		this.id_centro_trabajo = id_centro_trabajo;
 	}
+	public String getN_centro_trabajo() {
+		return n_centro_trabajo;
+	}
+	public void setN_centro_trabajo(String n_centro_trabajo) {
+		this.n_centro_trabajo = n_centro_trabajo;
+	}
 	public String getId_clave_servicio() {
 		return id_clave_servicio;
 	}
 	public void setId_clave_servicio(String id_clave_servicio) {
 		this.id_clave_servicio = id_clave_servicio;
 	}
+	public String getN_clave_servicio() {
+		return n_clave_servicio;
+	}
+	public void setN_clave_servicio(String n_clave_servicio) {
+		this.n_clave_servicio = n_clave_servicio;
+	}
 	public String getId_puesto_plaza() {
 		return id_puesto_plaza;
 	}
 	public void setId_puesto_plaza(String id_puesto_plaza) {
 		this.id_puesto_plaza = id_puesto_plaza;
+	}
+	public String getN_puesto_plaza() {
+		return n_puesto_plaza;
+	}
+	public void setN_puesto_plaza(String n_puesto_plaza) {
+		this.n_puesto_plaza = n_puesto_plaza;
 	}
 	public String getId_nivel() {
 		return id_nivel;

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.model.CifrasDeImpuestos;
 import gob.issste.gys.model.CifrasDeImpuestosPorRepresentacion;
+import gob.issste.gys.model.DatosPensionAlimenticia;
 import gob.issste.gys.model.DetalleCifrasDeImpuestos;
 import gob.issste.gys.model.DetalleCifrasDeImpuestosConPA;
 import gob.issste.gys.model.DetalleCifrasDeImpuestosPorRep;
@@ -336,28 +337,28 @@ public class AdminController {
 		return ResponseHandler.generateResponse("Se obtubieron las cifras de ISR de manera exitosa", HttpStatus.OK, cifras);
 	}
 
-	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
-	@GetMapping("/spep")
-	public ResponseEntity<Object> archivoSPEP(
-			@Parameter(description = "Fecha de control para el cálculo de ISR de la guardia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaControl,
-			@Parameter(description = "Parámetro para indicar el tipo de concepto (Guardias externas: GE o Suplencias externas: SE)", required = true) @RequestParam(required = true) String tipoConcepto ) {
-
-		List<String> layout;
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		String strDate = dateFormat.format(fechaControl);
-
-		try {
-
-			layout = adminRepository.consultaLayoutSPEP(strDate, tipoConcepto); 
-			//pagaRepository.updateStatus(4);
-
-			return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, layout);
-
-		} catch (Exception e) {
-
-			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
-		}
-	}
+//	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
+//	@GetMapping("/spep")
+//	public ResponseEntity<Object> archivoSPEP(
+//			@Parameter(description = "Fecha de control para el cálculo de ISR de la guardia", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fechaControl,
+//			@Parameter(description = "Parámetro para indicar el tipo de concepto (Guardias externas: GE o Suplencias externas: SE)", required = true) @RequestParam(required = true) String tipoConcepto ) {
+//
+//		List<String> layout;
+//		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//		String strDate = dateFormat.format(fechaControl);
+//
+//		try {
+//
+//			layout = adminRepository.consultaLayoutSPEP(strDate, tipoConcepto); 
+//			//pagaRepository.updateStatus(4);
+//
+//			return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, layout);
+//
+//		} catch (Exception e) {
+//
+//			return ResponseHandler.generateResponse("Error al obtener la fecha de control de pagos del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//		}
+//	}
 
 	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
 	@GetMapping("/layout_spep")
@@ -406,15 +407,37 @@ public class AdminController {
 			@Parameter(description = "ID de la representación para obtener las adscripciones asociadas", required = true) @RequestParam(required = true) String idRepresentacion ) {
 
 		List<LayoutSpep> layout;
-		//List<String> layoutStr = new ArrayList<String>();
+		List<DatosPensionAlimenticia> listaDeDatosPA;
 
 		try {
 
 			layout = adminRepository.consultaLayoutSPEP_X_Rep(anio, mes, tipoFechaControl, id_ordinal, idRepresentacion);
 
-//			for (LayoutSpep reg : layout) {
-//				layoutStr.add(reg.toString());
-//			}
+			for (LayoutSpep reg : layout) {
+				listaDeDatosPA = new ArrayList<DatosPensionAlimenticia>();
+				if (reg.getSuma_pension()>0) {
+					listaDeDatosPA = adminRepository.consultaDatosPA(anio, mes, tipoFechaControl, id_ordinal, reg.getRfc());
+				}
+				if (!listaDeDatosPA.isEmpty()) {
+					for (DatosPensionAlimenticia dpa:listaDeDatosPA) {
+						switch(dpa.getCons_benef()) {
+							case "1":
+									dpa.setPago_pension(reg.getPension_1());
+								break;
+							case "2":
+									dpa.setPago_pension(reg.getPension_2());
+								break;
+							case "3":
+									dpa.setPago_pension(reg.getPension_3());
+								break;
+							case "4":
+									dpa.setPago_pension(reg.getPension_4());
+								break;
+						}
+					}
+					reg.setBeneficiarios(listaDeDatosPA);
+				}
+			}
 
 			if (layout.isEmpty()) {
 				layout = new ArrayList<LayoutSpep>();
@@ -468,5 +491,49 @@ public class AdminController {
 			return ResponseHandler.generateResponse("Error del proceso de cálculo de pensión alimenticia para guardias o suplencias", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
+
+//	@Operation(summary = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", description = "Realiza el proceso de generación de archivo de carga al SPEP para guardias o suplencias", tags = { "Admin" })
+//	@GetMapping("/datos_pa")
+//	public ResponseEntity<Object> getDatosPA(
+//			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
+//			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
+//			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl,
+//			@Parameter(description = "Parámetro para indicar el ID ordinal a complementar en el cálculo de ISR", required = true) @RequestParam(required = true) Integer id_ordinal,
+//			@Parameter(description = "ID de la representación para obtener las adscripciones asociadas", required = true) @RequestParam(required = true) String idRepresentacion ) {
+//
+//		List<LayoutSpep> layout;
+//		List<DatosPensionAlimenticia> listaDeDatosPA;
+//
+//		try {
+//
+//			layout = adminRepository.consultaLayoutSPEP_X_Rep(anio, mes, tipoFechaControl, id_ordinal, idRepresentacion);
+//
+//			for (LayoutSpep reg : layout) {
+//				listaDeDatosPA = new ArrayList<DatosPensionAlimenticia>();
+//				if (reg.getSuma_pension()>0) {
+//					listaDeDatosPA = adminRepository.consultaDatosPA(anio, mes, tipoFechaControl, id_ordinal, reg.getRfc());
+//				}
+//				if (!listaDeDatosPA.isEmpty()) {
+//					reg.setBeneficiarios(listaDeDatosPA);
+//				}
+//			}
+//
+//			if (layout.isEmpty()) {
+//				layout = new ArrayList<LayoutSpep>();
+//				return ResponseHandler.generateResponse("No existen registros con las condiciones seleccionadas", HttpStatus.NOT_FOUND, layout);
+//			}
+//
+//		} catch (EmptyResultDataAccessException e) {
+//
+//			layout = new ArrayList<LayoutSpep>();
+//			return ResponseHandler.generateResponse("No existen registros con las condiciones seleccionadas", HttpStatus.NOT_FOUND, layout);
+//
+//		} catch (Exception e) {
+//
+//			return ResponseHandler.generateResponse("Error al obtener registros con las condiciones seleccionadas en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//		}
+//
+//		return ResponseHandler.generateResponse("Generación de archivo de carga al SPEP para guardias o suplencias de manera exitósa", HttpStatus.OK, layout);
+//	}
 
 }

@@ -127,7 +127,7 @@ public interface ISuplenciaRepository {
 
 	public String QUERY_GET_SALDO_SUPLENCIA_INT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_emp\r\n"
-												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_delegacion = ?)\r\n"
+												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? ) )\r\n"
 												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
 	double ObtenerSaldoUtilizado(String idDelegacion, int anio_ejercicio, int mes_ejercicio);
 
@@ -139,7 +139,7 @@ public interface ISuplenciaRepository {
 	
 	public String QUERY_GET_SALDO_SUPLENCIA_EXT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_ext\r\n"
-												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_delegacion = ?)\r\n"
+												+ "Where id_centro_trabajo IN (Select id_centro_trabajo From m4t_centros_trab Where id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? ) )\r\n"
 												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
 	double ObtenerSaldoUtilizadoExt(String idDelegacion, int anio_ejercicio, int mes_ejercicio);
 
@@ -165,6 +165,15 @@ public interface ISuplenciaRepository {
 												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
 	public int existe_suplente(DatosSuplencia suplencia);
 
+	public String QUERY_EXISTS_SUPLENTE_INT_UPD = "Select COUNT(*) \r\n"
+												+ "From gys_suplencias_emp\r\n"
+												+ "Where id_empleado_sup = ?\r\n"
+												+ "  And id<>?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int existe_suplente_upd(DatosSuplencia suplencia);
+
 	public String QUERY_EXISTS_SUPL_EXT         = "Select COUNT(*) \r\n"
 												+ "From gys_suplencias_ext\r\n"
 												+ "Where rfc = ?\r\n"
@@ -180,6 +189,15 @@ public interface ISuplenciaRepository {
 												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
 												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
 	public int existe_suplenteExt(DatosSuplencia suplencia);
+
+	public String QUERY_EXISTS_SUPLENTE_EXT_UPD = "Select COUNT(*) \r\n"
+												+ "From gys_suplencias_ext\r\n"
+												+ "Where  id_empleado_sup = ?\r\n"
+												+ "  And id<>?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int existe_suplenteExt_upd(DatosSuplencia suplencia);
 
 	public String QUERY_EXISTS_SUPL_INT_UPD     = "Select COUNT(*) \r\n"
 												+ "From gys_suplencias_emp\r\n"
@@ -217,6 +235,81 @@ public interface ISuplenciaRepository {
 											   + "Where rfc = ? And fec_paga = ? And fec_inicio = ? And id_ordinal = ?";
 	int updateSuplenciaExtVars(DatosSuplencia suplencia);
 
+	/*
+	 * 
+	 * Consultas para validar los topes de las horas/días de guardias
+	 * 
+	 */
+
+	public String QUERY_GET_HORAS_SUPLENCIA_INT = "Select SUM(TRUNC(id_tipo_jornada*dias)) \r\n"
+												+ "From gys_suplencias_emp\r\n"
+												+ "Where id_empleado = ? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_horas_suplencia(String clave_empleado, String inicio, String fin);
+
+	public String QUERY_GET_HORAS_SUPLENCIA_INT_UPD = "Select SUM(TRUNC(id_tipo_jornada*dias)) \r\n"
+												+ "From gys_suplencias_emp\r\n"
+												+ "Where id_empleado = ? \r\n"
+												+ "  And id<>? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_horas_suplencia_upd(String clave_empleado, Integer id, String inicio, String fin);
+
+	public String QUERY_GET_HORAS_SUPLENCIA_EXT = "Select SUM(TRUNC(id_tipo_jornada*dias)) \r\n"
+												+ "From gys_suplencias_ext\r\n"
+												+ "Where rfc = ? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_horas_suplencia_ext(String clave_empleado, String inicio, String fin);
+
+	public String QUERY_GET_HORAS_SUPLENCIA_EXT_UPD = "Select SUM(TRUNC(id_tipo_jornada*dias)) \r\n"
+												+ "From gys_suplencias_ext\r\n"
+												+ "Where rfc = ? \r\n"
+												+ "  And id<>? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?)) \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))    \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_horas_suplencia_ext_upd(String clave_empleado, Integer id, String inicio, String fin);
+
+	public String QUERY_GET_DIAS_SUPLENCIA_INT   = "Select SUM(dias) \r\n"
+												+ "From gys_suplencias_emp\r\n"
+												+ "Where id_empleado = ?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?))\r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))   \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_dias_suplencia(String clave_empleado, String inicio, String fin);
+
+	public String QUERY_GET_DIAS_SUPLENCIA_INT_UPD = "Select SUM(dias) \r\n"
+												+ "From gys_suplencias_emp\r\n"
+												+ "Where id_empleado = ?\r\n"
+												+ "  And id<>? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?))\r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))   \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_dias_suplencia_upd(String clave_empleado, Integer id, String inicio, String fin);
+
+	public String QUERY_GET_DIAS_SUPLENCIA_EXT    = "Select SUM(dias) \r\n"
+												+ "From gys_suplencias_ext\r\n"
+												+ "Where rfc = ?\r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?))\r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))   \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_dias_suplencia_ext(String clave_empleado, String inicio, String fin);
+
+	public String QUERY_GET_DIAS_SUPLENCIA_EXT_UPD = "Select SUM(dias) \r\n"
+												+ "From gys_suplencias_ext\r\n"
+												+ "Where rfc = ?\r\n"
+												+ "  And id<>? \r\n"
+												+ "  And (((fec_inicio>=?) And (fec_inicio <= ?))\r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_fin <= ?))   \r\n"
+												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
+	public int get_dias_suplencia_ext_upd(String clave_empleado, Integer id, String inicio, String fin);
+
+
 	public String STMT_UPDATE_STATUS 			= "UPDATE gys_suplencias_emp Set estatus = ?\r\n"
 												+ "Where id = ?";
 	int updateStatusSuplencia(int status, int id);
@@ -232,6 +325,42 @@ public interface ISuplenciaRepository {
 	public String STMT_UPDATE_AUTH_STATUS_2		= "UPDATE gys_autorizacion_suplencias Set estatus2 = ?, comentarios2 = ?, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND\r\n"
 												+ "Where id_suplencia = ? And id_tipo = ?";
 	int updateAuthStatusSuplencia2(int status, int id, String tipo, String comentarios, int idUsuario);
+
+	public String STMT_UPDATES_AUTH_STATUS_1	= "Merge Into gys_autorizacion_suplencias A\r\n"
+												+ "Using gys_suplencias_emp S\r\n"
+												+ "  ON  A.id_suplencia = S.id\r\n"
+												+ "  And A.estatus1 = 0 And id_tipo = ?\r\n"
+												+ "  And S.fec_paga = ?\r\n"
+												+ "WHEN MATCHED THEN\r\n"
+												+ "    UPDATE SET estatus1 = 1, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusSuplencias1(String tipo, String fec_pago, int idUsuario);
+
+	public String STMT_UPDATES_AUTH_STATUS_1ext	= "Merge Into gys_autorizacion_suplencias A\r\n"
+												+ "Using gys_suplencias_ext S\r\n"
+												+ "  ON  A.id_suplencia = S.id\r\n"
+												+ "  And A.estatus1 = 0 And id_tipo = ?\r\n"
+												+ "  And S.fec_paga = ?\r\n"
+												+ "WHEN MATCHED THEN\r\n"
+												+ "    UPDATE SET estatus1 = 1, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusSuplencias1Ext(String tipo, String fec_pago, int idUsuario);
+
+	public String STMT_UPDATES_AUTH_STATUS_2	= "Merge Into gys_autorizacion_suplencias A\r\n"
+												+ "Using gys_suplencias_emp S\r\n"
+												+ "  ON  A.id_suplencia = S.id\r\n"
+												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"
+												+ "  And id_tipo = ? And S.fec_paga = ?\r\n"
+												+ "WHEN MATCHED THEN\r\n"
+												+ "    UPDATE SET estatus2 = 3, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusSuplencias2(String tipo, String fec_pago, int idUsuario);
+
+	public String STMT_UPDATES_AUTH_STATUS_2ext	= "Merge Into gys_autorizacion_suplencias A\r\n"
+												+ "Using gys_suplencias_ext S\r\n"
+												+ "  ON  A.id_suplencia = S.id\r\n"
+												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"
+												+ "  And id_tipo = ? And S.fec_paga = ?\r\n"
+												+ "WHEN MATCHED THEN\r\n"
+												+ "    UPDATE SET estatus2 = 3, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusSuplencias2Ext(String tipo, String fec_pago, int idUsuario);
 
 	List<DatosSuplencia> ConsultaDynamicSuplencias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
 			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, String emp_suplir, Integer estatus);

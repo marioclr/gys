@@ -76,11 +76,11 @@ public class JdbcBolsaTrabajoRepository implements IBolsaTrabajoRepository {
 	}
 
 	@Override
-	public BolsaTrabajo findByRFC(String rfc) {
+	public BolsaTrabajo findByRFC(String rfc, String idDeleg) {
 		logger.info(QUERY_GET_BOLSA_TRABAJO_BY_RFC);
 		try {
 			BolsaTrabajo bolsa = jdbcTemplate.queryForObject(QUERY_GET_BOLSA_TRABAJO_BY_RFC, 
-					new BolsaTrabajoMapper(), rfc);
+					new BolsaTrabajoMapper(), rfc, idDeleg);
 			return bolsa;
 		} catch (EmptyResultDataAccessException e) {
 			return null;

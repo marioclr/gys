@@ -10,6 +10,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -348,6 +349,14 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
+	public int existe_suplente_upd(DatosSuplencia suplencia) {
+		logger.info(QUERY_EXISTS_SUPLENTE_INT_UPD);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPLENTE_INT_UPD, Integer.class,
+				new Object[] { suplencia.getClave_empleado_suplir(), suplencia.getId(), suplencia.getFec_inicio(), suplencia.getFec_fin(), 
+						suplencia.getFec_inicio(), suplencia.getFec_fin(), suplencia.getFec_inicio(), suplencia.getFec_fin() } );
+	}
+
+	@Override
 	public int updateSuplenciaIntVars(DatosSuplencia suplencia) {
 		return jdbcTemplate.update(QUERY_UPD_SUPLENCIA_INT_VARS, 
 				new Object[] { suplencia.getImporte(), suplencia.getRiesgos(),
@@ -391,6 +400,16 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
+	public int existe_suplenteExt_upd(DatosSuplencia suplencia) {
+		logger.info(QUERY_EXISTS_SUPLENTE_EXT_UPD);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPLENTE_EXT_UPD, Integer.class,
+				new Object[] { suplencia.getClave_empleado_suplir(), suplencia.getId(),
+						suplencia.getFec_inicio(), suplencia.getFec_fin(),
+						suplencia.getFec_inicio(), suplencia.getFec_fin(),
+						suplencia.getFec_inicio(), suplencia.getFec_fin() } );
+	}
+
+	@Override
 	public int existe_suplencia_upd(DatosSuplencia suplencia) {
 		logger.info(QUERY_EXISTS_SUPL_INT_UPD);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_SUPL_INT_UPD, Integer.class,
@@ -408,6 +427,118 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
 						suplencia.getFec_inicio(), suplencia.getFec_fin(), 
 						suplencia.getFec_inicio(), suplencia.getFec_fin() } );
+	}
+
+	@Override
+	public int get_horas_suplencia(String clave_empleado, String inicio, String fin) {
+		logger.info(QUERY_GET_HORAS_SUPLENCIA_INT);
+		try {
+			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_SUPLENCIA_INT, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return horas;
+		} catch(EmptyResultDataAccessException Ex) {
+			return 0;
+		}catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_horas_suplencia_upd(String clave_empleado, Integer id, String inicio, String fin) {
+		logger.info(QUERY_GET_HORAS_SUPLENCIA_INT_UPD);
+		try {
+			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_SUPLENCIA_INT_UPD, Integer.class,
+					new Object[] { clave_empleado, id,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return horas;
+		} catch(EmptyResultDataAccessException Ex) {
+			return 0;
+		}catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_horas_suplencia_ext(String clave_empleado, String inicio, String fin) {
+		logger.info(QUERY_GET_HORAS_SUPLENCIA_EXT);
+		try {
+			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_SUPLENCIA_EXT, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return horas;
+		} catch(EmptyResultDataAccessException Ex) {
+			return 0;
+		}catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_horas_suplencia_ext_upd(String clave_empleado, Integer id, String inicio, String fin) {
+		logger.info(QUERY_GET_HORAS_SUPLENCIA_EXT_UPD);
+		try {
+			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_SUPLENCIA_EXT_UPD, Integer.class,
+					new Object[] { clave_empleado, id,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return horas;
+		} catch(EmptyResultDataAccessException Ex) {
+			return 0;
+		}catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_dias_suplencia(String clave_empleado, String inicio, String fin) {
+		logger.info(QUERY_GET_DIAS_SUPLENCIA_INT);
+		try {
+			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_SUPLENCIA_INT, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return dias;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_dias_suplencia_upd(String clave_empleado, Integer id, String inicio, String fin) {
+		logger.info(QUERY_GET_DIAS_SUPLENCIA_INT_UPD);
+		try {
+			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_SUPLENCIA_INT_UPD, Integer.class,
+					new Object[] { clave_empleado, id,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return dias;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_dias_suplencia_ext(String clave_empleado, String inicio, String fin) {
+		logger.info(QUERY_GET_DIAS_SUPLENCIA_EXT);
+		try {
+			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_SUPLENCIA_EXT, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return dias;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_dias_suplencia_ext_upd(String clave_empleado, Integer id, String inicio, String fin) {
+		logger.info(QUERY_GET_DIAS_SUPLENCIA_EXT_UPD);
+		try {
+			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_SUPLENCIA_EXT_UPD, Integer.class,
+					new Object[] { clave_empleado, id,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return dias;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
 	}
 
 	@Override
@@ -436,6 +567,34 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 		logger.info(STMT_UPDATE_AUTH_STATUS_2);
 		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_2,
 	            new Object[] { status, comentarios, idUsuario, id, tipo });
+	}
+
+	@Override
+	public int updateAuthStatusSuplencias1(String tipo, String fec_pago, int idUsuario) {
+		logger.info(STMT_UPDATES_AUTH_STATUS_1);
+		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1,
+	            new Object[] { tipo, fec_pago, idUsuario });
+	}
+
+	@Override
+	public int updateAuthStatusSuplencias1Ext(String tipo, String fec_pago, int idUsuario) {
+		logger.info(STMT_UPDATES_AUTH_STATUS_1ext);
+		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1ext,
+	            new Object[] { tipo, fec_pago, idUsuario });
+	}
+
+	@Override
+	public int updateAuthStatusSuplencias2(String tipo, String fec_pago, int idUsuario) {
+		logger.info(STMT_UPDATES_AUTH_STATUS_2);
+		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_2,
+	            new Object[] { tipo, fec_pago, idUsuario });
+	}
+
+	@Override
+	public int updateAuthStatusSuplencias2Ext(String tipo, String fec_pago, int idUsuario) {
+		logger.info(STMT_UPDATES_AUTH_STATUS_2ext);
+		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_2ext,
+	            new Object[] { tipo, fec_pago, idUsuario });
 	}
 
 	@Override
@@ -482,7 +641,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 		}
 
 		if (idDelegacion != null) { 
-			QUERY_CONDITION += "  And C.id_delegacion = ?\r\n";
+			QUERY_CONDITION += "  And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n";
 			objects.add(idDelegacion);
 		}
 
@@ -511,7 +670,8 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 			objects.add(estatus);
 		}
 
-		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, S.id_clave_servicio, S.id_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
+		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, n_centro_trabajo,\r\n"
+							 + "  S.id_clave_servicio, n_clave_servicio, S.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
 							 + "  S.id_nivel, S.id_sub_nivel, S.id_tipo_jornada, S.id_turno, dias, S.fec_inicio, S.fec_fin, S.folio, S.motivo, S.id_clave_movimiento, S.coment, S.estatus,\r\n"
 							 + "  S.importe, P.id_tipo_tabulador, S.fec_paga, C.id_zona, S.id_ordinal, NVL(riesgos,0) riesgos, S.id_usuario,\r\n"
 							 + "  S.id_empleado_sup clave_empleado_suplir\r\n"
@@ -562,7 +722,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 		}
 
 		if (idDelegacion != null) { 
-			QUERY_CONDITION += "  And C.id_delegacion = ?\r\n";
+			QUERY_CONDITION += "  And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n";
 			objects.add(idDelegacion);
 		}
 
@@ -597,7 +757,8 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 
 		}
 
-		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, S.id_clave_servicio, S.id_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
+		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, n_centro_trabajo,\r\n"
+							 + "  S.id_clave_servicio, n_clave_servicio, S.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
 							 + "  S.id_nivel, S.id_sub_nivel, S.id_tipo_jornada, S.id_turno, dias, S.fec_inicio, S.fec_fin, S.folio, S.motivo, S.id_clave_movimiento, S.coment,\r\n"
 							 + "  Case When A.estatus2 = 0 Then A.estatus1 Else A.estatus2 End estatus,\r\n"
 							 + "  S.importe, P.id_tipo_tabulador, S.fec_paga, C.id_zona, S.id_ordinal, NVL(riesgos,0) riesgos, S.id_usuario,\r\n"
@@ -618,5 +779,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 
 		return suplencias;
 	}
+
+
 
 }

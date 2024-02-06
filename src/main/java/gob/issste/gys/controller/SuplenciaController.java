@@ -29,6 +29,7 @@ import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.BolsaTrabajo;
 import gob.issste.gys.model.DatosEmpleado;
 import gob.issste.gys.model.DatosSuplencia;
+import gob.issste.gys.model.Paga;
 import gob.issste.gys.model.Presupuesto;
 import gob.issste.gys.repository.IBolsaTrabajoRepository;
 import gob.issste.gys.repository.IEmpleadoRepository;
@@ -134,8 +135,16 @@ public class SuplenciaController {
 					if (conEmpleados) {
 						for(DatosSuplencia suplencia:suplencias) {
 							logger.info("Emp: " + suplencia.getClave_empleado() + " Sup: " + suplencia.getClave_empleado() + " Fecha: " + suplencia.getFec_paga());
+
 							try {
-								BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado());
+								empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
+							} catch (Exception ex) {
+								empleado_sup = new DatosEmpleado();
+							}
+							suplencia.setEmpleado_suplir(empleado_sup);
+
+							try {
+								BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado(), empleado_sup.getId_delegacion());
 								empleado = new DatosEmpleado();
 								empleado.setClave_empleado(bolsa.getRfc());
 								empleado.setNombre(bolsa.getNombre());
@@ -145,12 +154,7 @@ public class SuplenciaController {
 								empleado = new DatosEmpleado();
 							}
 							suplencia.setEmpleado(empleado);
-							try {
-								empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
-							} catch (Exception ex) {
-								empleado_sup = new DatosEmpleado();
-							}
-							suplencia.setEmpleado_suplir(empleado_sup);
+
 						}
 					}
 					break;
@@ -207,8 +211,16 @@ public class SuplenciaController {
 				case "SE":
 					suplencia = suplenciaRepository.findByIdExt(idSuplencia);
 					suplencia.setTipo_suplencia("SE");
+
 					try {
-						BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado());
+						empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
+					} catch (Exception ex) {
+						empleado_sup = new DatosEmpleado();
+					}
+					suplencia.setEmpleado_suplir(empleado_sup);
+
+					try {
+						BolsaTrabajo bolsa = bolsaTrabajoRepository.findByRFC(suplencia.getClave_empleado(), empleado_sup.getId_delegacion());
 						empleado = new DatosEmpleado();
 						empleado.setClave_empleado(bolsa.getRfc());
 						empleado.setNombre(bolsa.getNombre());
@@ -218,12 +230,7 @@ public class SuplenciaController {
 						empleado = new DatosEmpleado();
 					}
 					suplencia.setEmpleado(empleado);
-					try {
-						empleado_sup = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getClave_empleado_suplir());						
-					} catch (Exception ex) {
-						empleado_sup = new DatosEmpleado();
-					}
-					suplencia.setEmpleado_suplir(empleado_sup);
+
 					break;
 
 				default:
@@ -266,7 +273,7 @@ public class SuplenciaController {
 					if (idCentroTrab == null) {
 						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
 					} else {
-						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idDelegacion, anio_ejercicio, mes_ejercicio);
+						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
 					}
 					break;
 
@@ -288,10 +295,26 @@ public class SuplenciaController {
 		try {
 
 			int id = 0, anio, mes;
+			int maxHorasEnQnaInt = 0, maxHorasEnQnaExt = 0,
+				maxDiasEnQnaInt = 0,  maxDiasEnQnaExt = 0;
 			double saldo_utilizado=0, saldo=0;
 			Presupuesto presup;
+			Paga paga;
 
 			String fec_pago = suplencia.getFec_paga();
+			String inicio, fin;
+
+			try {
+				paga   = pagaRepository.findByFecha(fec_pago);
+				anio   = paga.getAnio_ejercicio();
+				mes    = paga.getMes_ejercicio();
+				inicio = paga.getFec_inicio();
+				fin    = paga.getFec_fin();
+			} catch (EmptyResultDataAccessException e) {
+				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+
+			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
 
 			switch (suplencia.getTipo_suplencia()) {
 
@@ -300,6 +323,54 @@ public class SuplenciaController {
 						return ResponseHandler.generateResponse("Existe un registro de Suplencia del suplente, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
 					if (suplenciaRepository.existe_suplente(suplencia) > 0)
 						return ResponseHandler.generateResponse("Existe un registro de Suplencia del empleado a suplir, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					maxHorasEnQnaInt = suplenciaRepository.get_horas_suplencia(suplencia.getClave_empleado(), inicio, fin);
+					maxDiasEnQnaInt  = suplenciaRepository.get_dias_suplencia(suplencia.getClave_empleado(), inicio, fin);
+
+					switch (suplencia.getId_clave_movimiento()) {
+
+						case "01", "02", "05":
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 88)
+								return ResponseHandler.generateResponse("No se puede exceder de 88 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaInt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + suplencia.getDias() > 12)
+								return ResponseHandler.generateResponse("No se puede exceder de 12 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaInt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "03":
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 96)
+								return ResponseHandler.generateResponse("No se puede exceder de 96 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaInt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + suplencia.getDias() > 4)
+								return ResponseHandler.generateResponse("No se puede exceder de 4 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaInt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "04":
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 84)
+								return ResponseHandler.generateResponse("No se puede exceder de 84 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaInt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + suplencia.getDias() > 7)
+								return ResponseHandler.generateResponse("No se puede exceder de 7 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaInt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
 					break;
 
 				case "SE":
@@ -307,25 +378,66 @@ public class SuplenciaController {
 						return ResponseHandler.generateResponse("Existe un registro de Suplencia del suplente, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
 					if (suplenciaRepository.existe_suplenteExt(suplencia) > 0)
 						return ResponseHandler.generateResponse("Existe un registro de Suplencia del empleado a suplir, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					maxHorasEnQnaExt = suplenciaRepository.get_horas_suplencia_ext(suplencia.getClave_empleado(), inicio, fin);
+					maxDiasEnQnaExt  = suplenciaRepository.get_dias_suplencia_ext(suplencia.getClave_empleado(), inicio, fin);
+
+					switch (suplencia.getId_clave_movimiento()) {
+
+						case "01", "02", "05":
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 88)
+								return ResponseHandler.generateResponse("No se puede exceder de 88 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaExt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + suplencia.getDias() > 12)
+								return ResponseHandler.generateResponse("No se puede exceder de 12 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaExt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "03":
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 96)
+								return ResponseHandler.generateResponse("No se puede exceder de 96 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaExt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + suplencia.getDias() > 4)
+								return ResponseHandler.generateResponse("No se puede exceder de 4 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaExt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "04":
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 84)
+								return ResponseHandler.generateResponse("No se puede exceder de 84 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaExt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + suplencia.getDias() > 7)
+								return ResponseHandler.generateResponse("No se puede exceder de 7 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaExt
+										+ " más " + suplencia.getDias() * (int) Double.parseDouble(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
 					break;
 
 				default:
 					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
 			int riesgos = empleadoRepository.ConsultaRiesgosEmp(suplencia.getEmpleado_suplir().getClave_empleado(), suplencia.getFec_paga());
 			suplencia.setRiesgos(riesgos);
 
 			String idCentroTrab = empleado.getId_centro_trabajo();
 
 			// Validaciones presupuestales
-			try {
-				anio = pagaRepository.findByFecha(fec_pago).getAnio_ejercicio();
-				mes = pagaRepository.findByFecha(fec_pago).getMes_ejercicio();
-			} catch (EmptyResultDataAccessException e) {
-				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			}
 			try {			
 				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes);
 			} catch (EmptyResultDataAccessException e) {
@@ -390,29 +502,146 @@ public class SuplenciaController {
 		try {
 
 			int anio, mes;
+			int maxHorasEnQnaInt = 0, maxHorasEnQnaExt = 0,
+					maxDiasEnQnaInt = 0,  maxDiasEnQnaExt = 0;
 			double saldo_utilizado=0, saldo=0;
 			Presupuesto presup;
+			Paga paga;
 
 			String fec_pago = suplencia.getFec_paga();
+			String inicio, fin;
 
+			try {
+				paga   = pagaRepository.findByFecha(fec_pago);
+				anio   = paga.getAnio_ejercicio();
+				mes    = paga.getMes_ejercicio();
+				inicio = paga.getFec_inicio();
+				fin    = paga.getFec_fin();
+			} catch (EmptyResultDataAccessException e) {
+				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			}
+
+			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
 
 			switch (suplencia.getTipo_suplencia()) {
 
 				case "SI":
 					if (suplenciaRepository.existe_suplencia_upd(suplencia)>0)
 						return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					if (suplenciaRepository.existe_suplente_upd(suplencia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia del empleado a suplir, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					maxHorasEnQnaInt = suplenciaRepository.get_horas_suplencia_upd(suplencia.getClave_empleado(), suplencia.getId(), inicio, fin);
+					maxDiasEnQnaInt  = suplenciaRepository.get_dias_suplencia_upd(suplencia.getClave_empleado(), suplencia.getId(), inicio, fin);
+
+					switch (suplencia.getId_clave_movimiento()) {
+
+						case "01", "02", "05":
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 88)
+								return ResponseHandler.generateResponse("No se puede exceder de 88 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaInt 
+										+ " más " + suplencia.getDias() * Integer.parseInt(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + suplencia.getDias() > 12)
+								return ResponseHandler.generateResponse("No se puede exceder de 12 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaInt 
+										+ " más " + suplencia.getDias() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "03":
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 96)
+								return ResponseHandler.generateResponse("No se puede exceder de 96 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaInt 
+										+ " más " + suplencia.getDias() * Integer.parseInt(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + suplencia.getDias() > 4)
+								return ResponseHandler.generateResponse("No se puede exceder de 4 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaInt 
+										+ " más " + suplencia.getDias() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "04":
+							// Valida horas por quincena
+							if (maxHorasEnQnaInt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 84)
+								return ResponseHandler.generateResponse("No se puede exceder de 84 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaInt 
+										+ " más " + suplencia.getDias() * Integer.parseInt(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaInt + suplencia.getDias() > 7)
+								return ResponseHandler.generateResponse("No se puede exceder de 7 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaInt 
+										+ " más " + suplencia.getDias() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
+
 					break;
 
 				case "SE":
-					if (suplenciaRepository.existe_suplenciaExt_upd(suplencia)>0)
-						return ResponseHandler.generateResponse("Existe un registro de Suplencia en ese mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					if (suplenciaRepository.existe_suplenciaExt_upd(suplencia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia del suplente, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					if (suplenciaRepository.existe_suplenteExt_upd(suplencia) > 0)
+						return ResponseHandler.generateResponse("Existe un registro de Suplencia del empleado a suplir, en ese mismo periodo, favor de validar", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+					maxHorasEnQnaExt = suplenciaRepository.get_horas_suplencia_ext_upd(suplencia.getClave_empleado(), suplencia.getId(), inicio, fin);
+					maxDiasEnQnaExt  = suplenciaRepository.get_dias_suplencia_ext_upd(suplencia.getClave_empleado(), suplencia.getId(), inicio, fin);
+
+					switch (suplencia.getId_clave_movimiento()) {
+
+						case "01", "02", "05":
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 88)
+								return ResponseHandler.generateResponse("No se puede exceder de 88 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaExt 
+										+ " más " + suplencia.getDias() * Integer.parseInt(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + suplencia.getDias() > 12)
+								return ResponseHandler.generateResponse("No se puede exceder de 12 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaExt 
+										+ " más " + suplencia.getDias() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "03":
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 96)
+								return ResponseHandler.generateResponse("No se puede exceder de 96 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaExt 
+										+ " más " + suplencia.getDias() * Integer.parseInt(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + suplencia.getDias() > 4)
+								return ResponseHandler.generateResponse("No se puede exceder de 4 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaExt 
+										+ " más " + suplencia.getDias() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						case "04":
+							// Valida horas por quincena
+							if (maxHorasEnQnaExt + (int) (suplencia.getDias() * Double.parseDouble(empleado.getId_tipo_jornada())) > 84)
+								return ResponseHandler.generateResponse("No se puede exceder de 84 horas a la quincena en el registro de suplencias. Acualmente cuenta con " + maxHorasEnQnaExt 
+										+ " más " + suplencia.getDias() * Integer.parseInt(empleado.getId_tipo_jornada()) + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							// Valida días por quincena
+							if(maxDiasEnQnaExt + suplencia.getDias() > 7)
+								return ResponseHandler.generateResponse("No se puede exceder de 7 días a la quincena en el registro de suplencias. Acualmente cuenta con " + maxDiasEnQnaExt 
+										+ " más " + suplencia.getDias() + " del registro actual, exceden ese límite.",
+										HttpStatus.INTERNAL_SERVER_ERROR, null);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
+					
 					break;
 
 				default:
 					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(suplencia.getFec_paga(), suplencia.getEmpleado_suplir().getClave_empleado());
 			int riesgos = empleadoRepository.ConsultaRiesgosEmp(suplencia.getEmpleado_suplir().getClave_empleado(), suplencia.getFec_paga());
 
 			String idCentroTrab = empleado.getId_centro_trabajo();
@@ -522,6 +751,67 @@ public class SuplenciaController {
 
 				default:
 					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+			}
+
+			return ResponseHandler.generateResponse("El estatus de la suplencia se actualizó de manera exitósa", HttpStatus.OK, null);
+		} catch (Exception e) {
+
+			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Actualizar Estatus de Suplencias en el Sistema", description = "Actualizar Estatus de Suplencias en el Sistema", tags = { "Suplencia" })
+	@PutMapping("/suplencias/validacion_suplencias")
+	public ResponseEntity<Object> validacionSuplencias(
+			@Parameter(description = "Fecha de control para validar las suplencias", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fec_pago,
+			@Parameter(description = "Estatus a actualizar de las suplencias (1 - Autorización, 3 - Confirmación)", required = true) @RequestParam(required = true) Integer estatus,
+			@Parameter(description = "Tipo de Suplencia para realizar la validación", required = true) @RequestParam(required = true) String tipo,
+			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario ) {
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		String strFecha = dateFormat.format(fec_pago);
+
+		try {
+
+			switch (estatus) {
+
+				case 1:
+
+					switch (tipo) {
+					
+						case "SI":
+								suplenciaRepository.updateAuthStatusSuplencias1(tipo, strFecha, idUsuario);
+							break;
+
+						case "SE":
+								suplenciaRepository.updateAuthStatusSuplencias1Ext(tipo, strFecha, idUsuario);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
+					break;
+
+				case 3:
+
+					switch (tipo) {
+					
+						case "SI":
+								suplenciaRepository.updateAuthStatusSuplencias2(tipo, strFecha, idUsuario);
+							break;
+	
+						case "SE":
+								suplenciaRepository.updateAuthStatusSuplencias2Ext(tipo, strFecha, idUsuario);
+							break;
+
+						default:
+							return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					}
+					break;
+
+				default:
+					return ResponseHandler.generateResponse("No se indicó el estatus de validación de la suplencia correctamente ('1': Autorizado o '3': Confirmado)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 			}
 

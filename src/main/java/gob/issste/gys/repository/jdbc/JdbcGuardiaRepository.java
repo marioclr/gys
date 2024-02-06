@@ -258,6 +258,211 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	}
 
 	@Override
+	public int existe_guardia(DatosGuardia guardia) {
+		logger.info(QUERY_EXISTS_GUARDIA_INT);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(), 
+							   guardia.getHora_inicio(), guardia.getHora_fin(),
+							   guardia.getHora_inicio(), guardia.getHora_fin(),
+							   guardia.getHora_inicio(), guardia.getHora_fin() } );
+	}
+
+	@Override
+	public int existe_guardia_upd(DatosGuardia guardia) {
+		logger.info(QUERY_EXISTS_GUARDIA_INT_UPD);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT_UPD, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
+						guardia.getId(),
+						guardia.getHora_inicio(), guardia.getHora_fin(),
+						guardia.getHora_inicio(), guardia.getHora_fin(),
+						guardia.getHora_inicio(), guardia.getHora_fin() } );
+	}
+
+	@Override
+	public int existe_guardia_ext(DatosGuardia guardia) {
+		logger.info(QUERY_EXISTS_GUARDIA_EXT);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_EXT, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
+							   guardia.getHora_inicio(), guardia.getHora_fin(),
+							   guardia.getHora_inicio(), guardia.getHora_fin(),
+							   guardia.getHora_inicio(), guardia.getHora_fin() } );
+	}
+
+	@Override
+	public int existe_guardia_ext_upd(DatosGuardia guardia) {
+		logger.info(QUERY_EXISTS_GUARDIA_EXT_UPD);
+		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_EXT_UPD, Integer.class,
+				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
+						guardia.getId(),
+						guardia.getHora_inicio(), guardia.getHora_fin(),
+						guardia.getHora_inicio(), guardia.getHora_fin(),
+						guardia.getHora_inicio(), guardia.getHora_fin() } );
+	}
+
+	// Validaciones de topes
+
+
+	@Override
+	public int get_horas_guardia(String clave_empleado, String inicio, String fin) {
+		logger.info(QUERY_GET_HORAS_GUARDIA_INT);
+		try {
+			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_GUARDIA_INT, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return horas;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_horas_guardia_upd(String clave_empleado, Integer id, String inicio, String fin) {
+		logger.info(QUERY_GET_HORAS_GUARDIA_INT_UPD);
+		try {
+			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_GUARDIA_INT_UPD, Integer.class,
+					new Object[] { clave_empleado, id,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return horas;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_horas_guardia_ext(String clave_empleado, String inicio, String fin) {
+		logger.info(QUERY_GET_HORAS_GUARDIA_EXT);
+		try {
+			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_GUARDIA_EXT, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, fin, inicio, fin, inicio, fin } );
+			return horas;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_horas_guardia_ext_upd(String clave_empleado, Integer id, String inicio, String fin) {
+		logger.info(QUERY_GET_HORAS_GUARDIA_EXT_UPD);
+		try {
+			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_GUARDIA_EXT_UPD, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, id, fin, inicio, fin, inicio, fin } );
+			return horas;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_dias_guardia(String clave_empleado, String inicio, String fin, String inicio1) {
+		logger.info(QUERY_GET_DIAS_GUARDIA_INT);
+		try {
+			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_GUARDIA_INT, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, fin, inicio, fin, inicio, fin, inicio1 } );
+			return dias;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_dias_guardia_upd(String clave_empleado, Integer id, String inicio, String fin, String inicio1) {
+		logger.info(QUERY_GET_DIAS_GUARDIA_INT_UPD);
+		try {
+			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_GUARDIA_INT_UPD, Integer.class,
+					new Object[] { clave_empleado, id,
+							inicio, fin, inicio, fin, inicio, fin, inicio1 } );
+			return dias;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_dias_guardia_ext(String clave_empleado, String inicio, String fin, String inicio1) {
+		logger.info(QUERY_GET_DIAS_GUARDIA_EXT);
+		try {
+			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_GUARDIA_EXT, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, fin, inicio, fin, inicio, fin, inicio1 } );
+			return dias;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int get_dias_guardia_ext_upd(String clave_empleado, Integer id, String inicio, String fin, String inicio1) {
+		logger.info(QUERY_GET_DIAS_GUARDIA_EXT_UPD);
+		try {
+			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_GUARDIA_EXT_UPD, Integer.class,
+					new Object[] { clave_empleado,
+							inicio, id, fin, inicio, fin, inicio, fin, inicio1 } );
+			return dias;
+		} catch(NullPointerException Ex) {
+			return 0;
+		}
+	}
+
+	@Override
+	public int updateStatusGuardia(int status, int id) {
+		logger.info(STMT_UPDATE_STATUS);
+		return jdbcTemplate.update(STMT_UPDATE_STATUS,
+	            new Object[] { status, id });
+	}
+
+	@Override
+	public int updateStatusGuardiaExt(int status, int id) {
+		logger.info(STMT_UPDATE_STATUS_EXT);
+		return jdbcTemplate.update(STMT_UPDATE_STATUS_EXT,
+	            new Object[] { status, id });
+	}
+
+	@Override
+	public int updateAuthStatusGuardia1(int status, int id, String tipo, String comentarios, int idUsuario) {
+		logger.info(STMT_UPDATE_AUTH_STATUS_1);
+		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_1,
+	            new Object[] { status, comentarios, idUsuario, id, tipo });
+	}
+
+	@Override
+	public int updateAuthStatusGuardia2(int status, int id, String tipo, String comentarios, int idUsuario) {
+		logger.info(STMT_UPDATE_AUTH_STATUS_2);
+		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_2,
+	            new Object[] { status, comentarios, idUsuario, id, tipo });
+	}
+
+	@Override
+	public int updateAuthStatusGuardias1(String tipo, String fec_pago, int idUsuario) {
+		logger.info(STMT_UPDATES_AUTH_STATUS_1);
+		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1,
+	            new Object[] { tipo, fec_pago, idUsuario });
+	}
+
+	@Override
+	public int updateAuthStatusGuardias1Ext(String tipo, String fec_pago, int idUsuario) {
+		logger.info(STMT_UPDATES_AUTH_STATUS_1ext);
+		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1ext,
+	            new Object[] { tipo, fec_pago, idUsuario });
+	}
+
+	@Override
+	public int updateAuthStatusGuardias2(String tipo, String fec_pago, int idUsuario) {
+		logger.info(STMT_UPDATES_AUTH_STATUS_2);
+		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_2,
+	            new Object[] { tipo, fec_pago, idUsuario });
+	}
+
+	@Override
+	public int updateAuthStatusGuardias2Ext(String tipo, String fec_pago, int idUsuario) {
+		logger.info(STMT_UPDATES_AUTH_STATUS_2ext);
+		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_2ext,
+	            new Object[] { tipo, fec_pago, idUsuario });
+	}
+
+	@Override
 	public List<DatosGuardia> ConsultaDynamicGuardias(String fechaPago, String tipo, String clave_empleado, Double importe_min, Double importe_max,
 			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus ) {
 
@@ -300,7 +505,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		}
 
 		if (idDelegacion != null) { 
-			QUERY_CONDITION += "And C.id_delegacion = ?\r\n";
+			QUERY_CONDITION += "And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n";
 			objects.add(idDelegacion);
 		}
 
@@ -324,14 +529,17 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 			objects.add(estatus);
 		}
 
-		String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, id_clave_servicio, G.id_puesto_plaza, '" + tipo + "' tipo_guardia,\r\n"
-							 + "id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, G.estatus,\r\n"
-							 + "G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
-							 + "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU \r\n"
+		String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, n_centro_trabajo,\r\n"
+							 + "  G.id_clave_servicio, n_clave_servicio, G.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_guardia,\r\n"
+							 + "  id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, hora_inicio, hora_fin, G.coment, G.estatus,\r\n"
+							 + "  G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
+							 + "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE\r\n"
 							 + "Where G.fec_paga = P.fec_pago And \r\n"
-							 + "G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
-							 + "G.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
-							 + "PU.id_sociedad = '01' And PU.id_empresa = '01'\r\n"
+							 + "  G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
+							 + "  G.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
+							 + "  PU.id_sociedad = '01' And PU.id_empresa = '01' And\r\n"
+							 + "  G.id_clave_servicio = SE.id_clave_servicio And\r\n"
+							 + "  SE.id_empresa='01'\r\n"
 							 + QUERY_CONDITION
 							 + "Order by G.fec_paga desc, G.fec_inicio";
 
@@ -340,76 +548,6 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 		return guardias;
 
-	}
-
-	@Override
-	public int existe_guardia(DatosGuardia guardia) {
-		logger.info(QUERY_EXISTS_GUARDIA_INT);
-		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT, Integer.class,
-				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(), 
-							   guardia.getHora_inicio(), guardia.getHora_fin(),
-							   guardia.getHora_inicio(), guardia.getHora_fin(),
-							   guardia.getHora_inicio(), guardia.getHora_fin() } );
-	}
-
-	@Override
-	public int existe_guardia_upd(DatosGuardia guardia) {
-		logger.info(QUERY_EXISTS_GUARDIA_INT_UPD);
-		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_INT_UPD, Integer.class,
-				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
-						guardia.getId(),
-						guardia.getHora_inicio(), guardia.getHora_fin(),
-						guardia.getHora_inicio(), guardia.getHora_fin(),
-						guardia.getHora_inicio(), guardia.getHora_fin() } );
-	}
-
-	@Override
-	public int existe_guardia_ext(DatosGuardia guardia) {
-		logger.info(QUERY_EXISTS_GUARDIA_EXT);
-		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_EXT, Integer.class,
-				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
-							   guardia.getHora_inicio(), guardia.getHora_fin(),
-							   guardia.getHora_inicio(), guardia.getHora_fin(),
-							   guardia.getHora_inicio(), guardia.getHora_fin() } );
-	}
-
-	@Override
-	public int existe_guardia_ext_upd(DatosGuardia guardia) {
-		logger.info(QUERY_EXISTS_GUARDIA_EXT_UPD);
-		return jdbcTemplate.queryForObject(QUERY_EXISTS_GUARDIA_EXT_UPD, Integer.class,
-				new Object[] { guardia.getClave_empleado(), guardia.getFec_inicio(),
-						guardia.getId(),
-						guardia.getHora_inicio(), guardia.getHora_fin(),
-						guardia.getHora_inicio(), guardia.getHora_fin(),
-						guardia.getHora_inicio(), guardia.getHora_fin() } );
-	}
-
-	@Override
-	public int updateStatusGuardia(int status, int id) {
-		logger.info(STMT_UPDATE_STATUS);
-		return jdbcTemplate.update(STMT_UPDATE_STATUS,
-	            new Object[] { status, id });
-	}
-
-	@Override
-	public int updateStatusGuardiaExt(int status, int id) {
-		logger.info(STMT_UPDATE_STATUS_EXT);
-		return jdbcTemplate.update(STMT_UPDATE_STATUS_EXT,
-	            new Object[] { status, id });
-	}
-
-	@Override
-	public int updateAuthStatusGuardia1(int status, int id, String tipo, String comentarios, int idUsuario) {
-		logger.info(STMT_UPDATE_AUTH_STATUS_1);
-		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_1,
-	            new Object[] { status, comentarios, idUsuario, id, tipo });
-	}
-
-	@Override
-	public int updateAuthStatusGuardia2(int status, int id, String tipo, String comentarios, int idUsuario) {
-		logger.info(STMT_UPDATE_AUTH_STATUS_2);
-		return jdbcTemplate.update(STMT_UPDATE_AUTH_STATUS_2,
-	            new Object[] { status, comentarios, idUsuario, id, tipo });
 	}
 
 	@Override
@@ -442,7 +580,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		}
 
 		if (idDelegacion != null) { 
-			QUERY_CONDITION += "And C.id_delegacion = ?\r\n";
+			QUERY_CONDITION += "And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n";
 			objects.add(idDelegacion);
 		}
 
@@ -477,16 +615,19 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 		}
 
-		String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, id_clave_servicio, G.id_puesto_plaza, '" + tipo + "' tipo_guardia,\r\n"
-							 + "  id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, "
+		String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, n_centro_trabajo,\r\n"
+							 + "  G.id_clave_servicio, n_clave_servicio, G.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_guardia,\r\n"
+							 + "  id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, hora_inicio, hora_fin, G.coment, "
 							 + "  Case When A.estatus2 = 0 Then A.estatus1 Else A.estatus2 End estatus,\r\n"
 							 + "  G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
-							 + "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU \r\n"
+							 + "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE\r\n"
 							 + "Where A.id_guardia = G.id And\r\n"
-							 + "G.fec_paga = P.fec_pago And\r\n"
-							 + "G.id_centro_trabajo = C.id_centro_trabajo And\r\n"
-							 + "G.id_puesto_plaza = PU.id_puesto_plaza And\r\n"
-							 + "PU.id_sociedad = '01' And PU.id_empresa = '01'\r\n"
+							 + "  G.fec_paga = P.fec_pago And\r\n"
+							 + "  G.id_centro_trabajo = C.id_centro_trabajo And\r\n"
+							 + "  G.id_puesto_plaza = PU.id_puesto_plaza And\r\n"
+							 + "  PU.id_sociedad = '01' And PU.id_empresa = '01'\r\n And"
+							 + "  G.id_clave_servicio = SE.id_clave_servicio And\r\n"
+							 + "  SE.id_empresa='01'\r\n"
 							 + QUERY_CONDITION
 							 + "Order by G.fec_paga desc, G.fec_inicio";
 
@@ -495,6 +636,5 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 		return guardias;
 	}
-
 
 }
