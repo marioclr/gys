@@ -32,6 +32,9 @@ public class LayoutSpep {
 	private String n_centro_trabajo;
 	private String id_clave_servicio;
 	private String n_clave_servicio;
+	private String ur;
+	private String ct;
+	private String aux;
 	private Double guardia;
 	private String id_puesto_plaza_g;
 	private String n_puesto_plaza_g;
@@ -208,6 +211,24 @@ public class LayoutSpep {
 	public void setN_clave_servicio(String n_clave_servicio) {
 		this.n_clave_servicio = n_clave_servicio;
 	}
+	public String getUr() {
+		return ur;
+	}
+	public void setUr(String ur) {
+		this.ur = ur;
+	}
+	public String getCt() {
+		return ct;
+	}
+	public void setCt(String ct) {
+		this.ct = ct;
+	}
+	public String getAux() {
+		return aux;
+	}
+	public void setAux(String aux) {
+		this.aux = aux;
+	}
 	public Double getGuardia() {
 		return guardia;
 	}
@@ -263,10 +284,10 @@ public class LayoutSpep {
 				+ suma_pension + ", fec_inicio=" + fec_inicio + ", fec_fin=" + fec_fin + ", id_representacion="
 				+ id_representacion + ", n_representacion=" + n_representacion + ", id_centro_trabajo="
 				+ id_centro_trabajo + ", n_centro_trabajo=" + n_centro_trabajo + ", id_clave_servicio="
-				+ id_clave_servicio + ", n_clave_servicio=" + n_clave_servicio + ", guardia=" + guardia
-				+ ", id_puesto_plaza_g=" + id_puesto_plaza_g + ", n_puesto_plaza_g=" + n_puesto_plaza_g + ", suplencia="
-				+ suplencia + ", id_puesto_plaza_s=" + id_puesto_plaza_s + ", n_puesto_plaza_s=" + n_puesto_plaza_s
-				+ ", datos_pa=" + datos_pa + "]";
+				+ id_clave_servicio + ", n_clave_servicio=" + n_clave_servicio + ", ur=" + ur + ", ct=" + ct + ", aux="
+				+ aux + ", guardia=" + guardia + ", id_puesto_plaza_g=" + id_puesto_plaza_g + ", n_puesto_plaza_g="
+				+ n_puesto_plaza_g + ", suplencia=" + suplencia + ", id_puesto_plaza_s=" + id_puesto_plaza_s
+				+ ", n_puesto_plaza_s=" + n_puesto_plaza_s + ", datos_pa=" + datos_pa + "]";
 	}
 
 }
