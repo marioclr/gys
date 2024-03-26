@@ -48,7 +48,7 @@ public class BeneficiarioController {
 				return ResponseHandler.generateResponse("La suma de porcentajes a beneficiarios del títular en bolsa de trabajo excede el 100 %", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			idBenef = beneficiarioRepository.save(new Beneficiario( beneficiario.getIdBolsa(), beneficiario.getRfc(), beneficiario.getNombre(), 
+			idBenef = beneficiarioRepository.save(new Beneficiario( beneficiario.getIdBolsa(), beneficiario.getRfc_bolsa(), beneficiario.getNombre(), 
 													beneficiario.getApellidoPaterno(), beneficiario.getApellidoMaterno(), beneficiario.getPorcentaje(), 
 													beneficiario.getNumeroBenef(), beneficiario.getId_centro_trab(), beneficiario.getRfc(), 
 													beneficiario.getFec_inicio(), beneficiario.getFec_fin(),

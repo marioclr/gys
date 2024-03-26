@@ -212,6 +212,7 @@ public class JdbcAdminRepository implements IAdminRepository {
 	@Override
 	public List<DatosPensionAlimenticia> consultaDatosPA(Integer anio, Integer mes, Integer tipoPaga,
 			Integer id_ordinal, String rfc) {
+		logger.info(QUERY_GET_DATOS_PA);
 
 		return jdbcTemplate.query(QUERY_GET_DATOS_PA,
 				BeanPropertyRowMapper.newInstance(DatosPensionAlimenticia.class), new Object [] { anio, mes, tipoPaga, id_ordinal, rfc } );

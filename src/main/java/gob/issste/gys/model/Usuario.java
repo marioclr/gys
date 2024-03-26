@@ -37,6 +37,7 @@ public class Usuario {
 		this.delegacion = delegacion;
 		this.centrosTrabajo = centrosTrabajo;
 		this.nivelVisibilidad = nivelVisibilidad;
+		this.idTipoUsuario = idTipoUsuario;
 		this.id_usuario = id_usuario;
 	}
 
