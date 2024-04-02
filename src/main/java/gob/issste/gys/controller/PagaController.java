@@ -108,6 +108,8 @@ public class PagaController {
 			_paga.setMes_ejercicio(paga.getMes_ejercicio());
 			_paga.setId_tipo_paga(paga.getId_tipo_paga());
 			_paga.setIdnivelvisibilidad(paga.getIdnivelvisibilidad());
+			_paga.setProgramas(paga.getProgramas());
+			_paga.setId_usuario(paga.getId_usuario());
 
 			pagaRepository.update(_paga);
 

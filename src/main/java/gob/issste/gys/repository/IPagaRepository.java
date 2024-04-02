@@ -13,11 +13,11 @@ public interface IPagaRepository {
 	 * Operaciones básicas del CRUD
 	 */
 	public String QUERY_ADD_NEW_PAGAS      = "INSERT INTO gys_fechas_control ( fec_pago, descripcion, estatus, fec_inicio, fec_fin, "
-										   + "anio_ejercicio, mes_ejercicio, id_tipo_paga, idnivelvisibilidad ) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+										   + "anio_ejercicio, mes_ejercicio, id_tipo_paga, idnivelvisibilidad, programas, id_usuario ) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 	int save(Paga tipMovPresup) throws SQLException;
 
-	public String QUERY_UPDATE_PAGAS       = "UPDATE gys_fechas_control Set descripcion = ?, estatus = ?, fec_inicio = ?, fec_fin = ?, "
-										   + "anio_ejercicio = ?, mes_ejercicio = ?, id_tipo_paga = ?, idnivelvisibilidad = ? Where id = ?";
+	public String QUERY_UPDATE_PAGAS       = "UPDATE gys_fechas_control Set descripcion = ?, estatus = ?, fec_inicio = ?, fec_fin = ?, anio_ejercicio = ?, "
+										   + "mes_ejercicio = ?, id_tipo_paga = ?, idnivelvisibilidad = ?, programas = ?, id_usuario = ? Where id = ?";
 	int update(Paga tipMovPresup);
 
 	public String QUERY_DELETE_PAGAS_BY_ID = "DELETE FROM gys_fechas_control WHERE id=?";

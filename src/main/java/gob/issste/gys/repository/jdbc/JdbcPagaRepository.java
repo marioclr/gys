@@ -46,6 +46,8 @@ public class JdbcPagaRepository implements IPagaRepository {
             preparedStatement.setInt(7, paga.getMes_ejercicio());
             preparedStatement.setInt(8, paga.getId_tipo_paga());
             preparedStatement.setInt(9, paga.getIdnivelvisibilidad());
+            preparedStatement.setString(10, paga.getProgramas());
+            preparedStatement.setString(11, paga.getId_usuario());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -64,7 +66,7 @@ public class JdbcPagaRepository implements IPagaRepository {
 		logger.info(QUERY_UPDATE_PAGAS);
 		return jdbcTemplate.update(QUERY_UPDATE_PAGAS,
 	            new Object[] { paga.getDescripcion(), paga.getEstatus(), paga.getFec_inicio(), paga.getFec_fin(), paga.getAnio_ejercicio(), 
-	            		paga.getMes_ejercicio(), paga.getId_tipo_paga(), paga.getIdnivelvisibilidad(), paga.getId() });
+	            		paga.getMes_ejercicio(), paga.getId_tipo_paga(), paga.getIdnivelvisibilidad(), paga.getProgramas(), paga.getId_usuario(),  paga.getId() });
 	}
 
 	@Override
