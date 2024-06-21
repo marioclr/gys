@@ -53,7 +53,8 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
             preparedStatement.setString(4, usuario.getDelegacion().getId_div_geografica());
             preparedStatement.setInt(5, usuario.getNivelVisibilidad().getIdNivelVisibilidad());
             preparedStatement.setInt(6, usuario.getIdTipoUsuario());
-            preparedStatement.setString(7, usuario.getId_usuario());
+			preparedStatement.setString(7, usuario.getSistema());
+            preparedStatement.setString(8, usuario.getId_usuario());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -73,7 +74,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 
 		return jdbcTemplate.update(QUERY_UPDATE_USU,
 				new Object[] { usuario.getClave(), usuario.getPassword(), usuario.getEmpleado().getId_empleado(), usuario.getDelegacion().getId_div_geografica(), 
-						usuario.getNivelVisibilidad().getIdNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getId_usuario(), usuario.getIdUsuario() });
+						usuario.getNivelVisibilidad().getIdNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getSistema(), usuario.getId_usuario(), usuario.getIdUsuario() });
 	}
 
 	@Override

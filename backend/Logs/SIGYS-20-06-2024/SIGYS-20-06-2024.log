@@ -1,0 +1,15 @@
+20-06-2024 14:37:18 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [gob.issste.gys.JdbcTemplateDemo01ApplicationTests]: JdbcTemplateDemo01ApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+
+
+20-06-2024 14:37:18 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration gob.issste.gys.JdbcTemplateDemo01Application for test class gob.issste.gys.JdbcTemplateDemo01ApplicationTests
+
+
+20-06-2024 14:37:19 [main] INFO  g.i.g.JdbcTemplateDemo01ApplicationTests -- Starting JdbcTemplateDemo01ApplicationTests using Java 20.0.2 with PID 26400 (started by jaim.martinez in D:\BACK-GYS\GIT-CLONE\gys)
+
+
+20-06-2024 14:37:19 [main] INFO  g.i.g.JdbcTemplateDemo01ApplicationTests -- No active profile set, falling back to 1 default profile: "default"
+
+
+20-06-2024 14:37:21 [main] INFO  g.i.g.JdbcTemplateDemo01ApplicationTests -- Started JdbcTemplateDemo01ApplicationTests in 2.02 seconds (process running for 2.863)
+
+

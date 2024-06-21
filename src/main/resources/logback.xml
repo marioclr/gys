@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <timestamp key="myTimestamp" datePattern="dd-MM-yyyy"/>
+<!--    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
+    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+<!--        <file>./backend/Logs/SIGYS-${myTimestamp}/SIGYS-${myTimestamp}.log</file>-->
+        <file>./backend/Logs/SIGYS-${myTimestamp}/SIGYS-${myTimestamp}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>
+                %d{dd-MM-yyyy HH:mm:ss} [%thread] %-5level %logger{36} -- %msg%n%n%n
+            </Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- diario rollover -->
+            <fileNamePattern>./backend/Historial-logs/SIGYS-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- mantener 30 días de historia -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <root level="INFO">
+        <!-- PARA PRODUCCIÓN Y PRE-PRODUCCIÓN -->
+        <appender-ref ref="FILE-ROLLING" />
+        <!-- PARA DSARROLLO -->
+<!--         <appender-ref ref="CONSOLE" />-->
+    </root>
+</configuration>

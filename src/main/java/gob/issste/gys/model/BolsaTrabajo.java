@@ -65,5 +65,20 @@ public class BolsaTrabajo {
 	}
 	public void setId_beneficiario(String id_beneficiario) {
 		this.id_beneficiario = id_beneficiario;
-	}	
+	}
+
+	@Override
+	public String toString() {
+		return "BolsaTrabajo{" +
+				"id=" + id +
+				", rfc='" + rfc + '\'' +
+				", nombre='" + nombre + '\'' +
+				", apellidoPat='" + apellidoPat + '\'' +
+				", apellidoMat='" + apellidoMat + '\'' +
+				", delegacion=" + delegacion +
+				", codigoPostal='" + codigoPostal + '\'' +
+				", curp='" + curp + '\'' +
+				", id_beneficiario='" + id_beneficiario + '\'' +
+				'}';
+	}
 }

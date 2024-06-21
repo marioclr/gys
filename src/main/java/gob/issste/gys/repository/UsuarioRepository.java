@@ -10,10 +10,10 @@ import gob.issste.gys.model.Usuario;
 
 public interface UsuarioRepository {
 
-	public String QUERY_ADD_NEW_USU         = "INSERT INTO gys_Usuarios (Clave, Password, IdEmpleado, IdDelegacion, IdNivelVisibilidad, IdTipoUsuario, id_usuario) VALUES ( ?, ?, ?, ?, ?, ?, ? )";
+	public String QUERY_ADD_NEW_USU         = "INSERT INTO gys_Usuarios (Clave, Password, IdEmpleado, IdDelegacion, IdNivelVisibilidad, IdTipoUsuario, sistema, id_usuario) VALUES ( ?, ?, ?, ?, ?, ?, ?, ? )";
 	int save(Usuario usuario) throws SQLException;
 
-	public String QUERY_UPDATE_USU          = "UPDATE gys_Usuarios Set Clave=?, Password=?, IdEmpleado=?, IdDelegacion=?, IdNivelVisibilidad=?, IdTipoUsuario=?, id_usuario=? Where IdUsuario=?";
+	public String QUERY_UPDATE_USU          = "UPDATE gys_Usuarios Set Clave=?, Password=?, IdEmpleado=?, IdDelegacion=?, IdNivelVisibilidad=?, IdTipoUsuario=?, sistema=?, id_usuario=? Where IdUsuario=?";
 	int update(Usuario usuario);
 
 	public String QUERY_FIND_USU_BY_ID      = "SELECT u.*, e.id_sociedad, e.id_empleado, e.nombre, e.apellido_1, e.apellido_2, e.id_legal,\r\n"

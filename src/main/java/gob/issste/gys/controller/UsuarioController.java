@@ -41,6 +41,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
@@ -68,12 +71,23 @@ public class UsuarioController {
 	public ResponseEntity<Object> createUsuario(
 			@Parameter(description = "Objeto de Usuario a crear en el Sistema") @RequestBody Usuario usuario) {
 
+		System.out.println("Estos datos llegan: "
+				+"1.- "+usuario.getClave() + "\n"
+				+"2.- "+usuario.getPassword() + "\n"
+				+"3.- "+usuario.getEmpleado().getId_empleado() + "\n"
+				+"4.- "+usuario.getDelegacion().getId_div_geografica() + "\n"
+				+"5.- "+usuario.getNivelVisibilidad().getIdNivelVisibilidad() + "\n"
+				+"6.- "+usuario.getIdTipoUsuario() + "\n"
+				+"7.- "+usuario.getSistema() + "\n"
+				+"8.- "+usuario.getId_usuario() + "\n");
 		DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
 
 		try {
-			int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), usuario.getPassword(), usuario.getEmpleado(), 
-					usuario.getDelegacion(), usuario.getCentrosTrabajo(), usuario.getNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getId_usuario()));
+			int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), usuario.getPassword(),
+					usuario.getEmpleado(),
+					usuario.getDelegacion(), usuario.getCentrosTrabajo(), usuario.getNivelVisibilidad(),
+					usuario.getIdTipoUsuario(), usuario.getSistema(), usuario.getId_usuario()));
 			for(Perfil p:usuario.getPerfiles()) {
 				perfilRepository.addPerfilToUser(idUsuario, p.getIdPerfil());
 				for(Opcion o:p.getOpciones()) {
@@ -117,7 +131,7 @@ public class UsuarioController {
 				_usuario.setId_usuario(usuario.getId_usuario());
 				_usuario.setNivelVisibilidad(usuario.getNivelVisibilidad());
 				_usuario.setIdTipoUsuario(usuario.getIdTipoUsuario());
-
+				_usuario.setSistema(usuario.getSistema());
 				usuarioRepository.update(_usuario);
 				// Delete Permissions
 				usuarioRepository.removePermissions(id);

@@ -13,10 +13,11 @@ public class Usuario {
 	private List<DatosAdscripcion> centrosTrabajo;
 	private NivelVisibilidad nivelVisibilidad;
 	private int idTipoUsuario;
+	private String sistema;
 	private String id_usuario;
 
 	public Usuario() {
-		
+
 	}
 
 	public Usuario(int idUsuario, String clave, String password, Empleado empleado, String id_usuario) {
@@ -28,8 +29,9 @@ public class Usuario {
 		this.id_usuario = id_usuario;
 	}
 
-	public Usuario(String clave, String password, Empleado empleado, Delegacion delegacion, List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad, 
-			int idTipoUsuario, String id_usuario) {
+	public Usuario(String clave, String password, Empleado empleado, Delegacion delegacion,
+				   List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad,
+			int idTipoUsuario, String sistema, String id_usuario) {
 		super();
 		this.clave = clave;
 		this.password = password;
@@ -38,6 +40,7 @@ public class Usuario {
 		this.centrosTrabajo = centrosTrabajo;
 		this.nivelVisibilidad = nivelVisibilidad;
 		this.idTipoUsuario = idTipoUsuario;
+		this.sistema = sistema;
 		this.id_usuario = id_usuario;
 	}
 
@@ -111,6 +114,12 @@ public class Usuario {
 
 	public void setIdTipoUsuario(int idTipoUsuario) {
 		this.idTipoUsuario = idTipoUsuario;
+	}
+	public String getSistema() {
+		return sistema;
+	}
+	public void setSistema(String sistema) {
+		this.sistema = sistema;
 	}
 
 	public String getId_usuario() {
