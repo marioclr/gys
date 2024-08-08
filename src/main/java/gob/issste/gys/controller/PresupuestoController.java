@@ -3,6 +3,7 @@ package gob.issste.gys.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -250,7 +251,8 @@ public class PresupuestoController {
 			//@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
 			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) String claveTipoPresup) {
 		try {
-
+			final String regexDeleg = "^[0-9]{2}$";
+			String message = "";
 			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
 			List<DatosAdscripcion> adsc; // = datosRepository.getDatosAdscripciones(idUsuario);
 			TiposPresupuesto tipoPresup = tiposPresupuestoRepository.findByClave(claveTipoPresup);
@@ -258,6 +260,27 @@ public class PresupuestoController {
 			Delegacion delegacion = datosRepository.getDatosDelegacionById(idDelegacion);
 			Presupuesto presupuesto;
 			double saldoDelegCt;
+
+			final String[] parameters = new String[] {idDelegacion, claveTipoPresup};
+			List<String> params = new ArrayList<>();
+			for(String param : parameters){
+				if (param != null){
+					params.add(param);
+				}
+			}
+
+			ParamsValidatorService paramsValidatorService = new ParamsValidatorService();
+			final boolean regexValidation = paramsValidatorService.regexValidation(regexDeleg,idDelegacion);
+			final boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
+
+			if(injectableValues || !regexValidation){
+				if (injectableValues){
+					message = "Intento de inyeccion detectado";
+				} else if(!regexValidation) {
+					message = "Valor rechazado por la expresion regular";
+				}
+				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
+			}
 
 			if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()== 1 ) {
 				//List<Delegacion> delegaciones = datosRepository.getDatosDelegaciones();

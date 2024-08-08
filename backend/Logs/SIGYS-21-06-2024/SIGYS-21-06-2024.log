@@ -1,0 +1,42 @@
+21-06-2024 18:02:08 [restartedMain] INFO  g.i.g.JdbcTemplateDemo01Application -- Starting JdbcTemplateDemo01Application using Java 20.0.2 with PID 10660 (D:\BACK-GYS\GIT-CLONE\gys\target\classes started by jaim.martinez in D:\BACK-GYS\GIT-CLONE\gys)
+
+
+21-06-2024 18:02:08 [restartedMain] INFO  g.i.g.JdbcTemplateDemo01Application -- No active profile set, falling back to 1 default profile: "default"
+
+
+21-06-2024 18:02:08 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor -- Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+
+
+21-06-2024 18:02:08 [restartedMain] INFO  o.s.b.d.e.DevToolsPropertyDefaultsPostProcessor -- For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+
+
+21-06-2024 18:02:09 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer -- Tomcat initialized with port(s): 8443 (http)
+
+
+21-06-2024 18:02:09 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol -- Initializing ProtocolHandler ["http-nio-8443"]
+
+
+21-06-2024 18:02:09 [restartedMain] INFO  o.a.catalina.core.StandardService -- Starting service [Tomcat]
+
+
+21-06-2024 18:02:09 [restartedMain] INFO  o.a.catalina.core.StandardEngine -- Starting Servlet engine: [Apache Tomcat/10.1.5]
+
+
+21-06-2024 18:02:09 [restartedMain] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] -- Initializing Spring embedded WebApplicationContext
+
+
+21-06-2024 18:02:09 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext -- Root WebApplicationContext: initialization completed in 1452 ms
+
+
+21-06-2024 18:02:10 [restartedMain] INFO  o.s.b.d.a.OptionalLiveReloadServer -- LiveReload server is running on port 35729
+
+
+21-06-2024 18:02:10 [restartedMain] INFO  o.a.coyote.http11.Http11NioProtocol -- Starting ProtocolHandler ["http-nio-8443"]
+
+
+21-06-2024 18:02:10 [restartedMain] INFO  o.s.b.w.e.tomcat.TomcatWebServer -- Tomcat started on port(s): 8443 (http) with context path ''
+
+
+21-06-2024 18:02:10 [restartedMain] INFO  g.i.g.JdbcTemplateDemo01Application -- Started JdbcTemplateDemo01Application in 2.786 seconds (process running for 3.477)
+
+

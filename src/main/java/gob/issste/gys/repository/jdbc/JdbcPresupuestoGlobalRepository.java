@@ -1,13 +1,18 @@
 package gob.issste.gys.repository.jdbc;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.model.DatosSuplencia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.stereotype.Repository;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
@@ -23,6 +28,13 @@ public class JdbcPresupuestoGlobalRepository implements IPresupuestoGlobalReposi
 	@Autowired
 	JdbcTemplate  jdbcTemplate;
 
+	protected final String Dynamic_query_composition(String query_condition){
+        return "SELECT * FROM gys_presupuesto_global P, m4t_delegaciones D\r\n"
+				+ "Where P.idDelegacion=D.id_div_geografica\r\n"
+				+ query_condition
+				+ "Order by idDelegacion";
+	}
+	
 	@Override
 	public int save(PresupuestoGlobal presupGlobal) {
 		logger.info(STMT_ADD_NEW_PRES_GLOBAL);
@@ -85,32 +97,35 @@ public class JdbcPresupuestoGlobalRepository implements IPresupuestoGlobalReposi
 	@Override
 	public List<PresupuestoGlobal> get_dynamic_regs(String idDelegacion, Integer anio, String coment) {
 		String QUERY_CONDITION = "";
-		List<Object> objects = new ArrayList<Object>();
 
 		if (idDelegacion != null) {
 			QUERY_CONDITION += "And P.idDelegacion = ?\r\n";
-			objects.add(idDelegacion);
 		}
-
 		if (anio != null) {
 			QUERY_CONDITION += "And P.anio = ?\r\n";
-			objects.add(anio);
 		}
-
 		if (coment != null) {
 			QUERY_CONDITION += "And comentarios like ?\r\n";
-			objects.add("%" + coment + "%");
 		}
 
-		String QUERY_GET_DYNAMIC_PRESUP_GLOBAL  = "SELECT * FROM gys_presupuesto_global P, m4t_delegaciones D\r\n"
-												+ "Where P.idDelegacion=D.id_div_geografica\r\n"
-												+ QUERY_CONDITION
-												+ "Order by idDelegacion";
+		final String QUERY_GET_DYNAMIC_PRESUP_GLOBAL  = this.Dynamic_query_composition(QUERY_CONDITION);
 
-		logger.info(QUERY_GET_DYNAMIC_PRESUP_GLOBAL);
-		List<PresupuestoGlobal> presupuestos = jdbcTemplate.query(QUERY_GET_DYNAMIC_PRESUP_GLOBAL, new PresupuestoGlobalMapper(),	objects.toArray());
+        return jdbcTemplate.query(QUERY_GET_DYNAMIC_PRESUP_GLOBAL, ps -> {
 
-		return presupuestos;
+            int count = 0;
+            if (idDelegacion != null) {
+                count ++;
+                ps.setString(count ,idDelegacion);
+            }
+            if (anio != null) {
+                count ++;
+                ps.setString(count ,anio.toString());
+            }
+            if (coment != null) {
+                count ++;
+                ps.setString(count ,coment);
+            }
+        }, new PresupuestoGlobalMapper());
 	}
 
 }
