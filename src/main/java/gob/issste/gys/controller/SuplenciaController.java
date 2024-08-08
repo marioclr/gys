@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class SuplenciaController {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
+	ParamsValidatorService paramsValidatorService = new ParamsValidatorService();
 
 	@Autowired
 	ISuplenciaRepository suplenciaRepository;
@@ -840,14 +842,25 @@ public class SuplenciaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
-
+			String[] parameters = new String[] {tipoSuplencia, claveEmpleado, idDelegacion, idCentroTrab,claveServicio,puesto};
+			List<String> params = new ArrayList<>();
+			for(String param : parameters){
+				if (param != null){
+					params.add(param);
+				}
+			}
+			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
 			if (quincena != null)
 				strQuincena = dateFormat.format(quincena);
 
 			List<DatosSuplencia> guardias = new ArrayList<DatosSuplencia>();
 
-			guardias = suplenciaRepository.ConsultaDynamicSuplencias(strQuincena, tipoSuplencia, claveEmpleado, importe_min, importe_max, 
-																idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir, estatus);
+			if(injectableValues){
+				return ResponseHandler.generateResponse("Intento de inyeccion detectado", HttpStatus.NOT_ACCEPTABLE, null);
+			} else {
+				guardias = suplenciaRepository.ConsultaDynamicSuplencias(strQuincena, tipoSuplencia, claveEmpleado, importe_min, importe_max,
+						idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir, estatus);
+			}
 
 			if (guardias.isEmpty()) {
 
@@ -875,20 +888,31 @@ public class SuplenciaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
-
+			String[] parameters = new String[] {tipoSuplencia, idDelegacion, idCentroTrab};
+			List<String> params = new ArrayList<>();
+			for(String param : parameters){
+				if (param != null){
+					params.add(param);
+				}
+			}
+			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
 			if (quincena != null)
 				strQuincena = dateFormat.format(quincena);
 
-			List<DatosSuplencia> guardias = new ArrayList<DatosSuplencia>();
+			List<DatosSuplencia> suplencias = new ArrayList<DatosSuplencia>();
 
-			guardias = suplenciaRepository.ConsultaDynamicAuthSuplencias(strQuincena, tipoSuplencia, idDelegacion, idCentroTrab, estatus);
+			if(injectableValues){
+				return ResponseHandler.generateResponse("Intento de inyeccion detectado", HttpStatus.NOT_ACCEPTABLE, null);
+			} else {
+				suplencias = suplenciaRepository.ConsultaDynamicAuthSuplencias(strQuincena, tipoSuplencia, idDelegacion, idCentroTrab, estatus);
+			}
 
-			if (guardias.isEmpty()) {
+			if (suplencias.isEmpty()) {
 
 				return ResponseHandler.generateResponse("No se encontraron los registros de suplencias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 
-			return ResponseHandler.generateResponse("Se obtuvieron los registros de suplencias del empleado en el Sistema", HttpStatus.OK, guardias);
+			return ResponseHandler.generateResponse("Se obtuvieron los registros de suplencias del empleado en el Sistema", HttpStatus.OK, suplencias);
 
 		} catch (Exception e) {
 			logger.info(e.toString());

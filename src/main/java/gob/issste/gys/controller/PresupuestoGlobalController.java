@@ -3,6 +3,7 @@ package gob.issste.gys.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,12 +125,34 @@ public class PresupuestoGlobalController {
 		try {
 
 			List<PresupuestoGlobal> presupuestosGlobal = new ArrayList<PresupuestoGlobal>();
+			final String regex = "^[0-9]{2}$";
+			String message = "";
+			List<String> params = new ArrayList<String>();
+				if ( (idDelegacion != null) || (anio != null) || (coment != null) ) {
+					if(idDelegacion != null){
+						String[] parameters = new String[] {idDelegacion, coment};
+						for(String param : parameters){
+							if (param != null){
+								params.add(param);
+							}
+						}
+						ParamsValidatorService paramsValidatorService = new ParamsValidatorService();
+						boolean regexValue = paramsValidatorService.regexValidation(regex, idDelegacion);
+						boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
+						if(injection || !regexValue){
+							if (injection){
+								message = "Intento de inyeccion detectado";
+							} else {
+								message = "Valor rechazado por la expresion regular";
+							}
+							return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
+						}
+					}
+					presupuestosGlobal = presGlobalRepository.get_dynamic_regs(idDelegacion, anio, coment);
+				} else {
+					presupuestosGlobal = presGlobalRepository.findAll();
+				}
 
-			if ( (idDelegacion != null) || (anio != null) || (coment != null) ) {
-				presupuestosGlobal = presGlobalRepository.get_dynamic_regs(idDelegacion, anio, coment);
-			} else {
-				presupuestosGlobal = presGlobalRepository.findAll();
-			}
 
 			if (presupuestosGlobal.isEmpty()) {
 
