@@ -753,6 +753,7 @@ public class GuardiaController {
 			@Parameter(description = "Estatus de las guardias", required = false) @RequestParam(required = false) Integer estatus) {
 
 		try {
+
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
 

@@ -185,44 +185,36 @@ public class JdbcDatosRepository implements IDatosRepository {
 	public List<DatosMatrizPuestos> ConsultaPuestoAutorizado(String tipo_ct, String clave_servicio, String puesto,
 			String nivel, String sub_nivel, String tipo_jornada, String tipo_guardia) {
 		String QUERY_CONDITION  = "";
-		List<Object> objects = new ArrayList<Object>();
 
 		if (tipo_ct != null) { 
 			QUERY_CONDITION += "And id_tipo_ct = ?\r\n";
-			objects.add(tipo_ct);
 		}
 
 		if (clave_servicio != null) { 
 			QUERY_CONDITION += "And id_clave_servicio = ?\r\n";
-			objects.add(clave_servicio);
 		}
 
 		if (puesto != null) { 
 			QUERY_CONDITION += "And id_puesto_plaza = ?\r\n";
-			objects.add(puesto);
 		}
 
 		if (nivel != null) { 
 			QUERY_CONDITION += "And id_nivel = ?\r\n";
-			objects.add(nivel);
 		}
 
 		if (sub_nivel != null) { 
 			QUERY_CONDITION += "And id_sub_nivel = ?\r\n";
-			objects.add(sub_nivel);
 		}
 
 		if (tipo_jornada != null) { 
 			QUERY_CONDITION += "And id_tipo_jornada = ?\r\n";
-			objects.add(tipo_jornada);
 		}
 
 		if (tipo_guardia != null) { 
 			QUERY_CONDITION += "And id_tipo_per = ?\r\n";
-			objects.add(tipo_guardia);
 		}
 
-		String DYNAMIC_QUERY = "Select id_tipo_ct, id_clave_servicio, n_des_servicio, \r\n"
+		final String DYNAMIC_QUERY = "Select id_tipo_ct, id_clave_servicio, n_des_servicio, \r\n"
 							 + "  id_puesto_plaza, n_puesto, id_nivel, id_sub_nivel, \r\n"
 							 + "  id_tipo_jornada, id_tipo_per tipo \r\n"
 							 + "From m4t_gys_matriz_puestos \r\n"
@@ -230,8 +222,46 @@ public class JdbcDatosRepository implements IDatosRepository {
 							 + QUERY_CONDITION
 							 + "Order By 1";
 
-		logger.info(DYNAMIC_QUERY);
-		List<DatosMatrizPuestos> matrix = jdbcTemplate.query(DYNAMIC_QUERY, BeanPropertyRowMapper.newInstance(DatosMatrizPuestos.class), objects.toArray() );
+		List<DatosMatrizPuestos> matrix = jdbcTemplate.query(DYNAMIC_QUERY, ps ->{
+			int cont = 0;
+
+			if (tipo_ct != null) {
+				cont++;
+				ps.setString(cont,tipo_ct);
+			}
+
+			if (clave_servicio != null) {
+				cont++;
+				ps.setString(cont,clave_servicio);
+			}
+
+			if (puesto != null) {
+				cont++;
+				ps.setString(cont,puesto);
+			}
+
+			if (nivel != null) {
+				cont++;
+				ps.setString(cont,nivel);
+			}
+
+			if (sub_nivel != null) {
+				cont++;
+				ps.setString(cont,sub_nivel);
+			}
+
+			if (tipo_jornada != null) {
+				cont++;
+				ps.setString(cont,tipo_jornada);
+			}
+
+			if (tipo_guardia != null) {
+				cont++;
+				ps.setString(cont,tipo_guardia);
+			}
+
+//			logger.info("Prepared statement: "+ DYNAMIC_QUERY);
+		}, BeanPropertyRowMapper.newInstance(DatosMatrizPuestos.class));
 
 		return matrix;
 	}
