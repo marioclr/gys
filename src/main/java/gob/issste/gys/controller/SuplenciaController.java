@@ -842,21 +842,42 @@ public class SuplenciaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
+			String message = "";
 			String[] parameters = new String[] {tipoSuplencia, claveEmpleado, idDelegacion, idCentroTrab,claveServicio,puesto};
 			List<String> params = new ArrayList<>();
+			List<String> regexList = new  ArrayList<>();
+//			List<String> regexList = List.of("^(SI|SE)$", "^[0-9]{5}$" ,"^[0-9]{2}$", "^[0-9]{5}$", "^[A-Za-z]{2}\\d{3}$", "^[A-Za-z]{1}\\d{5}");
 			for(String param : parameters){
 				if (param != null){
 					params.add(param);
 				}
 			}
+			if(tipoSuplencia != null){
+				regexList.add("^(SI|SE)$");
+			}
+			if(claveEmpleado != null){
+				regexList.add("^[0-9]{6}$");
+			}
+			if(idDelegacion != null){
+				regexList.add("^[0-9]{2}$");
+			}
+
+			boolean regexValidation = paramsValidatorService.validate(regexList, params);
 			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
+
+
 			if (quincena != null)
 				strQuincena = dateFormat.format(quincena);
 
 			List<DatosSuplencia> guardias = new ArrayList<DatosSuplencia>();
 
-			if(injectableValues){
-				return ResponseHandler.generateResponse("Intento de inyeccion detectado", HttpStatus.NOT_ACCEPTABLE, null);
+			if(injectableValues || !regexValidation){
+				if (injectableValues){
+					message = "Intento de inyeccion detectado";
+				} else {
+					message = "Valor rechazado por la expresion regular";
+				}
+				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
 			} else {
 				guardias = suplenciaRepository.ConsultaDynamicSuplencias(strQuincena, tipoSuplencia, claveEmpleado, importe_min, importe_max,
 						idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir, estatus);
@@ -888,21 +909,38 @@ public class SuplenciaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
+			String message = "";
 			String[] parameters = new String[] {tipoSuplencia, idDelegacion, idCentroTrab};
+//			List<String> regexList = List.of("^(SI|SE)$", "^[0-9]{2}$", "^[0-9]{5}$");
+			List<String> regexList = new ArrayList<>();
 			List<String> params = new ArrayList<>();
 			for(String param : parameters){
 				if (param != null){
 					params.add(param);
 				}
 			}
+			if(tipoSuplencia != null){
+				regexList.add("^(SI|SE)$");
+			}
+			if(idDelegacion != null){
+				regexList.add("^[0-9]{2}$");
+			}
+
+			boolean regexValidation = paramsValidatorService.validate(regexList, params);
 			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
+
 			if (quincena != null)
 				strQuincena = dateFormat.format(quincena);
 
 			List<DatosSuplencia> suplencias = new ArrayList<DatosSuplencia>();
 
-			if(injectableValues){
-				return ResponseHandler.generateResponse("Intento de inyeccion detectado", HttpStatus.NOT_ACCEPTABLE, null);
+			if(injectableValues || !regexValidation){
+				if (injectableValues){
+					message = "Intento de inyeccion detectado";
+				} else {
+					message = "Valor rechazado por la expresion regular";
+				}
+				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
 			} else {
 				suplencias = suplenciaRepository.ConsultaDynamicAuthSuplencias(strQuincena, tipoSuplencia, idDelegacion, idCentroTrab, estatus);
 			}

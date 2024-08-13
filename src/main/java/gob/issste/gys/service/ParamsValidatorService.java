@@ -55,6 +55,21 @@ public class ParamsValidatorService {
         return matcher.matches();
     }
 
+    public boolean validate(List<String> regexList, List<String> paramList) {
+        if (regexList.size() != paramList.size()) {
+            throw new IllegalArgumentException("Las listas deben tener el mismo tamaño.");
+        }
+
+        for (int i = 0; i < regexList.size(); i++) {
+            String regex = regexList.get(i);
+            String param = paramList.get(i);
+            System.out.println("Regex: " + regex + " Param: " + param);
+            if (!Pattern.matches(regex, param)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
 
 

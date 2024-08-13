@@ -276,7 +276,7 @@ public class PresupuestoController {
 			if(injectableValues || !regexValidation){
 				if (injectableValues){
 					message = "Intento de inyeccion detectado";
-				} else if(!regexValidation) {
+				} else {
 					message = "Valor rechazado por la expresion regular";
 				}
 				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
