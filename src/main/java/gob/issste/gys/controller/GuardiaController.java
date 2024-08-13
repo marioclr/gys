@@ -818,7 +818,7 @@ public class GuardiaController {
 				regexList.add(regexPuesto);
 			}
 
-			boolean regexResult = paramsValidatorService.validateListRegex(params,regexList);
+			boolean regexResult = paramsValidatorService.validate(params,regexList);
 			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
 
 //			System.out.println(regexResult+" - "+ injection);
@@ -885,7 +885,7 @@ public class GuardiaController {
 				regexList.add(regexCt);
 			}
 
-			boolean regexResult = paramsValidatorService.validateListRegex(params,regexList);
+			boolean regexResult = paramsValidatorService.validate(params,regexList);
 			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
 
 			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
