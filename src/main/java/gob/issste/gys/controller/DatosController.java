@@ -3,6 +3,7 @@ package gob.issste.gys.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class DatosController {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
+	ParamsValidatorService paramsValidatorService = new ParamsValidatorService();
 
 	@Autowired
 	IDatosRepository datosRepository;
@@ -294,13 +296,73 @@ public class DatosController {
 		try {
 			List<DatosMatrizPuestos> matrix = new ArrayList<DatosMatrizPuestos>();
 
-			matrix = datosRepository.ConsultaPuestoAutorizado(tipo_ct, clave_servicio, puesto, nivel, subnivel, tipo_jornada, tipo_guardia.substring(1));
+			final String regexAlfanumerico6_7 = "^[a-zA-Z0-9]{6,7}$";
+			final String regexAlfanumerico_5 = "^[a-zA-Z0-9]{5}$";
+			final String regexNumerico_1 = "^\\d{1}$";
+			final String regexNumerico_2 = "^\\d{2}$";
+			final String regexDecimal = "^\\d+\\.\\d+$";
 
-			if (matrix.isEmpty()) {
-				return ResponseHandler.generateResponse("Estas características no son autarizadas para guardias o suplencias", HttpStatus.NOT_FOUND, null);
+			final String regexNiv = "^[0-9]{2}$";
+			final String regexSubniv = "^[0-9]{1}$";
+			final String regexPuntoDecimal = "^[0-9]*\\.?[0-9]+$";
+
+//			String regexCURP = "^[A-Z]{4}\\d{6}[HM][A-Z]{2}[B-DF-HJ-NP-TV-Z]{3}[A-Z\\d]$";
+
+			String message = "";
+			List<String> params = new ArrayList<>();
+			List<String> regexList = new ArrayList<>();
+
+
+			if(clave_servicio != null){
+				params.add(clave_servicio);
+				regexList.add(regexAlfanumerico_5);
 			}
 
-			return ResponseHandler.generateResponse("Las características son autarizadas para guardias o suplencias", HttpStatus.OK, matrix);
+			if(puesto != null){
+				params.add(puesto);
+				regexList.add(regexAlfanumerico6_7);
+			}
+
+			if(nivel != null){
+				params.add(nivel);
+				regexList.add(regexNiv);
+			}
+
+			if(subnivel != null){
+				params.add(subnivel);
+				regexList.add(regexSubniv);
+			}
+
+			if(tipo_jornada != null){
+				params.add(tipo_jornada);
+
+				if(tipo_jornada.length() == 1){
+					regexList.add(regexSubniv);
+				}else{
+					regexList.add(regexPuntoDecimal);
+				}
+
+			}
+
+			boolean regexResult = paramsValidatorService.validate(params,regexList);
+			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
+
+//			System.out.println(regexResult+" "+ injection);
+
+			if(regexResult && !injection){
+				matrix = datosRepository.ConsultaPuestoAutorizado(tipo_ct, clave_servicio, puesto, nivel, subnivel, tipo_jornada, tipo_guardia.substring(1));
+
+				if (matrix.isEmpty()) {
+					return ResponseHandler.generateResponse("Estas características no son autarizadas para guardias o suplencias", HttpStatus.NOT_FOUND, null);
+				}
+
+				return ResponseHandler.generateResponse("Las características son autarizadas para guardias o suplencias", HttpStatus.OK, matrix);
+
+			}else{
+				message = "Revise los campos de consulta";
+				return ResponseHandler.generateResponse(message, HttpStatus.NOT_FOUND, null);
+			}
+
 		} catch (Exception e) {
 			return ResponseHandler.generateResponse("Error al validar sí las características son autarizadas para guardias o suplencias", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}

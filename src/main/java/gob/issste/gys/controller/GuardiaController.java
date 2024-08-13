@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class GuardiaController {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
+
+	ParamsValidatorService paramsValidatorService = new ParamsValidatorService();
 
 	@Autowired
 	GuardiaRepository guardiaRepository;
@@ -753,6 +756,20 @@ public class GuardiaController {
 			@Parameter(description = "Estatus de las guardias", required = false) @RequestParam(required = false) Integer estatus) {
 
 		try {
+
+			List<String> params = new ArrayList<>();
+			List<String> regexList = new ArrayList<>();
+			String message = "";
+
+			final String regexFecha_y_m_d = "^((19|20)\\d\\d)-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$";
+			final String regexRfc = "^([A-ZÑ&]{3,4}) ?(\\d{2}(0[1-9]|1[0-2])(0[1-9]|1\\d|2[0-9]|3[01]))?([A-Z\\d]{2})([A\\d])?$";
+			final String regexNumEmp = "^[0-9]{6}$";
+			final String regexDel = "^[0-9]{2}$";
+			final String regexCt = "^[0-9]{5}$";
+			final String regexServicio = "^[a-zA-Z0-9]{5}$";
+			final String regexPuesto = "^[a-zA-Z0-9]{6,7}$";
+
+
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
 
@@ -761,18 +778,67 @@ public class GuardiaController {
 
 			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
 
-			guardias = guardiaRepository.ConsultaDynamicGuardias(strQuincena, tipoGuardia, claveEmpleado, importe_min,
-					importe_max, idDelegacion, idCentroTrab, claveServicio, puesto, estatus);
+			if (quincena != null) {
 
-			if (guardias.isEmpty()) {
-
-				return ResponseHandler.generateResponse(
-						"No se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.NOT_FOUND,
-						null);
+				params.add(strQuincena);
+				regexList.add(regexFecha_y_m_d);
 			}
 
-			return ResponseHandler.generateResponse(
-					"Se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.OK, guardias);
+			if (claveEmpleado != null) {
+				if (tipoGuardia.equals(String.valueOf("GI"))) {
+					params.add(claveEmpleado);
+					regexList.add(regexNumEmp);
+
+				} else if(tipoGuardia.equals(String.valueOf("GE"))){
+					params.add(claveEmpleado);
+					regexList.add(regexRfc);
+
+				}else{
+					throw new SQLException("El numero de empleado es incorrecto");
+				}
+			}
+
+			if (idDelegacion != null) {
+				params.add(idDelegacion);
+				regexList.add(regexDel);
+			}
+
+			if (idCentroTrab != null) {
+				params.add(idCentroTrab);
+				regexList.add(regexCt);
+			}
+
+			if (claveServicio != null) {
+				params.add(claveServicio);
+				regexList.add(regexServicio);
+			}
+
+			if (puesto != null) {
+				params.add(puesto);
+				regexList.add(regexPuesto);
+			}
+
+			boolean regexResult = paramsValidatorService.validate(params,regexList);
+			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
+
+//			System.out.println(regexResult+" - "+ injection);
+
+			if(regexResult && !injection){
+				guardias = guardiaRepository.ConsultaDynamicGuardias(strQuincena, tipoGuardia, claveEmpleado, importe_min, importe_max,
+						idDelegacion, idCentroTrab, claveServicio, puesto, estatus);
+
+				if (guardias.isEmpty()) {
+					return ResponseHandler.generateResponse("No se encontraron los registros de suplencias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
+				}
+
+				return ResponseHandler.generateResponse(
+						"Se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.OK, guardias);
+
+			}else{
+				message = "Revise los campos de consulta";
+				return ResponseHandler.generateResponse(message, HttpStatus.NOT_FOUND, null);
+			}
+
 
 		} catch (Exception e) {
 			logger.info(e.toString());
@@ -792,25 +858,55 @@ public class GuardiaController {
 			@Parameter(description = "Estatus de las guardias", required = false) @RequestParam(required = false) Integer estatus) {
 
 		try {
+
+			List<String> params = new ArrayList<>();
+			List<String> regexList = new ArrayList<>();
+			String message = "";
+
+			final String regexTipoGuardia = "^(GI|GE)$";
+			final String regexDel = "^[0-9]{2}$";
+			final String regexCt = "^[0-9]{5}$";
+
+
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
 
 			if (quincena != null)
 				strQuincena = dateFormat.format(quincena);
 
-			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
 
-			guardias = guardiaRepository.ConsultaDynamicAuthGuardias(strQuincena, tipoGuardia, idDelegacion, idCentroTrab, estatus);
-
-			if (guardias.isEmpty()) {
-
-				return ResponseHandler.generateResponse(
-						"No se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.NOT_FOUND,
-						null);
+			if (idDelegacion != null) {
+				params.add(idDelegacion);
+				regexList.add(regexDel);
 			}
 
-			return ResponseHandler.generateResponse(
-					"Se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.OK, guardias);
+			if (idCentroTrab != null) {
+				params.add(idCentroTrab);
+				regexList.add(regexCt);
+			}
+
+			boolean regexResult = paramsValidatorService.validate(params,regexList);
+			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
+
+			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
+
+			if(regexResult && !injection){
+
+				guardias = guardiaRepository.ConsultaDynamicAuthGuardias(strQuincena, tipoGuardia,idDelegacion, idCentroTrab, estatus);
+
+				if (guardias.isEmpty()) {
+					message = "No se encontraron los registros de suplencias del empleado en el Sistema";
+					return ResponseHandler.generateResponse(message, HttpStatus.NOT_FOUND, null);
+				}
+
+				return ResponseHandler.generateResponse(
+						"Se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.OK, guardias);
+
+			}else{
+				message = "Revise los campos de consulta";
+				return ResponseHandler.generateResponse(message, HttpStatus.NOT_FOUND, null);
+			}
+
 
 		} catch (Exception e) {
 			logger.info(e.toString());
