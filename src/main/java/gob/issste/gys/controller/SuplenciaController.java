@@ -843,7 +843,7 @@ public class SuplenciaController {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
 			String message = "";
-			String[] parameters = new String[] {tipoSuplencia, claveEmpleado, idDelegacion, idCentroTrab,claveServicio,puesto};
+			String[] parameters = new String[] {tipoSuplencia, claveEmpleado, idDelegacion, idCentroTrab,claveServicio,puesto, emp_suplir};
 			List<String> params = new ArrayList<>();
 			List<String> regexList = new  ArrayList<>();
 //			List<String> regexList = List.of("^(SI|SE)$", "^[0-9]{5}$" ,"^[0-9]{2}$", "^[0-9]{5}$", "^[A-Za-z]{2}\\d{3}$", "^[A-Za-z]{1}\\d{5}");
@@ -855,11 +855,16 @@ public class SuplenciaController {
 			if(tipoSuplencia != null){
 				regexList.add("^(SI|SE)$");
 			}
-			if(claveEmpleado != null){
+			if(claveEmpleado != null && tipoSuplencia == "SI"){
 				regexList.add("^[0-9]{6}$");
+			} else {
+				regexList.add("^[A-ZÑ&]{3,4}([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[01]))?([A-Z\\d]{2}[A\\d])$");
 			}
 			if(idDelegacion != null){
 				regexList.add("^[0-9]{2}$");
+			}
+			if (emp_suplir != null){
+				regexList.add("^[0-9]{6}$");
 			}
 
 			boolean regexValidation = paramsValidatorService.validate(regexList, params);
