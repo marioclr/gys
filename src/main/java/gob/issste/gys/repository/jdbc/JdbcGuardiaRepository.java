@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import gob.issste.gys.response.ResponseHandler;
+import gob.issste.gys.service.ParamsValidatorService;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
 
+	ParamsValidatorService paramsValidatorService = new ParamsValidatorService();
 	@Value("${spring.datasource.url}")
 	private String url;
 	@Value("${spring.datasource.username}")
@@ -553,63 +556,63 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 				+ QUERY_CONDITION
 				+ "Order by G.fec_paga desc, G.fec_inicio";
 
-		List<DatosGuardia> guardias = jdbcTemplate.query(DYNAMIC_QUERY,ps -> {
+		List<DatosGuardia> guardias = jdbcTemplate.query(DYNAMIC_QUERY, ps -> {
 
-			int cont = 0;
+				int cont = 0;
 
-			if (fechaPago != null) {
-				cont++;
-				ps.setString(cont, fechaPago);
-				System.out.println(cont);
-			}
+				if (fechaPago != null) {
+					cont++;
+					ps.setString(cont, fechaPago);
+					System.out.println(cont);
+				}
 
-			if (clave_empleado != null) {
-				cont++;
-				ps.setString(cont, clave_empleado);
-				System.out.println(cont);
-			}
+				if (clave_empleado != null) {
+					cont++;
+					ps.setString(cont, clave_empleado);
+					System.out.println(cont);
+				}
 
-			if (importe_min != null) {
-				cont++;
-				ps.setDouble(cont, importe_min);
-				System.out.println(cont);
-			}
+				if (importe_min != null) {
+					cont++;
+					ps.setDouble(cont, importe_min);
+					System.out.println(cont);
+				}
 
-			if (importe_max != null) {
-				cont++;
-				ps.setDouble(cont, importe_max);
-			}
+				if (importe_max != null) {
+					cont++;
+					ps.setDouble(cont, importe_max);
+				}
 
-			if (idDelegacion != null) {
-				cont++;
-				ps.setString(cont, idDelegacion);
-			}
+				if (idDelegacion != null) {
+					cont++;
+					ps.setString(cont, idDelegacion);
+				}
 
-			if (idCentroTrab != null) {
-				cont++;
-				ps.setString(cont, idCentroTrab);
-			}
+				if (idCentroTrab != null) {
+					cont++;
+					ps.setString(cont, idCentroTrab);
+				}
 
-			if (claveServicio != null) {
-				cont++;
-				ps.setString(cont, claveServicio);
-			}
+				if (claveServicio != null) {
+					cont++;
+					ps.setString(cont, claveServicio);
+				}
 
-			if (puesto != null) {
-				cont++;
-				ps.setString(cont, puesto);
-			}
+				if (puesto != null) {
+					cont++;
+					ps.setString(cont, puesto);
+				}
 
-			if (estatus != null) {
-				cont++;
-				ps.setInt(cont, estatus);
-			}
+				if (estatus != null) {
+					cont++;
+					ps.setInt(cont, estatus);
+				}
 
 			logger.info("Prepared statement: "+ DYNAMIC_QUERY);
 
-		},BeanPropertyRowMapper.newInstance(DatosGuardia.class));
+			}, BeanPropertyRowMapper.newInstance(DatosGuardia.class));
 
-		return guardias;
+			return guardias;
 
 	}
 
