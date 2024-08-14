@@ -344,7 +344,7 @@ public class DatosController {
 
 			}
 
-			boolean regexResult = paramsValidatorService.validate(params,regexList);
+			boolean regexResult = paramsValidatorService.validate(regexList,params);
 			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
 
 //			System.out.println(regexResult+" "+ injection);

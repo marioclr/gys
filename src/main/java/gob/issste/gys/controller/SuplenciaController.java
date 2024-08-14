@@ -855,11 +855,14 @@ public class SuplenciaController {
 			if(tipoSuplencia != null){
 				regexList.add("^(SI|SE)$");
 			}
-			if(claveEmpleado != null && tipoSuplencia == "SI"){
-				regexList.add("^[0-9]{6}$");
-			} else {
-				regexList.add("^[A-ZÑ&]{3,4}([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[01]))?([A-Z\\d]{2}[A\\d])$");
+			if(claveEmpleado != null){
+				if(tipoSuplencia.equals(String.valueOf("SI"))){
+					regexList.add("^[0-9]{6}$");
+				}else {
+					regexList.add("^[A-ZÑ&]{3,4}([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[01]))?([A-Z\\d]{2}[A\\d])$");
+				}
 			}
+
 			if(idDelegacion != null){
 				regexList.add("^[0-9]{2}$");
 			}

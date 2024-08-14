@@ -778,11 +778,6 @@ public class GuardiaController {
 
 			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();
 
-			if (quincena != null) {
-
-				params.add(strQuincena);
-				regexList.add(regexFecha_y_m_d);
-			}
 
 			if (claveEmpleado != null) {
 				if (tipoGuardia.equals(String.valueOf("GI"))) {
@@ -818,7 +813,7 @@ public class GuardiaController {
 				regexList.add(regexPuesto);
 			}
 
-			boolean regexResult = paramsValidatorService.validate(params,regexList);
+			boolean regexResult = paramsValidatorService.validate(regexList,params);
 			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
 
 //			System.out.println(regexResult+" - "+ injection);
@@ -885,7 +880,7 @@ public class GuardiaController {
 				regexList.add(regexCt);
 			}
 
-			boolean regexResult = paramsValidatorService.validate(params,regexList);
+			boolean regexResult = paramsValidatorService.validate(regexList,params);
 			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
 
 			List<DatosGuardia> guardias = new ArrayList<DatosGuardia>();

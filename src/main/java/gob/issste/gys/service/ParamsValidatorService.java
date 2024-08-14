@@ -33,22 +33,6 @@ public class ParamsValidatorService {
         return list.toArray().length != 0;
     }
 
-    public boolean regexMultipleDataValidation(List<String> inputData, List<String> regexList) {
-        List<String> rgexMatchingData = new ArrayList<>();
-        Pattern pattern;
-        Matcher matcher;
-        for (String param: inputData) {
-            if (param != null)
-                for (String regexValue : regexList) {
-                    pattern = Pattern.compile(regexValue);
-                    matcher = pattern.matcher(param);
-                    if (!matcher.matches()){
-                        rgexMatchingData.add(param);
-                    }
-                }
-        }
-        return rgexMatchingData.toArray().length != 0;
-    }
     public boolean regexValidation(String regex, String value){
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(value);
@@ -63,7 +47,7 @@ public class ParamsValidatorService {
         for (int i = 0; i < regexList.size(); i++) {
             String regex = regexList.get(i);
             String param = paramList.get(i);
-            System.out.println("Regex: " + regex + " Param: " + param);
+//            System.out.println("Regex: " + regex + " Param: " + param);
             if (!Pattern.matches(regex, param)) {
                 return false;
             }
