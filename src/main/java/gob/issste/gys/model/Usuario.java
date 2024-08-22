@@ -16,7 +16,7 @@ public class Usuario {
 	private String id_usuario;
 
 	public Usuario() {
-		
+
 	}
 
 	public Usuario(int idUsuario, String clave, String password, Empleado empleado, String id_usuario) {
@@ -28,8 +28,8 @@ public class Usuario {
 		this.id_usuario = id_usuario;
 	}
 
-	public Usuario(String clave, String password, Empleado empleado, Delegacion delegacion, List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad, 
-			int idTipoUsuario, String id_usuario) {
+	public Usuario(String clave, String password, Empleado empleado, Delegacion delegacion, List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad,
+				   int idTipoUsuario, String id_usuario) {
 		super();
 		this.clave = clave;
 		this.password = password;
@@ -130,11 +130,11 @@ public class Usuario {
 	public boolean contieneCT(String centroTrab) {
 		boolean encontrado = false;
 		for (int x = 0; x < centrosTrabajo.size(); x++) {
-		  DatosAdscripcion adsc = centrosTrabajo.get(x);
-		  if (adsc.getClave().equals(centroTrab)) {
-		    encontrado = true;
-		    break;
-		  }
+			DatosAdscripcion adsc = centrosTrabajo.get(x);
+			if (adsc.getClave().equals(centroTrab)) {
+				encontrado = true;
+				break;
+			}
 		}
 		return encontrado;
 	}

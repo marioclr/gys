@@ -327,7 +327,7 @@ public interface GuardiaRepository {
 	int updateAuthStatusGuardias2Ext(String tipo, String fec_pago, int idUsuario);
 
 	List<DatosGuardia> ConsultaDynamicGuardias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
-			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus);
+			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus) throws SQLException;
 
 	List<DatosGuardia> ConsultaDynamicAuthGuardias(String fechaPago, String tipo, String idDelegacion, String idCentroTrab, Integer estatus);
 

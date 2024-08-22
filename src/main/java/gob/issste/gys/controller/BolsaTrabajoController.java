@@ -1,8 +1,14 @@
 package gob.issste.gys.controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import gob.issste.gys.JdbcTemplateDemo01Application;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +36,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Bolsa de Trabajo", description = "API de bolsa de trabajo")
 public class BolsaTrabajoController {
 
+	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
 	@Autowired
 	IBolsaTrabajoRepository bolsaTrabajoRepository;
 
@@ -197,6 +204,27 @@ public class BolsaTrabajoController {
 
 			return ResponseHandler.generateResponse("Error al obtener elementos a la bolsa de trabajo en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
+	}
+
+
+	/**
+	 * ******************************************************************************************
+	 */
+
+	@Operation(summary = "Almacenar bolsa de trabajo masivamente desde un excel", description = "Guarda bolsa de trabajo", tags = { "Bolsa de Trabajo" })
+	@PostMapping("/bolsatrabajo/guardaMasivo")
+	public ResponseEntity<Object> guardarBolsatrabajoMasivo(@RequestBody List<BolsaTrabajo> arrayBolsa){
+	try {
+		for (BolsaTrabajo bolsaTrabajo : arrayBolsa)
+		{
+				logger.info("Elemento: " + bolsaTrabajo.toString());
+				this.agregarElemento(bolsaTrabajo);
+		}
+
+	}catch (Exception e){
+		logger.error("Error", e);
+	}
+		return ResponseHandler.generateResponse("Los registros fueron agregados exitosamente", HttpStatus.OK, null);
 	}
 
 }

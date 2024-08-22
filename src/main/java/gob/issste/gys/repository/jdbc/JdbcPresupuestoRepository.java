@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.model.DatosSuplencia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -153,6 +155,7 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 				new Object[] { presupuesto.getSaldo(), presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getTipoPresup().getId() } );
 	}
 
+
 	@Override
 	public List<Presupuesto> get_dynamic_regs(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, String idCentTrab, boolean solo_deleg) {
 
@@ -161,51 +164,66 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 
 		if (idDelegacion != null) {
 			QUERY_CONDITION += "And P.idDelegacion = ?\r\n";
-			objects.add(idDelegacion);
 		}
 
 		if (claveTipoPresup != null) {
 			QUERY_CONDITION += "And T.clave = ?\r\n";
-			objects.add(claveTipoPresup);
 		}
 
 		if (anio != null) {
 			QUERY_CONDITION += "And P.anio = ?\r\n";
-			objects.add(anio);
 		}
 
 		if (mes != null) {
 			QUERY_CONDITION += "And P.mes = ?\r\n";
-			objects.add(mes);
 		}
 
 		if (idCentTrab != null) {
 			QUERY_CONDITION += "And P.id_centro_trabajo = ?\r\n";
-			//ADSC_FIELDS = "C.id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona,\r\n";
-			//ADSC_TABLE = ", m4t_centros_trab C";
-			//ADSC_WHERE = " And P.id_centro_trabajo = C.id_centro_trabajo";
-			objects.add(idCentTrab);
 		}
 
 		if (solo_deleg) {
 			QUERY_CONDITION += "And P.id_centro_trabajo Is NULL\r\n";
-		} else {
-			//QUERY_CONDITION += "And P.id_centro_trabajo Is Not NULL\r\n";
 		}
 
-		String QUERY_GET_DYNAMIC_PRESUPUESTO = "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
-				 + "P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
-				 + "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
-				 + "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
-				 + "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
-				 + QUERY_CONDITION
-				 + "Order by idDelegacion";
+		final String QUERY_GET_DYNAMIC_PRESUPUESTO = "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
+				+ "P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
+				+ "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
+				+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
+				+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
+				+ QUERY_CONDITION
+				+ "Order by idDelegacion";
 
-		logger.info(QUERY_GET_DYNAMIC_PRESUPUESTO);
-		List<Presupuesto> presupuestos = jdbcTemplate.query(QUERY_GET_DYNAMIC_PRESUPUESTO, new PresupuestoMapper(),	objects.toArray());
+		return jdbcTemplate.query(QUERY_GET_DYNAMIC_PRESUPUESTO, ps -> {
+            int count = 0;
+            if (idDelegacion != null) {
+                count ++;
+                ps.setString(count, idDelegacion);
+            }
 
-		return presupuestos;
+            if (claveTipoPresup != null) {
+				count ++;
+                ps.setString(count, claveTipoPresup);
+            }
+
+            if (anio != null) {
+				count ++;
+                ps.setString(count, anio.toString());
+            }
+
+            if (mes != null) {
+				count ++;
+                ps.setString(count, mes.toString());
+            }
+
+            if (idCentTrab != null) {
+				count ++;
+                ps.setString(count, idCentTrab);
+            }
+        }, new PresupuestoMapper());
+
 	}
+
 
 	@Override
 	public Presupuesto getDatosPresup(String idDelegacion, String idTipoPresup, Integer anio, Integer mes) {
@@ -249,16 +267,56 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 			objects.add(idCentTrab);
 		}
 
-		String QUERY_GET_PRESUPUESTO_DEL_CT = "Select NVL( SUM(P.saldo), 0.0) saldo \r\n"
-											+ "From gys_presupuesto P, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
-											+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
-											+ QUERY_CONDITION;
+		final String QUERY_GET_PRESUPUESTO_DEL_CT = "Select NVL( SUM(P.saldo), 0.0) saldo \r\n"
+				+ "From gys_presupuesto P, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
+				+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
+				+ QUERY_CONDITION;
 
-		logger.info(QUERY_GET_PRESUPUESTO_DEL_CT);
-		double saldo = jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_DEL_CT, Double.class, objects.toArray() );
+		return jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_DEL_CT, double.class, objects.toArray());
 
-		return saldo;
 	}
+
+//	@Override
+//	public double getSaldoDelegCt(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, String idCentTrab) {
+//
+//		String QUERY_CONDITION = "";
+//		List<Object> objects = new ArrayList<Object>();
+//
+//		if (idDelegacion != null) {
+//			QUERY_CONDITION += "And P.idDelegacion = ?\r\n";
+////			objects.add(idDelegacion);
+//		}
+//		if (claveTipoPresup != null) {
+//			QUERY_CONDITION += "And T.clave = ?\r\n";
+////			objects.add(claveTipoPresup);
+//		}
+//		if (anio != null) {
+//			QUERY_CONDITION += "And P.anio = ?\r\n";
+////			objects.add(anio);
+//		}
+//		if (mes != null) {
+//			QUERY_CONDITION += "And P.mes = ?\r\n";
+////			objects.add(mes);
+//		}
+//		if (idCentTrab != null) {
+//			QUERY_CONDITION += "And P.id_centro_trabajo = ?\r\n";
+////			objects.add(idCentTrab);
+//		}
+//
+//		String QUERY_GET_PRESUPUESTO_DEL_CT = "Select NVL( SUM(P.saldo), 0.0) saldo \r\n"
+//											+ "From gys_presupuesto P, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
+//											+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
+//											+ QUERY_CONDITION;
+//
+////		logger.info(QUERY_GET_PRESUPUESTO_DEL_CT);
+//
+//
+//		final double saldo = jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_DEL_CT, Double.class, objects.toArray() );
+//
+////		logger.info("Saldus:     "+saldo);
+//
+//		return saldo;
+//	}
 
 	@Override
 	public double getSaldoDistribuido(Integer anio, Integer mes, String idDelegacion, String idTipoPresup) {

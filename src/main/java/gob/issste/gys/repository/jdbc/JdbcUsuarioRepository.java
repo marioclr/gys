@@ -44,27 +44,27 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 	public int save(Usuario usuario) throws SQLException {
 		logger.info(QUERY_ADD_NEW_USU);
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        PreparedStatementCreator statementCreator = (Connection connection) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_NEW_USU, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, usuario.getClave());
-            preparedStatement.setString(2, usuario.getPassword());
-            preparedStatement.setString(3, usuario.getEmpleado().getId_empleado());
-            preparedStatement.setString(4, usuario.getDelegacion().getId_div_geografica());
-            preparedStatement.setInt(5, usuario.getNivelVisibilidad().getIdNivelVisibilidad());
-            preparedStatement.setInt(6, usuario.getIdTipoUsuario());
-            preparedStatement.setString(7, usuario.getId_usuario());
-            return preparedStatement;
-        };
-        int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
-        if (updatesCount == 1) {
-            Number generatedKey = keyHolder.getKey();
-            if (generatedKey == null) {
-                throw new SQLException("Getting user id error.");
-            }
-            return generatedKey.intValue();
-        }
-        throw new SQLException("Expected one row insert.");
+		KeyHolder keyHolder = new GeneratedKeyHolder();
+		PreparedStatementCreator statementCreator = (Connection connection) -> {
+			PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_NEW_USU, Statement.RETURN_GENERATED_KEYS);
+			preparedStatement.setString(1, usuario.getClave());
+			preparedStatement.setString(2, usuario.getPassword());
+			preparedStatement.setString(3, usuario.getEmpleado().getId_empleado());
+			preparedStatement.setString(4, usuario.getDelegacion().getId_div_geografica());
+			preparedStatement.setInt(5, usuario.getNivelVisibilidad().getIdNivelVisibilidad());
+			preparedStatement.setInt(6, usuario.getIdTipoUsuario());
+			preparedStatement.setString(7, usuario.getId_usuario());
+			return preparedStatement;
+		};
+		int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
+		if (updatesCount == 1) {
+			Number generatedKey = keyHolder.getKey();
+			if (generatedKey == null) {
+				throw new SQLException("Getting user id error.");
+			}
+			return generatedKey.intValue();
+		}
+		throw new SQLException("Expected one row insert.");
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 		logger.info(QUERY_UPDATE_USU);
 
 		return jdbcTemplate.update(QUERY_UPDATE_USU,
-				new Object[] { usuario.getClave(), usuario.getPassword(), usuario.getEmpleado().getId_empleado(), usuario.getDelegacion().getId_div_geografica(), 
+				new Object[] { usuario.getClave(), usuario.getPassword(), usuario.getEmpleado().getId_empleado(), usuario.getDelegacion().getId_div_geografica(),
 						usuario.getNivelVisibilidad().getIdNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getId_usuario(), usuario.getIdUsuario() });
 	}
 
@@ -83,7 +83,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 			Usuario usuario = jdbcTemplate.queryForObject(QUERY_FIND_USU_BY_ID,
 					new UsuarioMapper(), id);
 			return usuario;
-		} catch (IncorrectResultSizeDataAccessException e) {			
+		} catch (IncorrectResultSizeDataAccessException e) {
 			return null;
 		}
 	}
@@ -95,7 +95,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 			Usuario usuario = jdbcTemplate.queryForObject(QUERY_FIND_USU_BY_NAME,
 					new UsuarioMapper(), userName);
 			return usuario;
-		} catch (IncorrectResultSizeDataAccessException e) {			
+		} catch (IncorrectResultSizeDataAccessException e) {
 			return null;
 		}
 	}
@@ -108,7 +108,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 
 	@Override
 	public List<Usuario> findAll(boolean conPerfiles) {
-		
+
 		logger.info(QUERY_GET_ALL_USU);
 		List<Usuario> usuarios = jdbcTemplate.query(QUERY_GET_ALL_USU, new UsuarioMapper());
 		if (conPerfiles == true) {
@@ -152,7 +152,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 //	@Override
 //	public List<Usuario> findByClave(String clave, boolean conPerfiles) {
 //		logger.info(QUERY_FIND_USU_BY_CLAVE);
-//		return jdbcTemplate.query(QUERY_FIND_USU_BY_CLAVE, 
+//		return jdbcTemplate.query(QUERY_FIND_USU_BY_CLAVE,
 //				new UsuarioMapper(), "%" + clave + "%");
 //	}
 
@@ -162,7 +162,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 
 		List<Perfil> perfilesList =
 				this.jdbcTemplate.query(QUERY_GET_PER_FOR_USU,
-				BeanPropertyRowMapper.newInstance(Perfil.class), usuario.getIdUsuario());
+						BeanPropertyRowMapper.newInstance(Perfil.class), usuario.getIdUsuario());
 
 		return perfilesList;
 	}
@@ -175,7 +175,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 			Usuario usuario = jdbcTemplate.queryForObject(QUERY_LOGIN_USU,
 					new UsuarioMapper(), username, password);
 			return usuario;
-		} catch (IncorrectResultSizeDataAccessException e) {			
+		} catch (IncorrectResultSizeDataAccessException e) {
 			return null;
 		}
 	}
@@ -187,7 +187,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 		try {
 			return jdbcTemplate.update(QUERY_ADD_USU_PERMISSIONS,
 					new Object[] { IdUsuario, IdPerfil, IdOpcion, IdNivelAcceso });
-			
+
 		} catch (Exception e) {
 			throw new SQLException("Expected one row insert.");
 		}
@@ -238,7 +238,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 		try {
 			return jdbcTemplate.update(QUERY_ADD_USU_CTS,
 					new Object[] { IdUsuario, IdCentroTrab, id_usuario });
-			
+
 		} catch (Exception e) {
 			throw new SQLException("Error al insertar centro de trabajo para el usuario.");
 		}
@@ -250,7 +250,7 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 
 		List<DatosAdscripcion> centrosTrabList =
 				this.jdbcTemplate.query(QUERY_GET_USU_CTS,
-				BeanPropertyRowMapper.newInstance(DatosAdscripcion.class), IdUsuario);
+						BeanPropertyRowMapper.newInstance(DatosAdscripcion.class), IdUsuario);
 
 		return centrosTrabList;
 	}
@@ -260,14 +260,14 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 		logger.info(QUERY_DEL_USU_CTS);
 		return jdbcTemplate.update(QUERY_DEL_USU_CTS, IdUsuario);
 	}
-	
+
 	@Override
 	public List<NivelVisibilidad> getNivelVisibilidadUsuarios() {
 		logger.info(QUERY_GET_NIVEL_VIS_USU);
 
 		List<NivelVisibilidad> nivelVisibilidadList =
 				this.jdbcTemplate.query(QUERY_GET_NIVEL_VIS_USU,
-				BeanPropertyRowMapper.newInstance(NivelVisibilidad.class));
+						BeanPropertyRowMapper.newInstance(NivelVisibilidad.class));
 
 		return nivelVisibilidadList;
 	}

@@ -72,7 +72,7 @@ public class UsuarioController {
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
 
 		try {
-			int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), usuario.getPassword(), usuario.getEmpleado(), 
+			int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), usuario.getPassword(), usuario.getEmpleado(),
 					usuario.getDelegacion(), usuario.getCentrosTrabajo(), usuario.getNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getId_usuario()));
 			for(Perfil p:usuario.getPerfiles()) {
 				perfilRepository.addPerfilToUser(idUsuario, p.getIdPerfil());
@@ -86,19 +86,19 @@ public class UsuarioController {
 			platformTransactionManager.commit(status);
 			//return new ResponseEntity<>("El Usuario ha sido creado de manera exitosa", HttpStatus.OK);
 			return ResponseHandler.generateResponse("El Usuario ha sido creado de manera exitosa", HttpStatus.OK, null);
-			
+
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al agregar un nuevo usuario al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			
+
 		}
 	}
 
 	@Operation(summary = "Actualiza un usuario del Sistema", description = "Actualiza un usuario del Sistema", tags = { "Usuario" })
 	@PutMapping("/usuarios/{id}")
 	public ResponseEntity<Object> updateUsuario(
-			@Parameter(description = "El ID del usuario a modificar.", required = true) @PathVariable("id") int id, 
+			@Parameter(description = "El ID del usuario a modificar.", required = true) @PathVariable("id") int id,
 			@Parameter(description = "Actualizar un Usuario existente del Sistema") @RequestBody Usuario usuario) {
 
 		Usuario _usuario = usuarioRepository.findById(id);
@@ -135,13 +135,13 @@ public class UsuarioController {
 				}
 				platformTransactionManager.commit(status);
 				return ResponseHandler.generateResponse("El Usuario ha sido modificado de manera exitosa", HttpStatus.OK, null);
-				
+
 			} else {
 				return ResponseHandler.generateResponse("No se pudo encontrar el usuario con ID = " + id, HttpStatus.NOT_FOUND, null);
 			}
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
-			return ResponseHandler.generateResponse("Error al actualizar un usuario del Sistema de manera exitosa", HttpStatus.INTERNAL_SERVER_ERROR, null);			
+			return ResponseHandler.generateResponse("Error al actualizar un usuario del Sistema de manera exitosa", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -163,16 +163,16 @@ public class UsuarioController {
 			if (usuarios.isEmpty()) {
 				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se obtuvieron los usuarios del Sistema", HttpStatus.NOT_FOUND, null);
-				
+
 			}
 
 			//return new ResponseEntity<>(usuarios, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Obtiene todos los usuarios del Sistema de manera exitosa", HttpStatus.OK, usuarios);
-			
+
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al obtener todos los usuarios del Sistema de manera exitosa", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			
+
 		}
 	}
 
@@ -180,7 +180,7 @@ public class UsuarioController {
 	@GetMapping("/usuarios/{id}")
 	//public ResponseEntity<Usuario> getUsuarioById(
 	public ResponseEntity<Object> getUsuarioById(
-			@Parameter(description = "El ID del usuario consultado.", required = true) @PathVariable("id") int id, 
+			@Parameter(description = "El ID del usuario consultado.", required = true) @PathVariable("id") int id,
 			@Parameter(description = "Boolean para indicar si se incluyen los Perfiles", required = true) @RequestParam(value = "conPerfiles", required = true) Boolean conPerfiles) {
 
 		Usuario usuario = usuarioRepository.findById(id);
@@ -200,11 +200,11 @@ public class UsuarioController {
 			usuario = usuarioRepository.getPermissionsForUser(usuario);
 			//return new ResponseEntity<>(usuario, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se obtuvo el usuario mediante ID de manera exitosa", HttpStatus.OK, usuario);
-			
+
 		} else {
 			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			return ResponseHandler.generateResponse("Error al obtener el usuario mediante ID del Sistema", HttpStatus.NOT_FOUND, null);
-			
+
 		}
 	}
 
@@ -222,11 +222,11 @@ public class UsuarioController {
 			}
 			//return new ResponseEntity<>("El Usuario fué eliminada exitosamente", HttpStatus.OK);
 			return ResponseHandler.generateResponse("El Usuario fué eliminada exitosamente", HttpStatus.OK, null);
-			
+
 		} catch (Exception e) {
 			//return new ResponseEntity<>("No se borró el Usuario", HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("No se borró el Usuario", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			
+
 		}
 	}
 
@@ -246,23 +246,23 @@ public class UsuarioController {
 		try {
 
 			Usuario usuario = usuarioRepository.loginUser(clave, password);
-			
+
 			if (usuario == null) {
 				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se pudieron validar las credenciales del usuario", HttpStatus.NOT_FOUND, null);
-				
+
 			}
 			usuario.setCentrosTrabajo(usuarioRepository.getCentTrabForUsu(usuario.getIdUsuario()));
 			usuario = usuarioRepository.getPermissionsForUser(usuario);
 			//return new ResponseEntity<>(usuario, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Logea Usuario en el Sistema de manera exitosa", HttpStatus.OK, usuario);
-			
+
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("No se pudo crear la opcion de manera exitosa", HttpStatus.INTERNAL_SERVER_ERROR, null);
-			
+
 		}
-		
+
 	}
 
 	@Operation(summary = "Obtiene los permisos del usuarios del Sistema", description = "Obtiene los permisos del usuarios del Sistema", tags = { "Usuario" })
@@ -278,11 +278,11 @@ public class UsuarioController {
 			usuario = usuarioRepository.getPermissionsForUser(usuario);
 			//return new ResponseEntity<>(usuario, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Se obtienen los permisos del usuarios del Sistema", HttpStatus.OK, usuario);
-			
+
 		} else {
 			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			return ResponseHandler.generateResponse("Error al obtener los permisos del usuarios del Sistema", HttpStatus.NOT_FOUND, null);
-			
+
 		}
 	}
 

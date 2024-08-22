@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class SuplenciaController {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
+	ParamsValidatorService paramsValidatorService = new ParamsValidatorService();
 
 	@Autowired
 	ISuplenciaRepository suplenciaRepository;
@@ -840,14 +842,54 @@ public class SuplenciaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
+			String message = "";
+			String[] parameters = new String[] {tipoSuplencia, claveEmpleado, idDelegacion, idCentroTrab,claveServicio,puesto, emp_suplir};
+			List<String> params = new ArrayList<>();
+			List<String> regexList = new  ArrayList<>();
+//			List<String> regexList = List.of("^(SI|SE)$", "^[0-9]{5}$" ,"^[0-9]{2}$", "^[0-9]{5}$", "^[A-Za-z]{2}\\d{3}$", "^[A-Za-z]{1}\\d{5}");
+			for(String param : parameters){
+				if (param != null){
+					params.add(param);
+				}
+			}
+			if(tipoSuplencia != null){
+				regexList.add("^(SI|SE)$");
+			}
+			if(claveEmpleado != null){
+				if(tipoSuplencia.equals(String.valueOf("SI"))){
+					regexList.add("^[0-9]{6}$");
+				}else {
+					regexList.add("^[A-ZÑ&]{3,4}([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[01]))?([A-Z\\d]{2}[A\\d])$");
+				}
+			}
+
+			if(idDelegacion != null){
+				regexList.add("^[0-9]{2}$");
+			}
+			if (emp_suplir != null){
+				regexList.add("^[0-9]{6}$");
+			}
+
+			boolean regexValidation = paramsValidatorService.validate(regexList, params);
+			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
+
 
 			if (quincena != null)
 				strQuincena = dateFormat.format(quincena);
 
 			List<DatosSuplencia> guardias = new ArrayList<DatosSuplencia>();
 
-			guardias = suplenciaRepository.ConsultaDynamicSuplencias(strQuincena, tipoSuplencia, claveEmpleado, importe_min, importe_max, 
-																idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir, estatus);
+			if(injectableValues || !regexValidation){
+				if (injectableValues){
+					message = "Intento de inyeccion detectado";
+				} else {
+					message = "Valor rechazado por la expresion regular";
+				}
+				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
+			} else {
+				guardias = suplenciaRepository.ConsultaDynamicSuplencias(strQuincena, tipoSuplencia, claveEmpleado, importe_min, importe_max,
+						idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir, estatus);
+			}
 
 			if (guardias.isEmpty()) {
 
@@ -875,20 +917,48 @@ public class SuplenciaController {
 		try {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			String strQuincena = null;
+			String message = "";
+			String[] parameters = new String[] {tipoSuplencia, idDelegacion, idCentroTrab};
+//			List<String> regexList = List.of("^(SI|SE)$", "^[0-9]{2}$", "^[0-9]{5}$");
+			List<String> regexList = new ArrayList<>();
+			List<String> params = new ArrayList<>();
+			for(String param : parameters){
+				if (param != null){
+					params.add(param);
+				}
+			}
+			if(tipoSuplencia != null){
+				regexList.add("^(SI|SE)$");
+			}
+			if(idDelegacion != null){
+				regexList.add("^[0-9]{2}$");
+			}
+
+			boolean regexValidation = paramsValidatorService.validate(regexList, params);
+			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
 
 			if (quincena != null)
 				strQuincena = dateFormat.format(quincena);
 
-			List<DatosSuplencia> guardias = new ArrayList<DatosSuplencia>();
+			List<DatosSuplencia> suplencias = new ArrayList<DatosSuplencia>();
 
-			guardias = suplenciaRepository.ConsultaDynamicAuthSuplencias(strQuincena, tipoSuplencia, idDelegacion, idCentroTrab, estatus);
+			if(injectableValues || !regexValidation){
+				if (injectableValues){
+					message = "Intento de inyeccion detectado";
+				} else {
+					message = "Valor rechazado por la expresion regular";
+				}
+				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
+			} else {
+				suplencias = suplenciaRepository.ConsultaDynamicAuthSuplencias(strQuincena, tipoSuplencia, idDelegacion, idCentroTrab, estatus);
+			}
 
-			if (guardias.isEmpty()) {
+			if (suplencias.isEmpty()) {
 
 				return ResponseHandler.generateResponse("No se encontraron los registros de suplencias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 
-			return ResponseHandler.generateResponse("Se obtuvieron los registros de suplencias del empleado en el Sistema", HttpStatus.OK, guardias);
+			return ResponseHandler.generateResponse("Se obtuvieron los registros de suplencias del empleado en el Sistema", HttpStatus.OK, suplencias);
 
 		} catch (Exception e) {
 			logger.info(e.toString());

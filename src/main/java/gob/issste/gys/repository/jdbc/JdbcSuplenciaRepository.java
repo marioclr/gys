@@ -1,9 +1,6 @@
 package gob.issste.gys.repository.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,13 +21,20 @@ import gob.issste.gys.model.DatosSuplencia;
 import gob.issste.gys.model.FactoresSuplencia;
 import gob.issste.gys.repository.ISuplenciaRepository;
 
+import javax.sql.DataSource;
+
 @Repository
 public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
+	private final DataSource dataSource;
 
 	@Autowired
 	JdbcTemplate jdbcTemplate;
+
+	public JdbcSuplenciaRepository(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
 	@Override
 	public int save(DatosSuplencia suplencia) throws SQLException {
@@ -598,14 +602,13 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
-	public List<DatosSuplencia> ConsultaDynamicSuplencias(String fechaPago, String tipo, String clave_empleado,
-			Double importe_min, Double importe_max, String idDelegacion, String idCentroTrab, String claveServicio, 
-			String puesto, String emp_suplir, Integer estatus) {
-
+	public List<DatosSuplencia>
+	ConsultaDynamicSuplencias(String fechaPago, String tipo, String clave_empleado,
+														  Double importe_min, Double importe_max, String idDelegacion, String idCentroTrab, String claveServicio,
+														  String puesto, String emp_suplir, Integer estatus) {
 		String QUERY_CONDITION  = "";
 		String EMPLOYEE_FIELD   = "";
 		String QUERY_TABLE_BASE = "";
-		List<Object> objects = new ArrayList<Object>();
 
 		if (tipo.equals(String.valueOf("SI"))) {
 			QUERY_TABLE_BASE = "gys_suplencias_emp";
@@ -615,148 +618,163 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 			EMPLOYEE_FIELD   = "S.rfc";
 		}
 
-		if (fechaPago != null) { 
+		if (fechaPago != null) {
 			QUERY_CONDITION += "  And S.fec_paga = ?\r\n";
-			objects.add(fechaPago);
 		}
 
 		if (clave_empleado != null) {
 			if (tipo.equals(String.valueOf("SI"))) {
 				QUERY_CONDITION += "And S.id_empleado = ?\r\n";
-				objects.add(clave_empleado);
 			} else {
 				QUERY_CONDITION += "And S.rfc = ?\r\n";
-				objects.add(clave_empleado);
 			}
 		}
 
 		if (importe_min != null) {
 			QUERY_CONDITION += "  And S.importe >= ?\r\n";
-			objects.add(importe_min.toString());
 		}
 
 		if (importe_max != null) {
 			QUERY_CONDITION += "  And S.importe <= ?\r\n";
-			objects.add(importe_max.toString());
 		}
 
-		if (idDelegacion != null) { 
+		if (idDelegacion != null) {
 			QUERY_CONDITION += "  And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n";
-			objects.add(idDelegacion);
 		}
 
-		if (idCentroTrab != null) { 
+		if (idCentroTrab != null) {
 			QUERY_CONDITION += "  And C.id_centro_trabajo = ?\r\n";
-			objects.add(idCentroTrab);
 		}
-
-		if (claveServicio != null) { 
-			QUERY_CONDITION += "  And SE.id_clave_servicio = ?\r\n";
-			objects.add(claveServicio);
-		}
-
-		if (puesto != null) { 
+		if (puesto != null) {
 			QUERY_CONDITION += "  And P.id_puesto_plaza = ?\r\n";
-			objects.add(puesto);
 		}
 
-		if (emp_suplir != null) { 
+		if (claveServicio != null) {
+			QUERY_CONDITION += "  And SE.id_clave_servicio = ?\r\n";
+		}
+
+
+		if (emp_suplir != null) {
 			QUERY_CONDITION += "  And S.id_empleado_sup = ?\r\n";
-			objects.add(puesto);
 		}
 
-		if (estatus != null) { 
+		if (estatus != null) {
 			QUERY_CONDITION += "  And S.estatus = ?\r\n";
-			objects.add(estatus);
 		}
 
-		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, n_centro_trabajo,\r\n"
-							 + "  S.id_clave_servicio, n_clave_servicio, S.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
-							 + "  S.id_nivel, S.id_sub_nivel, S.id_tipo_jornada, S.id_turno, dias, S.fec_inicio, S.fec_fin, S.folio, S.motivo, S.id_clave_movimiento, S.coment, S.estatus,\r\n"
-							 + "  S.importe, P.id_tipo_tabulador, S.fec_paga, C.id_zona, S.id_ordinal, NVL(riesgos,0) riesgos, S.id_usuario,\r\n"
-							 + "  S.id_empleado_sup clave_empleado_suplir\r\n"
-							 + "From " + QUERY_TABLE_BASE + " S, gys_fechas_control F, m4t_puestos_plaza P, m4t_clave_servicio SE, m4t_centros_trab C\r\n"
-							 + "Where S.fec_paga = F.fec_pago\r\n"
-							 + "  And S.id_puesto_plaza = P.id_puesto_plaza\r\n"
-							 + "  And P.id_empresa='01'\r\n"
-							 + "  And S.id_clave_servicio = SE.id_clave_servicio\r\n"
-							 + "  And SE.id_empresa='01'\r\n"
-							 + "  And S.id_centro_trabajo = C.id_centro_trabajo\r\n"
-							 + QUERY_CONDITION
-							 + "Order by S.fec_paga desc, S.fec_inicio";
+		 final String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, n_centro_trabajo,\r\n"
+				+ "  S.id_clave_servicio, n_clave_servicio, S.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
+				+ "  S.id_nivel, S.id_sub_nivel, S.id_tipo_jornada, S.id_turno, dias, S.fec_inicio, S.fec_fin, S.folio, S.motivo, S.id_clave_movimiento, S.coment, S.estatus,\r\n"
+				+ "  S.importe, P.id_tipo_tabulador, S.fec_paga, C.id_zona, S.id_ordinal, NVL(riesgos,0) riesgos, S.id_usuario,\r\n"
+				+ "  S.id_empleado_sup clave_empleado_suplir\r\n"
+				+ "	 From " + QUERY_TABLE_BASE + " S, gys_fechas_control F, m4t_puestos_plaza P, m4t_clave_servicio SE, m4t_centros_trab C\r\n"
+				+ "	 Where S.fec_paga = F.fec_pago\r\n"
+				+ "  And S.id_puesto_plaza = P.id_puesto_plaza\r\n"
+				+ "  And P.id_empresa='01'\r\n"
+				+ "  And S.id_clave_servicio = SE.id_clave_servicio\r\n"
+				+ "  And SE.id_empresa='01'\r\n"
+				+ "  And S.id_centro_trabajo = C.id_centro_trabajo\r\n"
+				+    QUERY_CONDITION
+				+ "	 Order by S.fec_paga desc, S.fec_inicio";
 
-		logger.info(DYNAMIC_QUERY);
-		List<DatosSuplencia> suplencias = jdbcTemplate.query(DYNAMIC_QUERY, BeanPropertyRowMapper.newInstance(DatosSuplencia.class), objects.toArray() );
+		List<DatosSuplencia> suplencias = jdbcTemplate.query( DYNAMIC_QUERY, ps -> {
+		int count = 0;
+    	if (fechaPago != null) {
+		count ++;
+        ps.setString(count, fechaPago);
+    	}
 
-		return suplencias;
+    	if (clave_empleado != null) {
+		count ++;
+		ps.setString(count, clave_empleado);
+    	}
 
+    	if (importe_min != null) {
+		count ++;
+        ps.setString(count, importe_min.toString());
+    	}
+
+    	if (importe_max != null) {
+		count ++;
+        ps.setString(count, importe_max.toString());
+    	}
+
+    	if (idDelegacion != null) {
+		count ++;
+        ps.setString(count, idDelegacion);
+    	}
+
+    	if (idCentroTrab != null) {
+		count ++;
+        ps.setString(count, idCentroTrab);
+    	}
+
+		if (puesto != null) {
+		count ++;
+		ps.setString(count, puesto);
+		}
+
+    	if (claveServicio != null) {
+		count ++;
+        ps.setString(count, claveServicio);
+    	}
+
+    	if (emp_suplir != null) {
+		count ++;
+        ps.setString(count, emp_suplir);
+    	}
+
+    	if (estatus != null) {
+		count ++;
+        ps.setString(count, estatus.toString());
+    	}
+		logger.info("Prepared statement: "+ DYNAMIC_QUERY);
+		}, BeanPropertyRowMapper.newInstance(DatosSuplencia.class));
+			return suplencias;
 	}
 
 	@Override
 	public List<DatosSuplencia> ConsultaDynamicAuthSuplencias(String fechaPago, String tipo, String idDelegacion,
 			String idCentroTrab, Integer estatus) {
+
 		String QUERY_CONDITION  = "";
 		String EMPLOYEE_FIELD   = "";
 		String QUERY_TABLE_BASE = "";
-		List<Object> objects = new ArrayList<Object>();
-
 		switch (tipo) {
-
 			case "SI":
-
 				QUERY_TABLE_BASE = "gys_autorizacion_suplencias A, gys_suplencias_emp";
 				EMPLOYEE_FIELD   = "S.id_empleado";
 				break;
-
 			case "SE":
-
 				QUERY_TABLE_BASE = "gys_autorizacion_suplencias A, gys_suplencias_ext";
 				EMPLOYEE_FIELD   = "S.rfc";
 				break;
-
 		}
-
 		if (fechaPago != null) { 
 			QUERY_CONDITION += "  And S.fec_paga = ?\r\n";
-			objects.add(fechaPago);
 		}
 
 		if (idDelegacion != null) { 
 			QUERY_CONDITION += "  And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n";
-			objects.add(idDelegacion);
 		}
 
-		if (idCentroTrab != null) { 
+		if (idCentroTrab != null) {
 			QUERY_CONDITION += "  And C.id_centro_trabajo = ?\r\n";
-			objects.add(idCentroTrab);
 		}
 
 		if (estatus != null) {
-
 			switch (estatus) {
-
 				case 0:
-
 					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
-					objects.add(estatus);
 					break;
-
 				case 1,2:
-
 					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
-					objects.add(estatus);
 					break;
-
 				case 3,4:
-
 					QUERY_CONDITION += "  And A.estatus2 = ?\r\n";
-					objects.add(estatus);
 					break;
-
 			}
-
 		}
-
 		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, n_centro_trabajo,\r\n"
 							 + "  S.id_clave_servicio, n_clave_servicio, S.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
 							 + "  S.id_nivel, S.id_sub_nivel, S.id_tipo_jornada, S.id_turno, dias, S.fec_inicio, S.fec_fin, S.folio, S.motivo, S.id_clave_movimiento, S.coment,\r\n"
@@ -771,15 +789,34 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 							 + "  And S.id_clave_servicio = SE.id_clave_servicio\r\n"
 							 + "  And SE.id_empresa='01'\r\n"
 							 + "  And S.id_centro_trabajo = C.id_centro_trabajo\r\n"
-							 + QUERY_CONDITION
-							 + "Order by S.fec_paga desc, S.fec_inicio";
+							 + 	  QUERY_CONDITION
+							 + "  Order by S.fec_paga desc, S.fec_inicio";
 
-		logger.info(DYNAMIC_QUERY);
-		List<DatosSuplencia> suplencias = jdbcTemplate.query(DYNAMIC_QUERY, BeanPropertyRowMapper.newInstance(DatosSuplencia.class), objects.toArray() );
+		List<DatosSuplencia> suplencias = jdbcTemplate.query(DYNAMIC_QUERY, ps ->{
+			int count = 0;
+
+			if (fechaPago != null) {
+				count ++;
+				ps.setString(count, fechaPago);
+			}
+
+			if (idDelegacion != null) {
+				count ++;
+				ps.setString(count, idDelegacion);
+			}
+
+			if (idCentroTrab != null) {
+				count ++;
+				ps.setString(count, idCentroTrab);
+			}
+
+			if (estatus != null) {
+				count ++;
+				ps.setString(count, estatus.toString());
+			}
+		}, BeanPropertyRowMapper.newInstance(DatosSuplencia.class));
 
 		return suplencias;
 	}
-
-
 
 }
