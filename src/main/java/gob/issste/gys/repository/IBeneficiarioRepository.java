@@ -8,12 +8,12 @@ import gob.issste.gys.model.Beneficiario;
 public interface IBeneficiarioRepository {
 
 	public String STMT_ADD_NEW_BENEFICIARIO			= "INSERT INTO gys_beneficiarios ( idBolsa, rfc_bolsa, nombre, apellidoPaterno, apellidoMaterno, "
-													+ "numeroBenef, porcentaje, id_centro_trab, rfc, fec_inicio, fec_fin, cons_benef, id_usuario )\r\n"
-													+ "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
+													+ "numeroBenef, consecutivo, porcentaje, id_centro_trab, rfc, fec_inicio, fec_fin, cons_benef, id_usuario )\r\n"
+													+ "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )";
 	int save(Beneficiario beneficiario) throws SQLException;
 
 	public String STMT_UPDATE_BENEFICIARIO			= "UPDATE gys_beneficiarios Set rfc_bolsa=?, nombre = ?, apellidoPaterno = ?, apellidoMaterno = ?,\r\n"
-													+ "numeroBenef = ?, porcentaje = ?, id_centro_trab = ?, rfc = ?, fec_inicio = ?, fec_fin = ?,\r\n"
+													+ "numeroBenef = ?, consecutivo = ?, porcentaje = ?, id_centro_trab = ?, rfc = ?, fec_inicio = ?, fec_fin = ?,\r\n"
 													+ "cons_benef = ?, id_usuario = ?\r\n"
 													+ "Where id = ?";
 	int update(Beneficiario beneficiario);

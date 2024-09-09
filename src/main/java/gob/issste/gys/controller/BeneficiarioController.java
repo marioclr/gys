@@ -3,11 +3,13 @@ package gob.issste.gys.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.model.DatosSuplencia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,9 +50,9 @@ public class BeneficiarioController {
 				return ResponseHandler.generateResponse("La suma de porcentajes a beneficiarios del títular en bolsa de trabajo excede el 100 %", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			idBenef = beneficiarioRepository.save(new Beneficiario( beneficiario.getIdBolsa(), beneficiario.getRfc_bolsa(), beneficiario.getNombre(), 
-													beneficiario.getApellidoPaterno(), beneficiario.getApellidoMaterno(), beneficiario.getPorcentaje(), 
-													beneficiario.getNumeroBenef(), beneficiario.getId_centro_trab(), beneficiario.getRfc(), 
+			idBenef = beneficiarioRepository.save(new Beneficiario( beneficiario.getIdBolsa(), beneficiario.getRfc_bolsa(), beneficiario.getNombre(),
+													beneficiario.getApellidoPaterno(), beneficiario.getApellidoMaterno(), beneficiario.getPorcentaje(),
+													beneficiario.getNumeroBenef(), beneficiario.getConsecutivo(), beneficiario.getId_centro_trab(), beneficiario.getRfc(),
 													beneficiario.getFec_inicio(), beneficiario.getFec_fin(),
 													beneficiario.getCons_benef(), beneficiario.getId_usuario() ));
 
@@ -76,6 +78,7 @@ public class BeneficiarioController {
 			_beneficiario.setApellidoPaterno(beneficiario.getApellidoPaterno());
 			_beneficiario.setApellidoMaterno(beneficiario.getApellidoMaterno());
 			_beneficiario.setNumeroBenef(beneficiario.getNumeroBenef());
+			_beneficiario.setConsecutivo(beneficiario.getConsecutivo());
 			_beneficiario.setPorcentaje(beneficiario.getPorcentaje());
 			_beneficiario.setId_centro_trab(beneficiario.getId_centro_trab());
 			_beneficiario.setRfc(beneficiario.getRfc());

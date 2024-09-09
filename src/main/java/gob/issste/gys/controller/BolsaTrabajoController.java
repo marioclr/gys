@@ -112,6 +112,7 @@ public class BolsaTrabajoController {
 			_elemento.setCodigoPostal(elemento.getCodigoPostal());
 			_elemento.setCurp(elemento.getCurp());
 			_elemento.setId_beneficiario(elemento.getId_beneficiario());
+			_elemento.setConsecutivo(elemento.getConsecutivo());
 			bolsaTrabajoRepository.update(_elemento);
 
 			return ResponseHandler.generateResponse("El elemento de la bolsa de trabajo ha sido modificado de manera exitosa", HttpStatus.OK, null);

@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+#### SSL file ####
+src/main/resources/*.p12
+
+#### backend ####
+backend/

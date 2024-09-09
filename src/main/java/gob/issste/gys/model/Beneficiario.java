@@ -10,6 +10,7 @@ public class Beneficiario {
 	private String apellidoMaterno;
 	private int porcentaje;
 	private String numeroBenef;
+	private int consecutivo;
 	private String id_centro_trab;
 	private String rfc;
 	private String fec_inicio;
@@ -22,7 +23,7 @@ public class Beneficiario {
 	}
 
 	public Beneficiario(int idBolsa, String rfc_bolsa, String nombre, String apellidoPaterno, String apellidoMaterno, int porcentaje,
-			String numeroBenef, String id_centro_trab, String rfc, String fec_inicio, String fec_fin, int cons_benef, String id_usuario) {
+			String numeroBenef,  int consecutivo, String id_centro_trab, String rfc, String fec_inicio, String fec_fin, int cons_benef, String id_usuario) {
 		super();
 		this.idBolsa = idBolsa;
 		this.rfc_bolsa = rfc_bolsa;
@@ -31,6 +32,7 @@ public class Beneficiario {
 		this.apellidoMaterno = apellidoMaterno;
 		this.porcentaje = porcentaje;
 		this.numeroBenef = numeroBenef;
+		this.consecutivo = consecutivo;
 		this.id_centro_trab = id_centro_trab;
 		this.rfc = rfc;
 		this.fec_inicio = fec_inicio;
@@ -101,6 +103,12 @@ public class Beneficiario {
 
 	public void setNumeroBenef(String numeroBenef) {
 		this.numeroBenef = numeroBenef;
+	}
+	public int getConsecutivo() {
+		return consecutivo;
+	}
+	public void setConsecutivo(int consecutivo) {
+		this.consecutivo = consecutivo;
 	}
 
 	public String getId_centro_trab() {
