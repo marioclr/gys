@@ -19,7 +19,6 @@ public class UsuarioMapper implements RowMapper<Usuario> {
 		usuario.setIdUsuario(rs.getInt("IdUsuario"));
 		usuario.setClave(rs.getString("Clave"));
 		usuario.setPassword(rs.getString("Password"));
-//		usuario.setSistema(rs.getString("sistema"));
 		usuario.setId_usuario(rs.getString("id_usuario"));
 
 		Empleado empleado = new Empleado();
@@ -40,7 +39,6 @@ public class UsuarioMapper implements RowMapper<Usuario> {
 		nivelVisibilidad.setIdNivelVisibilidad(rs.getInt("IdNivelVisibilidad"));
 		nivelVisibilidad.setDescripcion(rs.getString("Descripcion"));
 		usuario.setNivelVisibilidad(nivelVisibilidad);
-//		usuario.setSistema(rs.getString("sistema"));
 		usuario.setIdTipoUsuario(rs.getInt("IdTipoUsuario"));
 
 		return usuario;
