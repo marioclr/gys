@@ -27,7 +27,11 @@ public class JdbcProgramaticaRepository implements IProgramaticaRepository {
 
     @Override
     public List<Programatica> findAllProgramaticaByType(String tipo, int page, int size) {
-        return null;
+        return jdbcTemplate.query(GET_PROGRAMATICA_DATA_BY_TYPE, ps -> {
+            ps.setString(1, tipo);
+            ps.setInt(2, page);
+            ps.setInt(3, size);
+        }, BeanPropertyRowMapper.newInstance(Programatica.class));
     }
 
     public Long getProgramSize(){

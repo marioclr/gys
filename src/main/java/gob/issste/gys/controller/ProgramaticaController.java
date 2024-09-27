@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
 public class ProgramaticaController {
@@ -37,6 +37,24 @@ public class ProgramaticaController {
         }
     }
 
+    @Operation(summary = "Trae la programatica presupuestal usando valores de paginador como referencia",
+            description = "Método que trae programatica presupuestal",
+            tags = { "Programatica presupuestal" })
+    @GetMapping("/Programatica/byType")
+    public ResponseEntity<Object> getProgramPresupByType(@RequestParam String type, int page, int size){
+        String message = "";
+        try {
+            Map<String, Object> dataAndSize = new HashMap<>();
+            List<Programatica> programaticaList = new ArrayList<>();
+            programaticaList = iProgramaticaRepository.findAllProgramaticaByType(type,page, size);
+            dataAndSize.put("programatica",programaticaList);
+            dataAndSize.put("size", iProgramaticaRepository.getProgramSize());
+
+            return ResponseHandler.generateResponse("Programatica de obtenida con exito", HttpStatus.OK, dataAndSize);
+        }catch (Exception e){
+            return ResponseHandler.generateResponse("No se pudo obtener la programatrica presupuestal " + e, HttpStatus.CONFLICT, null);
+        }
+    }
     @PutMapping("/Programatica")
     public ResponseEntity<Object> updateProgramaticaById(@RequestBody Programatica programatica){
         try {
