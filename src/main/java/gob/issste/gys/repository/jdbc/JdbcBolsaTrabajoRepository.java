@@ -45,6 +45,7 @@ public class JdbcBolsaTrabajoRepository implements IBolsaTrabajoRepository {
             preparedStatement.setString(6, elemento.getCodigoPostal());
             preparedStatement.setString(7, elemento.getCurp());
             preparedStatement.setString(8, elemento.getId_beneficiario());
+			preparedStatement.setInt(9, elemento.getConsecutivo());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -64,7 +65,7 @@ public class JdbcBolsaTrabajoRepository implements IBolsaTrabajoRepository {
 		return jdbcTemplate.update(QUERY_UPD_BOLSA_TRABAJO, 
 				new Object[] { elemento.getRfc(), elemento.getNombre(), elemento.getApellidoPat(), elemento.getApellidoMat(),
 						elemento.getDelegacion().getId_div_geografica(), elemento.getCodigoPostal(), elemento.getCurp(), 
-						elemento.getId_beneficiario(), elemento.getId() });
+						elemento.getId_beneficiario(), elemento.getConsecutivo(), elemento.getId() });
 	}
 
 	@Override

@@ -11,6 +11,7 @@ public class BolsaTrabajo {
 	private String codigoPostal;
 	private String curp;
 	private String id_beneficiario;
+	private int consecutivo;
 
 	public int getId() {
 		return id;
@@ -66,6 +67,12 @@ public class BolsaTrabajo {
 	public void setId_beneficiario(String id_beneficiario) {
 		this.id_beneficiario = id_beneficiario;
 	}
+	public int getConsecutivo() {
+		return consecutivo;
+	}
+	public void setConsecutivo(int consecutivo) {
+		this.consecutivo = consecutivo;
+	}
 
 	@Override
 	public String toString() {
@@ -79,6 +86,7 @@ public class BolsaTrabajo {
 				", codigoPostal='" + codigoPostal + '\'' +
 				", curp='" + curp + '\'' +
 				", id_beneficiario='" + id_beneficiario + '\'' +
+				", consecutivo='" + consecutivo + '\'' +
 				'}';
 	}
 }

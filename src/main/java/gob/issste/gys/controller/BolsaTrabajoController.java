@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Bolsa de Trabajo", description = "API de bolsa de trabajo")
@@ -112,6 +112,7 @@ public class BolsaTrabajoController {
 			_elemento.setCodigoPostal(elemento.getCodigoPostal());
 			_elemento.setCurp(elemento.getCurp());
 			_elemento.setId_beneficiario(elemento.getId_beneficiario());
+			_elemento.setConsecutivo(elemento.getConsecutivo());
 			bolsaTrabajoRepository.update(_elemento);
 
 			return ResponseHandler.generateResponse("El elemento de la bolsa de trabajo ha sido modificado de manera exitosa", HttpStatus.OK, null);

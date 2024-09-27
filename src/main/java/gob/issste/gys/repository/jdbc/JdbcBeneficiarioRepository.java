@@ -42,13 +42,14 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
             preparedStatement.setString(4, beneficiario.getApellidoPaterno());
             preparedStatement.setString(5, beneficiario.getApellidoMaterno());
             preparedStatement.setString(6, beneficiario.getNumeroBenef());
-            preparedStatement.setInt(7, beneficiario.getPorcentaje());
-            preparedStatement.setString(8, beneficiario.getId_centro_trab());
-            preparedStatement.setString(9, beneficiario.getRfc());
-            preparedStatement.setString(10, beneficiario.getFec_inicio());
-            preparedStatement.setString(11, beneficiario.getFec_fin());
-            preparedStatement.setInt(12, beneficiario.getCons_benef());
-            preparedStatement.setString(13, beneficiario.getId_usuario());
+			preparedStatement.setInt(7, beneficiario.getConsecutivo());
+            preparedStatement.setInt(8, beneficiario.getPorcentaje());
+            preparedStatement.setString(9, beneficiario.getId_centro_trab());
+            preparedStatement.setString(10, beneficiario.getRfc());
+            preparedStatement.setString(11, beneficiario.getFec_inicio());
+            preparedStatement.setString(12, beneficiario.getFec_fin());
+            preparedStatement.setInt(13, beneficiario.getCons_benef());
+            preparedStatement.setString(14, beneficiario.getId_usuario());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -68,7 +69,7 @@ public class JdbcBeneficiarioRepository implements IBeneficiarioRepository {
 
 		return jdbcTemplate.update(STMT_UPDATE_BENEFICIARIO, 
 				new Object[] { beneficiario.getRfc_bolsa(), beneficiario.getNombre(), beneficiario.getApellidoPaterno(),
-						beneficiario.getApellidoMaterno(), beneficiario.getNumeroBenef(), beneficiario.getPorcentaje(), 
+						beneficiario.getApellidoMaterno(), beneficiario.getNumeroBenef(), beneficiario.getConsecutivo(), beneficiario.getPorcentaje(),
 						beneficiario.getId_centro_trab(), beneficiario.getRfc(), beneficiario.getFec_inicio(), beneficiario.getFec_fin(), 
 						beneficiario.getCons_benef(), beneficiario.getId_usuario(), beneficiario.getId() });
 	}

@@ -22,6 +22,7 @@ public class BolsaTrabajoMapper implements RowMapper<BolsaTrabajo> {
 		bolsa.setCodigoPostal(rs.getString("codigo_postal"));
 		bolsa.setCurp(rs.getString("curp"));
 		bolsa.setId_beneficiario(rs.getString("id_beneficiario"));
+		bolsa.setConsecutivo(rs.getInt("consecutivo"));
 
 		Delegacion delegacion =  new Delegacion();
 		delegacion.setId_div_geografica(rs.getString("id_div_geografica"));

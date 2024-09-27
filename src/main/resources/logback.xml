@@ -4,15 +4,16 @@
     <!-- PARA DSARROLLO -->
     <!--    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
     <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>D:\backend\Logs\SIGYS-${myTimestamp}\Historial-SIGYS-${myTimestamp}.log</file>
-        <!--        <file>./backend/Logs/SIGYS-${myTimestamp}/SIGYS-${myTimestamp}.log</file>-->
+<!--        <file>D:\backend\Logs\SIGYS-${myTimestamp}\Historial-SIGYS-${myTimestamp}.log</file>-->
+                <file>./backend/Logs/SIGYS-${myTimestamp}/SIGYS-${myTimestamp}.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <Pattern>
                 %d{dd-MM-yyyy HH:mm:ss} | [%thread] | %-5level | %logger{36} | -- %msg%n
             </Pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>D:\backend\SIGYS-logs\Historial-SIGYS-%d{yyyy-MM-dd}.log</fileNamePattern>
+<!--            <fileNamePattern>D:\backend\SIGYS-logs\Historial-SIGYS-%d{yyyy-MM-dd}.log</fileNamePattern>-->
+            <fileNamePattern>./backend/Logs/SIGYS-${myTimestamp}/SIGYS-%d{yyyy-MM-dd}.log</fileNamePattern>
             <!-- mantener 30 días de historia -->
             <maxHistory>30</maxHistory>
         </rollingPolicy>
