@@ -6,27 +6,27 @@ import gob.issste.gys.model.*;
 
 public interface IDatosRepository {
 
-	public String QUERY_GET_ADSCRIPCIONES           = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona\r\n"
-													+ "From m4t_centros_trab \r\n"
-													+ "Where id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)";
+	public String QUERY_GET_ADSCRIPCIONES           = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona, V.ur, V.ct, V.aux\r\n"
+													+ "From m4t_centros_trab, m4t_conv_ct V\r\n"
+													+ "Where id_centro_trabajo = ct5 And id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)";
 	List<DatosAdscripcion> getDatosAdscripciones();
 
-	public String QUERY_GET_ADSCRIPCIONES_FOR_DEL   = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona\r\n"
-													+ "From m4t_centros_trab \r\n"
-													+ "Where id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
+	public String QUERY_GET_ADSCRIPCIONES_FOR_DEL   = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona, V.ur, V.ct, V.aux\r\n"
+													+ "From m4t_centros_trab, m4t_conv_ct V\r\n"
+													+ "Where id_centro_trabajo = ct5 And id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
 													+ "	And id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )";
 	List<DatosAdscripcion> getDatosAdscForDeleg(String idDeleg);
 
-	public String QUERY_GET_ADSCRIPCIONES_BY_USER   = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona\r\n"
-													+ "From m4t_centros_trab\r\n"
-													+ "Where id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
+	public String QUERY_GET_ADSCRIPCIONES_BY_USER   = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona, V.ur, V.ct, V.aux\r\n"
+													+ "From m4t_centros_trab, m4t_conv_ct V\r\n"
+													+ "Where id_centro_trabajo = ct5 And id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
 													+ "  And id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = (\r\n"
 													+ "    Select IdDelegacion From gys_Usuarios Where IdUsuario = ?) )";
 	List<DatosAdscripcion> getDatosAdscripciones(int idUsuario);
 
-	public String QUERY_GET_ADSCRIPCIONES_BY_USER_CT = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona\r\n"
-													+ "From m4t_centros_trab\r\n"
-													+ "Where id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
+	public String QUERY_GET_ADSCRIPCIONES_BY_USER_CT = "Select id_centro_trabajo Clave, n_centro_trabajo Descripcion, id_tipo_ct Tipo, id_zona Zona, V.ur, V.ct, V.aux\r\n"
+													+ "From m4t_centros_trab, m4t_conv_ct V\r\n"
+													+ "Where id_centro_trabajo = ct5 And id_tipo_ct IN (Select Distinct id_tipo_ct From m4t_gys_matriz_puestos)\r\n"
 													+ "  And id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = (\r\n"
 													+ "    Select IdDelegacion From gys_Usuarios Where IdUsuario = ?) ) \r\n"
 													+ "  And id_centro_trabajo IN (Select IdCentroTrab From gys_Usuarios_Centros_Trab Where IdUsuario=?)";

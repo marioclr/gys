@@ -6,6 +6,9 @@ public class DatosAdscripcion {
 	private String descripcion;
 	private String tipo;
 	private String zona;
+	private String ur;
+	private String ct;
+	private String aux;
 
 	public String getClave() {
 		return clave;
@@ -31,11 +34,29 @@ public class DatosAdscripcion {
 	public void setZona(String zona) {
 		this.zona = zona;
 	}
+	public String getUr() {
+		return ur;
+	}
+	public void setUr(String ur) {
+		this.ur = ur;
+	}
+	public String getCt() {
+		return ct;
+	}
+	public void setCt(String ct) {
+		this.ct = ct;
+	}
+	public String getAux() {
+		return aux;
+	}
+	public void setAux(String aux) {
+		this.aux = aux;
+	}
 
 	@Override
 	public String toString() {
 		return "DatosAdscripcion [clave=" + clave + ", descripcion=" + descripcion + ", tipo=" + tipo + ", zona=" + zona
-				+ "]";
+				+ ", ur=" + ur + ", ct=" + ct + ", aux=" + aux + "]";
 	}
 
 }
