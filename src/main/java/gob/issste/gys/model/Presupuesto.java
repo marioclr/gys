@@ -12,24 +12,30 @@ public class Presupuesto {
 	private DatosAdscripcion centroTrabajo;
 	private List<MovimientosPresupuesto> movimientos;
 
+	private DatosProgramatica datosProgramatica;
+
 	public Presupuesto() {
 	}
-	public Presupuesto(int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, TiposPresupuesto tipoPresup, Double saldo) {
+	public Presupuesto(int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, DatosProgramatica datosProgramatica,
+					   TiposPresupuesto tipoPresup, Double saldo) {
 		super();
 		this.anio = anio;
 		this.mes = mes;
 		this.delegacion = delegacion;
 		this.centroTrabajo = centroTrabajo;
+		this.datosProgramatica = datosProgramatica;
 		this.tipoPresup = tipoPresup;
 		this.saldo = saldo;
 	}
-	public Presupuesto(int id, int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, TiposPresupuesto tipoPresup, Double saldo) {
+	public Presupuesto(int id, int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, DatosProgramatica datosProgramatica,
+					   TiposPresupuesto tipoPresup, Double saldo) {
 		super();
 		this.id = id;
 		this.anio = anio;
 		this.mes = mes;
 		this.delegacion = delegacion;
 		this.centroTrabajo = centroTrabajo;
+		this.datosProgramatica = datosProgramatica;
 		this.tipoPresup = tipoPresup;
 		this.saldo = saldo;
 	}
@@ -80,6 +86,12 @@ public class Presupuesto {
 	}
 	public void setMovimientos(List<MovimientosPresupuesto> movimientos) {
 		this.movimientos = movimientos;
+	}
+	public DatosProgramatica getDatosProgramatica() {
+		return datosProgramatica;
+	}
+	public void setDatosProgramatica(DatosProgramatica datosProgramatica) {
+		this.datosProgramatica = datosProgramatica;
 	}
 
 	@Override

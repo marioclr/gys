@@ -1,8 +1,11 @@
 package gob.issste.gys.controller;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.model.*;
+import gob.issste.gys.repository.*;
 import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,23 +28,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
-import gob.issste.gys.model.DatosAdscripcion;
-import gob.issste.gys.model.Delegacion;
-import gob.issste.gys.model.MovimientosPresupuesto;
-import gob.issste.gys.model.Presupuesto;
-import gob.issste.gys.model.PresupuestoUtilizado;
-import gob.issste.gys.model.TipoMovPresupuesto;
-import gob.issste.gys.model.TiposPresupuesto;
-import gob.issste.gys.model.Usuario;
-import gob.issste.gys.repository.GuardiaRepository;
-import gob.issste.gys.repository.IDatosRepository;
-import gob.issste.gys.repository.IMovimientosPresupuestoRepository;
-import gob.issste.gys.repository.IPresupuestoGlobalRepository;
-import gob.issste.gys.repository.IPresupuestoRepository;
-import gob.issste.gys.repository.ISuplenciaRepository;
-import gob.issste.gys.repository.ITipoMovPresupuestoRepository;
-import gob.issste.gys.repository.ITiposPresupuestoRepository;
-import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -59,6 +45,8 @@ public class PresupuestoController {
 
 	@Autowired
 	ITipoMovPresupuestoRepository tipMovPresupRepository;
+	@Autowired
+	IDatosProgramaticaRepository datosProgRepository;
 	@Autowired
 	IMovimientosPresupuestoRepository movPresupuestoRepository;
 	@Autowired
@@ -88,8 +76,10 @@ public class PresupuestoController {
 	})
 	@PostMapping("/Presupuesto")
 	public ResponseEntity<Object> createPresupuesto(
-			@Parameter(description = "Objeto de Presupuesto a crear en el Sistema") @RequestBody Presupuesto presupuesto, 
-			@Parameter(description = "Comentarios del registro de presupuesto.", required = false) @RequestParam(name = "comentarios", required = false, defaultValue = "false") String comentarios) {
+			@Parameter(description = "Objeto de Presupuesto a crear en el Sistema")
+			@RequestBody Presupuesto presupuesto,
+			@Parameter(description = "Comentarios del registro de presupuesto.", required = false)
+			@RequestParam(name = "comentarios", required = false, defaultValue = "false") String comentarios) {
 
 		DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
@@ -138,11 +128,16 @@ public class PresupuestoController {
 			}
 
 			if( presupuesto.getCentroTrabajo() == null ) {
-				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
-						presupuesto.getTipoPresup(), presupuesto.getSaldo()));				
+				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
+						, null ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
 			} else {				
-				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
-						presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
+						, presupuesto.getDatosProgramatica() ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+				int datosProg = datosProgRepository.save(new DatosProgramatica(
+						idPresup, presupuesto.getDatosProgramatica().getGf(), presupuesto.getDatosProgramatica().getFn(), presupuesto.getDatosProgramatica().getSf(), presupuesto.getDatosProgramatica().getPg(), presupuesto.getDatosProgramatica().getFf(),
+						presupuesto.getDatosProgramatica().getAi(), presupuesto.getDatosProgramatica().getAp(), presupuesto.getDatosProgramatica().getSp(), presupuesto.getDatosProgramatica().getR(), presupuesto.getDatosProgramatica().getMun(), presupuesto.getDatosProgramatica().getFd(), presupuesto.getDatosProgramatica().getPtda(),
+						presupuesto.getDatosProgramatica().getSbptd(), presupuesto.getDatosProgramatica().getTp(), presupuesto.getDatosProgramatica().getTpp(), presupuesto.getDatosProgramatica().getFdo(), null, null
+				));
 			}
 			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));
 			platformTransactionManager.commit(status);
@@ -291,26 +286,28 @@ public class PresupuestoController {
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
 				}
 				presupuestos.add(presupuesto);
 				//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
 				//presupuesto = new Presupuesto(anio, mes, delegacion, null, tipoPresup, saldoDelegCt);
 				//presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscForDeleg(delegacion.getId_div_geografica());
+//				programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
 				for(DatosAdscripcion ct:adsc) {
+
 					try {
 						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+//						datosProgramatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
 						presupuesto.setDelegacion(usuario.getDelegacion());
 						presupuesto.setTipoPresup(tipoPresup);
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
 						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
+						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, null, tipoPresup, saldoDelegCt);
 					}
 					presupuestos.add(presupuesto);
 				}
-				//}
 			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==2 ) {
 				if ( usuario.getDelegacion().getId_div_geografica().compareTo(idDelegacion) != 0 ) {
 					return ResponseHandler.generateResponse("El usuario tiene visibilidad por Delegación y la Delegación indicada no corresponde con la que tiene asignada", HttpStatus.NOT_FOUND, null);
@@ -321,7 +318,7 @@ public class PresupuestoController {
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null,null, tipoPresup, saldoDelegCt);
 				}
 				//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, null);
 				//presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
@@ -336,7 +333,7 @@ public class PresupuestoController {
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
 						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
+						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, null, tipoPresup, saldoDelegCt);
 					}
 					presupuestos.add(presupuesto);
 				}
@@ -347,7 +344,7 @@ public class PresupuestoController {
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
 				}
 				presupuestos.add(presupuesto);
 				//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, null);
@@ -362,7 +359,7 @@ public class PresupuestoController {
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
 						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, tipoPresup, saldoDelegCt);
+						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct,null, tipoPresup, saldoDelegCt);
 					}
 					presupuestos.add(presupuesto);
 				}
