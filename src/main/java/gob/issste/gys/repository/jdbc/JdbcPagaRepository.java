@@ -44,10 +44,11 @@ public class JdbcPagaRepository implements IPagaRepository {
             preparedStatement.setString(5, paga.getFec_fin());
             preparedStatement.setInt(6, paga.getAnio_ejercicio());
             preparedStatement.setInt(7, paga.getMes_ejercicio());
-            preparedStatement.setInt(8, paga.getId_tipo_paga());
-            preparedStatement.setInt(9, paga.getIdnivelvisibilidad());
-            preparedStatement.setString(10, paga.getProgramas());
-            preparedStatement.setString(11, paga.getId_usuario());
+			preparedStatement.setInt(8, paga.getQuincena());
+            preparedStatement.setInt(9, paga.getId_tipo_paga());
+            preparedStatement.setInt(10, paga.getIdnivelvisibilidad());
+            preparedStatement.setString(11, paga.getProgramas());
+            preparedStatement.setString(12, paga.getId_usuario());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -66,7 +67,7 @@ public class JdbcPagaRepository implements IPagaRepository {
 		logger.info(QUERY_UPDATE_PAGAS);
 		return jdbcTemplate.update(QUERY_UPDATE_PAGAS,
 	            new Object[] { paga.getDescripcion(), paga.getEstatus(), paga.getFec_inicio(), paga.getFec_fin(), paga.getAnio_ejercicio(), 
-	            		paga.getMes_ejercicio(), paga.getId_tipo_paga(), paga.getIdnivelvisibilidad(), paga.getProgramas(), paga.getId_usuario(),  paga.getId() });
+	            		paga.getMes_ejercicio(), paga.getQuincena(), paga.getId_tipo_paga(), paga.getIdnivelvisibilidad(), paga.getProgramas(), paga.getId_usuario(),  paga.getId() });
 	}
 
 	@Override
@@ -148,14 +149,14 @@ public class JdbcPagaRepository implements IPagaRepository {
 	public int existe_abierta(Paga paga) {
 		logger.info(QUERY_EXISTS_PAGA_ABIERTA);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_PAGA_ABIERTA, Integer.class,
-				new Object[] { paga.getAnio_ejercicio(), paga.getMes_ejercicio(), paga.getId_tipo_paga() } );
+				new Object[] { paga.getAnio_ejercicio(), paga.getMes_ejercicio(), paga.getQuincena(), paga.getId_tipo_paga() } );
 	}
 
 	@Override
 	public int existe_abierta_al_cambiar(Paga paga) {
 		logger.info(QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_PAGA_ABIERTA_AL_CAMBIAR, Integer.class,
-				new Object[] { paga.getId(), paga.getAnio_ejercicio(), paga.getMes_ejercicio(), paga.getId_tipo_paga() } );
+				new Object[] { paga.getId(), paga.getAnio_ejercicio(), paga.getMes_ejercicio(), paga.getQuincena(), paga.getId_tipo_paga() } );
 	}
 
 	@Override

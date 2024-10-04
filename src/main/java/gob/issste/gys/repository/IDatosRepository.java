@@ -130,4 +130,42 @@ public interface IDatosRepository {
 	public String QUERY_GET_DELEGACION_BY_ID		= "Select * From m4t_delegaciones Where id_div_geografica = ?";
 	Delegacion getDatosDelegacionById(String idDelegacion);
 
+	public String QUERY_GET_GF		= "Select Distinct gf From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getGf(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_FN		= "Select Distinct fn From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getFn(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_SF		= "Select Distinct sf From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getSf(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_PG		= "Select Distinct pg From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getPg(String tipo,String ur, String ct, String aux);
+	public String QUERY_GET_FF		= "Select Distinct ff From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getFf(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_MUN		= "Select Distinct mun From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getMun(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_FD		= "Select Distinct fd From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getFd(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_PTDA		= "Select Distinct ptda From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getPtda(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_SBPTD		= "Select Distinct sbptd From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getSbptd(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_TP		= "Select Distinct tp From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getTp(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_TPP		= "Select Distinct tpp From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getTpp(String tipo,String ur, String ct, String aux);
+	public String QUERY_GET_FDO		= "Select Distinct fdo From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getFdo(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_AREA		= "Select Distinct area From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getArea(String tipo,String ur, String ct, String aux);
+
+
 }

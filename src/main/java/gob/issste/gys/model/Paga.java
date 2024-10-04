@@ -12,6 +12,7 @@ public class Paga {
 	private String fec_fin;
 	private int anio_ejercicio;
 	private int mes_ejercicio;
+	private int quincena;
 	private int id_tipo_paga;
 	private int idnivelvisibilidad;
 	private String programas;
@@ -23,7 +24,7 @@ public class Paga {
 	}
 
 	public Paga(String fec_pago, String descripcion, int estatus, String fec_inicio, String fec_fin, 
-			int anio_ejercicio, int mes_ejercicio, int id_tipo_paga, int nivel_visibilidad,
+			int anio_ejercicio, int mes_ejercicio, int quincena, int id_tipo_paga, int nivel_visibilidad,
 			String programas, String usuario, List<Delegacion> delegaciones) {
 		super();
 		this.fec_pago = fec_pago;
@@ -33,6 +34,7 @@ public class Paga {
 		this.fec_fin = fec_fin;
 		this.anio_ejercicio = anio_ejercicio;
 		this.mes_ejercicio = mes_ejercicio;
+		this.quincena = quincena;
 		this.id_tipo_paga = id_tipo_paga;
 		this.idnivelvisibilidad = nivel_visibilidad;
 		this.id_usuario = usuario;
@@ -86,6 +88,13 @@ public class Paga {
 	}
 	public void setMes_ejercicio(int mes_ejercicio) {
 		this.mes_ejercicio = mes_ejercicio;
+	}
+
+	public int getQuincena() {
+		return quincena;
+	}
+	public void setQuincena(int quincena) {
+		this.quincena = quincena;
 	}
 	public int getId_tipo_paga() {
 		return id_tipo_paga;

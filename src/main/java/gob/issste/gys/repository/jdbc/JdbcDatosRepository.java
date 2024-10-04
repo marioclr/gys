@@ -6,6 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -265,5 +266,149 @@ public class JdbcDatosRepository implements IDatosRepository {
 
 		return matrix;
 	}
+
+	@Override
+	public List<String> getGf(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> gfs = jdbcTemplate.queryForList(QUERY_GET_GF,String.class, tipo, ur, ct, aux);
+			return gfs;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getFn(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> fns = jdbcTemplate.queryForList(QUERY_GET_FN,String.class, tipo, ur, ct, aux);
+			return fns;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getSf(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> sfs = jdbcTemplate.queryForList(QUERY_GET_SF,String.class, tipo, ur, ct, aux);
+			return sfs;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getPg(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> pgs = jdbcTemplate.queryForList(QUERY_GET_PG,String.class, tipo, ur, ct, aux);
+			return pgs;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getFf(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> ffs = jdbcTemplate.queryForList(QUERY_GET_FF,String.class, tipo, ur, ct, aux);
+			return ffs;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getMun(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> mun = jdbcTemplate.queryForList(QUERY_GET_MUN,String.class, tipo, ur, ct, aux);
+			return mun;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getFd(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> fd = jdbcTemplate.queryForList(QUERY_GET_FD,String.class, tipo, ur, ct, aux);
+			return fd;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getPtda(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> ptdas = jdbcTemplate.queryForList(QUERY_GET_PTDA,String.class, tipo, ur, ct, aux);
+			return ptdas;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getSbptd(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> sbptds = jdbcTemplate.queryForList(QUERY_GET_SBPTD,String.class, tipo, ur, ct, aux);
+			return sbptds;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getTp(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> tps = jdbcTemplate.queryForList(QUERY_GET_TP,String.class, tipo, ur, ct, aux);
+			return tps;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getTpp(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> tpps = jdbcTemplate.queryForList(QUERY_GET_TPP,String.class, tipo, ur, ct, aux);
+			return tpps;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getFdo(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> fdos = jdbcTemplate.queryForList(QUERY_GET_FDO,String.class, tipo, ur, ct, aux);
+			return fdos;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getArea(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> areas = jdbcTemplate.queryForList(QUERY_GET_AREA,String.class, tipo, ur, ct, aux);
+			return areas;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
 
 }

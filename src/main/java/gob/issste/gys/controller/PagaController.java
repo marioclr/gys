@@ -107,6 +107,7 @@ public class PagaController {
 			_paga.setFec_fin(paga.getFec_fin());
 			_paga.setAnio_ejercicio(paga.getAnio_ejercicio());
 			_paga.setMes_ejercicio(paga.getMes_ejercicio());
+			_paga.setQuincena(paga.getQuincena());
 			_paga.setId_tipo_paga(paga.getId_tipo_paga());
 			_paga.setIdnivelvisibilidad(paga.getIdnivelvisibilidad());
 			_paga.setProgramas(paga.getProgramas());
