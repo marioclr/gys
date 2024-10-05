@@ -136,7 +136,7 @@ public class PresupuestoController {
 				int datosProg = datosProgRepository.save(new DatosProgramatica(
 						idPresup, presupuesto.getDatosProgramatica().getGf(), presupuesto.getDatosProgramatica().getFn(), presupuesto.getDatosProgramatica().getSf(), presupuesto.getDatosProgramatica().getPg(), presupuesto.getDatosProgramatica().getFf(),
 						presupuesto.getDatosProgramatica().getAi(), presupuesto.getDatosProgramatica().getAp(), presupuesto.getDatosProgramatica().getSp(), presupuesto.getDatosProgramatica().getR(), presupuesto.getDatosProgramatica().getMun(), presupuesto.getDatosProgramatica().getFd(), presupuesto.getDatosProgramatica().getPtda(),
-						presupuesto.getDatosProgramatica().getSbptd(), presupuesto.getDatosProgramatica().getTp(), presupuesto.getDatosProgramatica().getTpp(), presupuesto.getDatosProgramatica().getFdo(), null, null
+						presupuesto.getDatosProgramatica().getSbptd(), presupuesto.getDatosProgramatica().getTp(), presupuesto.getDatosProgramatica().getTpp(), presupuesto.getDatosProgramatica().getFdo(), presupuesto.getDatosProgramatica().getArea(), presupuesto.getDatosProgramatica().getTipo()
 				));
 			}
 			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));

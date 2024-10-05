@@ -167,5 +167,16 @@ public interface IDatosRepository {
 	public String QUERY_GET_AREA		= "Select Distinct area From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
 	List<String> getArea(String tipo,String ur, String ct, String aux);
 
+	public String QUERY_GET_AI		= "Select Distinct ai From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getAi(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_AP		= "Select Distinct ap From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getAp(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_SP		= "Select Distinct sp From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getSp(String tipo,String ur, String ct, String aux);
+
+	public String QUERY_GET_R		= "Select Distinct r From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
+	List<String> getR(String tipo,String ur, String ct, String aux);
 
 }

@@ -707,4 +707,108 @@ public class DatosController {
 		}
 	}
 
+	@Operation(summary = "Obtener el catálogo de AREA", description = "Obtener el catálogo de AI", tags = { "Datos" })
+	@GetMapping("/datos/ai")
+	public ResponseEntity<Object> getAi(
+			@Parameter(description = "Tipo (G- Guardia) ó (S -Suplencia)", required = false) @RequestParam(required = false) String tipo,
+			@Parameter(description = "Unidad Responsable", required = false) @RequestParam(required = false) String ur,
+			@Parameter(description = "Centro de trabajo", required = false) @RequestParam(required = false) String ct,
+			@Parameter(description = "Auxiliar", required = false) @RequestParam(required = false) String aux
+	) {
+
+		List<String> ai = new ArrayList<String>();
+
+		try {
+
+			ai = datosRepository.getAi(tipo, ur, ct, aux);
+
+			if(ai.isEmpty()){
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de AREA", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Se encontró el catálogo de AREA", HttpStatus.OK, ai);
+
+		} catch (Exception e) {
+			return ResponseHandler.generateResponse("Error al consultar el catálogo de AREA", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Obtener el catálogo de AREA", description = "Obtener el catálogo de AP", tags = { "Datos" })
+	@GetMapping("/datos/ap")
+	public ResponseEntity<Object> getAp(
+			@Parameter(description = "Tipo (G- Guardia) ó (S -Suplencia)", required = false) @RequestParam(required = false) String tipo,
+			@Parameter(description = "Unidad Responsable", required = false) @RequestParam(required = false) String ur,
+			@Parameter(description = "Centro de trabajo", required = false) @RequestParam(required = false) String ct,
+			@Parameter(description = "Auxiliar", required = false) @RequestParam(required = false) String aux
+	) {
+
+		List<String> ap = new ArrayList<String>();
+
+		try {
+
+			ap = datosRepository.getAp(tipo, ur, ct, aux);
+
+			if(ap.isEmpty()){
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de AP", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Se encontró el catálogo de AP", HttpStatus.OK, ap);
+
+		} catch (Exception e) {
+			return ResponseHandler.generateResponse("Error al consultar el catálogo de AP", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Obtener el catálogo de AREA", description = "Obtener el catálogo de SP", tags = { "Datos" })
+	@GetMapping("/datos/sp")
+	public ResponseEntity<Object> getSp(
+			@Parameter(description = "Tipo (G- Guardia) ó (S -Suplencia)", required = false) @RequestParam(required = false) String tipo,
+			@Parameter(description = "Unidad Responsable", required = false) @RequestParam(required = false) String ur,
+			@Parameter(description = "Centro de trabajo", required = false) @RequestParam(required = false) String ct,
+			@Parameter(description = "Auxiliar", required = false) @RequestParam(required = false) String aux
+	) {
+
+		List<String> sp = new ArrayList<String>();
+
+		try {
+
+			sp = datosRepository.getSp(tipo, ur, ct, aux);
+
+			if(sp.isEmpty()){
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de SP", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Se encontró el catálogo de SP", HttpStatus.OK, sp);
+
+		} catch (Exception e) {
+			return ResponseHandler.generateResponse("Error al consultar el catálogo de SP", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Obtener el catálogo de AREA", description = "Obtener el catálogo de R", tags = { "Datos" })
+	@GetMapping("/datos/r")
+	public ResponseEntity<Object> getR(
+			@Parameter(description = "Tipo (G- Guardia) ó (S -Suplencia)", required = false) @RequestParam(required = false) String tipo,
+			@Parameter(description = "Unidad Responsable", required = false) @RequestParam(required = false) String ur,
+			@Parameter(description = "Centro de trabajo", required = false) @RequestParam(required = false) String ct,
+			@Parameter(description = "Auxiliar", required = false) @RequestParam(required = false) String aux
+	) {
+
+		List<String> r = new ArrayList<String>();
+
+		try {
+
+			r = datosRepository.getR(tipo, ur, ct, aux);
+
+			if(r.isEmpty()){
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de R", HttpStatus.NOT_FOUND, null);
+			}
+
+			return ResponseHandler.generateResponse("Se encontró el catálogo de R", HttpStatus.OK, r);
+
+		} catch (Exception e) {
+			return ResponseHandler.generateResponse("Error al consultar el catálogo de R", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
 }
