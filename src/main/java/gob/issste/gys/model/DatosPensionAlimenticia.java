@@ -13,6 +13,7 @@ public class DatosPensionAlimenticia {
 	public String apellidopaterno;
 	public String apellidomaterno;
 	public String numerobenef;
+	public int consecutivo;
 	public String id_centro_trab;
 	public String fec_inicio;
 	public String fec_fin;
@@ -83,6 +84,12 @@ public class DatosPensionAlimenticia {
 	}
 	public void setNumerobenef(String numerobenef) {
 		this.numerobenef = numerobenef;
+	}
+	public int getConsecutivo() {
+		return consecutivo;
+	}
+	public void setConsecutivo(int consecutivo) {
+		this.consecutivo = consecutivo;
 	}
 	public String getId_centro_trab() {
 		return id_centro_trab;

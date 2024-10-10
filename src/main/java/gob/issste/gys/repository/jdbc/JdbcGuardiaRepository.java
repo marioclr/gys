@@ -667,6 +667,10 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 		}
 
+		if (tipo != null){
+			QUERY_CONDITION += (tipo.equals("GI")) ? "And A.id_tipo='GI'\r\n" : "And A.id_tipo='GE'\r\n";
+		}
+
 		final String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, n_centro_trabajo,\r\n"
 				+ "  G.id_clave_servicio, n_clave_servicio, G.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_guardia,\r\n"
 				+ "  id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, hora_inicio, hora_fin, G.coment, "
@@ -675,6 +679,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 				+ "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE\r\n"
 				+ "Where A.id_guardia = G.id And\r\n"
 				+ "  G.fec_paga = P.fec_pago And\r\n"
+				+ "	 G.fec_paga = A.fec_pago And\r\n"
 				+ "  G.id_centro_trabajo = C.id_centro_trabajo And\r\n"
 				+ "  G.id_puesto_plaza = PU.id_puesto_plaza And\r\n"
 				+ "  PU.id_sociedad = '01' And PU.id_empresa = '01'\r\n And"
