@@ -775,6 +775,11 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 					break;
 			}
 		}
+
+		if (tipo != null){
+			QUERY_CONDITION += (tipo.equals("SI")) ? "And A.id_tipo='SI'\r\n" : "And A.id_tipo='SE'\r\n";
+		}
+
 		String DYNAMIC_QUERY = "Select S.id, " + EMPLOYEE_FIELD + " clave_empleado, S.id_centro_trabajo, n_centro_trabajo,\r\n"
 							 + "  S.id_clave_servicio, n_clave_servicio, S.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_suplencia,\r\n"
 							 + "  S.id_nivel, S.id_sub_nivel, S.id_tipo_jornada, S.id_turno, dias, S.fec_inicio, S.fec_fin, S.folio, S.motivo, S.id_clave_movimiento, S.coment,\r\n"
@@ -784,6 +789,7 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 							 + "From " + QUERY_TABLE_BASE + " S, gys_fechas_control F, m4t_puestos_plaza P, m4t_clave_servicio SE, m4t_centros_trab C\r\n"
 							 + "Where A.id_suplencia = S.id\r\n"
 							 + "  And S.fec_paga = F.fec_pago\r\n"
+							 + "  And S.fec_paga = A.fec_pago\r\n"
 							 + "  And S.id_puesto_plaza = P.id_puesto_plaza\r\n"
 							 + "  And P.id_empresa='01'\r\n"
 							 + "  And S.id_clave_servicio = SE.id_clave_servicio\r\n"
@@ -814,6 +820,8 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 				count ++;
 				ps.setString(count, estatus.toString());
 			}
+
+			logger.info("Prepared statement: "+ DYNAMIC_QUERY);
 		}, BeanPropertyRowMapper.newInstance(DatosSuplencia.class));
 
 		return suplencias;

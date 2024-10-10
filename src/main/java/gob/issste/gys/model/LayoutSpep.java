@@ -9,6 +9,7 @@ public class LayoutSpep {
 	private String apellidoPat;
 	private String apellidoMat;
 	private String id_beneficiario;
+	private int consecutivo;
 	private Double percepciones;
 	private Double isr;
 	private Double pension_1;
@@ -38,9 +39,17 @@ public class LayoutSpep {
 	private Double guardia;
 	private String id_puesto_plaza_g;
 	private String n_puesto_plaza_g;
+	private String ff_g;
+	private String ai_g;
+	private String ap_g;
+	private String sp_g;
 	private Double suplencia;
 	private String id_puesto_plaza_s;
 	private String n_puesto_plaza_s;
+	private String ff_s;
+	private String ai_s;
+	private String ap_s;
+	private String sp_s;
 	private List<DatosPensionAlimenticia> datos_pa; 
 	
 	public String getRfc() {
@@ -73,6 +82,14 @@ public class LayoutSpep {
 	public void setId_beneficiario(String id_beneficiario) {
 		this.id_beneficiario = id_beneficiario;
 	}
+
+	public int getConsecutivo() {
+		return consecutivo;
+	}
+	public void setConsecutivo(int consecutivo) {
+		this.consecutivo = consecutivo;
+	}
+
 	public Double getPercepciones() {
 		return percepciones;
 	}
@@ -253,6 +270,30 @@ public class LayoutSpep {
 	public void setN_puesto_plaza_g(String n_puesto_plaza_g) {
 		this.n_puesto_plaza_g = n_puesto_plaza_g;
 	}
+	public String getFf_g() {
+		return ff_g;
+	}
+	public void setFf_g(String ff_g) {
+		this.ff_g = ff_g;
+	}
+	public String getAi_g() {
+		return ai_g;
+	}
+	public void setAi_g(String ai_g) {
+		this.ai_g = ai_g;
+	}
+	public String getAp_g() {
+		return ap_g;
+	}
+	public void setAp_g(String ap_g) {
+		this.ap_g = ap_g;
+	}
+	public String getSp_g() {
+		return sp_g;
+	}
+	public void setSp_g(String sp_g) {
+		this.sp_g = sp_g;
+	}
 	public String getId_puesto_plaza_s() {
 		return id_puesto_plaza_s;
 	}
@@ -265,6 +306,25 @@ public class LayoutSpep {
 	public void setN_puesto_plaza_s(String n_puesto_plaza_s) {
 		this.n_puesto_plaza_s = n_puesto_plaza_s;
 	}
+	public String getFf_s() { return ff_s; }
+	public void setFf_s(String ff_s) {
+		this.ff_s = ff_s;
+	}
+	public String getAi_s() { return ai_s; }
+	public void setAi_s(String ai_s) {
+		this.ai_s = ai_s;
+	}
+	public String getAp_s() { return ap_s; }
+	public void setAp_s(String ap_s) {
+		this.ap_s = ap_s;
+	}
+	public String getSp_s() {
+		return sp_s;
+	}
+	public void setSp_s(String sp_s) {
+		this.sp_s = sp_s;
+	}
+
 	public List<DatosPensionAlimenticia> getBeneficiarios() {
 		return datos_pa;
 	}
@@ -272,22 +332,39 @@ public class LayoutSpep {
 		this.datos_pa = beneficiarios;
 	}
 
+//	@Override
+//	public String toString() {
+//		return "LayoutSpep [rfc=" + rfc + ", nombre=" + nombre + ", apellidoPat=" + apellidoPat + ", apellidoMat="
+//				+ apellidoMat + ", id_beneficiario=" + id_beneficiario + ", percepciones=" + percepciones + ", isr="
+//				+ isr + ", pension_1=" + pension_1 + ", rfc_pension_1=" + rfc_pension_1 + ", nombre_pension_1="
+//				+ nombre_pension_1 + ", pension_2=" + pension_2 + ", rfc_pension_2=" + rfc_pension_2
+//				+ ", nombre_pension_2=" + nombre_pension_2 + ", pension_3=" + pension_3 + ", rfc_pension_3="
+//				+ rfc_pension_3 + ", nombre_pension_3=" + nombre_pension_3 + ", pension_4=" + pension_4
+//				+ ", rfc_pension_4=" + rfc_pension_4 + ", nombre_pension_4=" + nombre_pension_4 + ", suma_pension="
+//				+ suma_pension + ", fec_inicio=" + fec_inicio + ", fec_fin=" + fec_fin + ", id_representacion="
+//				+ id_representacion + ", n_representacion=" + n_representacion + ", id_centro_trabajo="
+//				+ id_centro_trabajo + ", n_centro_trabajo=" + n_centro_trabajo + ", id_clave_servicio="
+//				+ id_clave_servicio + ", n_clave_servicio=" + n_clave_servicio + ", ur=" + ur + ", ct=" + ct + ", aux="
+//				+ aux + ", guardia=" + guardia + ", id_puesto_plaza_g=" + id_puesto_plaza_g + ", n_puesto_plaza_g="
+//				+ n_puesto_plaza_g + ", suplencia=" + suplencia + ", id_puesto_plaza_s=" + id_puesto_plaza_s
+//				+ ", n_puesto_plaza_s=" + n_puesto_plaza_s + ", datos_pa=" + datos_pa + "]";
+//	}
+
 	@Override
 	public String toString() {
-		return "LayoutSpep [rfc=" + rfc + ", nombre=" + nombre + ", apellidoPat=" + apellidoPat + ", apellidoMat="
-				+ apellidoMat + ", id_beneficiario=" + id_beneficiario + ", percepciones=" + percepciones + ", isr="
-				+ isr + ", pension_1=" + pension_1 + ", rfc_pension_1=" + rfc_pension_1 + ", nombre_pension_1="
-				+ nombre_pension_1 + ", pension_2=" + pension_2 + ", rfc_pension_2=" + rfc_pension_2
-				+ ", nombre_pension_2=" + nombre_pension_2 + ", pension_3=" + pension_3 + ", rfc_pension_3="
-				+ rfc_pension_3 + ", nombre_pension_3=" + nombre_pension_3 + ", pension_4=" + pension_4
-				+ ", rfc_pension_4=" + rfc_pension_4 + ", nombre_pension_4=" + nombre_pension_4 + ", suma_pension="
-				+ suma_pension + ", fec_inicio=" + fec_inicio + ", fec_fin=" + fec_fin + ", id_representacion="
-				+ id_representacion + ", n_representacion=" + n_representacion + ", id_centro_trabajo="
-				+ id_centro_trabajo + ", n_centro_trabajo=" + n_centro_trabajo + ", id_clave_servicio="
-				+ id_clave_servicio + ", n_clave_servicio=" + n_clave_servicio + ", ur=" + ur + ", ct=" + ct + ", aux="
-				+ aux + ", guardia=" + guardia + ", id_puesto_plaza_g=" + id_puesto_plaza_g + ", n_puesto_plaza_g="
-				+ n_puesto_plaza_g + ", suplencia=" + suplencia + ", id_puesto_plaza_s=" + id_puesto_plaza_s
-				+ ", n_puesto_plaza_s=" + n_puesto_plaza_s + ", datos_pa=" + datos_pa + "]";
+		return "LayoutSpep{" + "rfc='" + rfc + '\'' + ", nombre='" + nombre + '\'' + ", apellidoPat='" + apellidoPat + '\'' +
+				", apellidoMat='" + apellidoMat + '\'' + ", id_beneficiario='" + id_beneficiario + '\'' + ", consecutivo='" + consecutivo + '\'' + ", percepciones=" + percepciones +
+				", isr=" + isr + ", pension_1=" + pension_1 + ", rfc_pension_1='" + rfc_pension_1 + '\'' + ", nombre_pension_1='" + nombre_pension_1 + '\'' +
+				", pension_2=" + pension_2 + ", rfc_pension_2='" + rfc_pension_2 + '\'' + ", nombre_pension_2='" + nombre_pension_2 + '\'' + ", pension_3=" + pension_3 +
+				", rfc_pension_3='" + rfc_pension_3 + '\'' + ", nombre_pension_3='" + nombre_pension_3 + '\'' + ", pension_4=" + pension_4 +
+				", rfc_pension_4='" + rfc_pension_4 + '\'' + ", nombre_pension_4='" + nombre_pension_4 + '\'' + ", suma_pension=" + suma_pension +
+				", fec_inicio='" + fec_inicio + '\'' + ", fec_fin='" + fec_fin + '\'' + ", id_representacion='" + id_representacion + '\'' +
+				", n_representacion='" + n_representacion + '\'' + ", id_centro_trabajo='" + id_centro_trabajo + '\'' + ", n_centro_trabajo='" + n_centro_trabajo + '\'' +
+				", id_clave_servicio='" + id_clave_servicio + '\'' + ", n_clave_servicio='" + n_clave_servicio + '\'' + ", ur='" + ur + '\'' +
+				", ct='" + ct + '\'' + ", aux='" + aux + '\'' + ", guardia=" + guardia + ", id_puesto_plaza_g='" + id_puesto_plaza_g + '\'' + ", n_puesto_plaza_g='" + n_puesto_plaza_g + '\'' +
+				", ff_g='" + ff_g + '\'' + ", ai_g='" + ai_g + '\'' + ", ap_g='" + ap_g + '\'' + ", sp_g='" + sp_g + '\'' +
+				", suplencia=" + suplencia + ", id_puesto_plaza_s='" + id_puesto_plaza_s + '\'' + ", n_puesto_plaza_s='" + n_puesto_plaza_s + '\'' +
+				", ff_s='" + ff_s + '\'' + ", ai_s='" + ai_s + '\'' + ", ap_s='" + ap_s + '\'' + ", sp_s='" + sp_s + '\'' +
+				", datos_pa=" + datos_pa + '}';
 	}
-
 }
