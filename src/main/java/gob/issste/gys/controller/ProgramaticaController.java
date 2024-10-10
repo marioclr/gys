@@ -1,6 +1,8 @@
 package gob.issste.gys.controller;
 
+import gob.issste.gys.model.DatosProgramatica;
 import gob.issste.gys.model.Programatica;
+import gob.issste.gys.repository.IDatosProgramaticaRepository;
 import gob.issste.gys.repository.IProgramaticaRepository;
 import gob.issste.gys.response.ResponseHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,6 +22,8 @@ import java.util.Map;
 public class ProgramaticaController {
     @Autowired
      IProgramaticaRepository iProgramaticaRepository;
+    @Autowired
+    IDatosProgramaticaRepository iDatosProgramaticaRepository;
     @Operation(summary = "Trae la programatica presupuestal usando valores de paginador como referencia",
             description = "Método que trae programatica presupuestal",
             tags = { "Programatica presupuestal" })
@@ -62,6 +66,16 @@ public class ProgramaticaController {
             return ResponseHandler.generateResponse("Elemento " + programatica.getRowid() + " actualizado con exito", HttpStatus.OK, null);
         }   catch (Exception e) {
             return ResponseHandler.generateResponse("Elemento no actualizado", HttpStatus.CONFLICT, null);
+        }
+    }
+
+    @PutMapping("/Programatica/datosCt")
+    public ResponseEntity<Object> updateDatosProgramaticaCt(@RequestBody DatosProgramatica datosProgramatica) {
+        try {
+           iDatosProgramaticaRepository.update(datosProgramatica);
+           return ResponseHandler.generateResponse("Elemento actualizado con éxito", HttpStatus.OK, null);
+        }catch (Exception e) {
+            return ResponseHandler.generateResponse("Elemento no actualizado", HttpStatus.CONFLICT, e.getMessage());
         }
     }
 }

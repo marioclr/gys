@@ -3,12 +3,8 @@ package gob.issste.gys.repository.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import gob.issste.gys.model.*;
 import org.springframework.jdbc.core.RowMapper;
-
-import gob.issste.gys.model.DatosAdscripcion;
-import gob.issste.gys.model.Delegacion;
-import gob.issste.gys.model.Presupuesto;
-import gob.issste.gys.model.TiposPresupuesto;
 
 public class PresupuestoMapper implements RowMapper<Presupuesto> {
 
@@ -21,6 +17,7 @@ public class PresupuestoMapper implements RowMapper<Presupuesto> {
 		presupuesto.setId(rs.getInt("id"));
 		presupuesto.setAnio(rs.getInt("anio"));
 		presupuesto.setMes(rs.getInt("mes"));
+//		presupuesto.setQuincena(rs.getInt("quincena"));
 		presupuesto.setSaldo(rs.getDouble("saldo"));
 		
 		Delegacion delegacion = new Delegacion();
@@ -42,7 +39,6 @@ public class PresupuestoMapper implements RowMapper<Presupuesto> {
 		tipoPresupuesto.setId(rs.getInt("idTipoPresup"));
 		tipoPresupuesto.setClave(rs.getString("clave_tipo_presup"));
 		tipoPresupuesto.setDescripcion(rs.getString("descripcion_tipo_presup"));
-
 		presupuesto.setTipoPresup(tipoPresupuesto);
 
 		return presupuesto;

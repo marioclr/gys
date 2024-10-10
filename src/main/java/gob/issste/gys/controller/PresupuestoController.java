@@ -293,12 +293,13 @@ public class PresupuestoController {
 				//presupuesto = new Presupuesto(anio, mes, delegacion, null, tipoPresup, saldoDelegCt);
 				//presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscForDeleg(delegacion.getId_div_geografica());
-//				programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
+
 				for(DatosAdscripcion ct:adsc) {
 
 					try {
 						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-//						datosProgramatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
+						DatosProgramatica programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
+						presupuesto.setDatosProgramatica(programatica);
 						presupuesto.setDelegacion(usuario.getDelegacion());
 						presupuesto.setTipoPresup(tipoPresup);
 						presupuesto.setCentroTrabajo(ct);
@@ -318,7 +319,7 @@ public class PresupuestoController {
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null,null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
 				}
 				//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, null);
 				//presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
@@ -328,6 +329,8 @@ public class PresupuestoController {
 				for(DatosAdscripcion ct:adsc) {
 					try {
 						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+						DatosProgramatica programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
+						presupuesto.setDatosProgramatica(programatica);
 						presupuesto.setDelegacion(usuario.getDelegacion());
 						presupuesto.setTipoPresup(tipoPresup);
 						presupuesto.setCentroTrabajo(ct);
@@ -354,6 +357,8 @@ public class PresupuestoController {
 				for(DatosAdscripcion ct:adsc) {
 					try {
 						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+						DatosProgramatica programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
+						presupuesto.setDatosProgramatica(programatica);
 						presupuesto.setDelegacion(usuario.getDelegacion());
 						presupuesto.setTipoPresup(tipoPresup);
 						presupuesto.setCentroTrabajo(ct);
@@ -422,7 +427,7 @@ public class PresupuestoController {
 			}
 			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del Sistema", HttpStatus.OK, presupuestosUtilizado);
 		} catch (Exception e) {
-			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 	@Operation(summary = "Obtener el saldo utilizado por registro de guardias para una delegación en un año determinado", description = "Obtener el saldo utilizado por registro de guardias para una delegación en un año determinado", tags = { "Presupuesto" })
@@ -625,6 +630,22 @@ public class PresupuestoController {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al obtener movimientos del presupuesto en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
+	}
+
+	@Operation(summary = "Consulta presupuesto por Id",
+			description = "Consulta de presupuesto junto con su función programatica",
+			tags = { "Presupuesto" })
+	@GetMapping("/Presupuesto/dpbyid")
+	public ResponseEntity<Object> getDatosProgByIdPresup(@RequestParam int idPresup){
+		Presupuesto presupuesto = null;
+		try {
+			 presupuesto = datosProgRepository.getElementByIdWProgData(idPresup);
+		}catch (Exception e){
+			logger.error("Fucking error: " + e);
+			return ResponseHandler.generateResponse("Error al consultar el presupuesto con el id: " + idPresup,
+					HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+		}
+		return ResponseHandler.generateResponse("Presupuesto con id " + idPresup +" consultado cón éxito", HttpStatus.OK, presupuesto);
 	}
 
 	@Operation(summary = "Agrega un movimiento al presupuesto en el Sistema", description = "Agrega un movimiento al presupuesto en el Sistema", tags = { "Movimientos de presupuesto" })

@@ -2,7 +2,9 @@ package gob.issste.gys.repository.jdbc;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.DatosProgramatica;
+import gob.issste.gys.model.Presupuesto;
 import gob.issste.gys.repository.IDatosProgramaticaRepository;
+import gob.issste.gys.repository.mappers.PresupuestoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,21 +27,26 @@ public class JdbcDatosProgramatica implements IDatosProgramaticaRepository {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
-
     Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
 
     @Override
-    public List<DatosProgramatica> getProgDataByIdPresupuesto(int idpresupuesto) {
-        List<DatosProgramatica> datosProgramatica =
-                jdbcTemplate.query(
-                QUERY_GET_PROG_DATA_BY_ID_PRESUP, new PreparedStatementSetter() {
-                    @Override
-                    public void setValues(PreparedStatement ps) throws SQLException {
-                        ps.setInt(1, idpresupuesto);
-                    }
-                },
-                 BeanPropertyRowMapper.newInstance(DatosProgramatica.class));
-        return datosProgramatica;
+    public DatosProgramatica getProgDataByIdPresupuesto(int idpresupuesto) {
+        logger.info("Get by id: " + QUERY_GET_PRESUPUESTO_BY_ID_W_PROG_DATA);
+        return jdbcTemplate.queryForObject(
+                QUERY_GET_PROG_DATA_BY_ID_PRESUP,
+                BeanPropertyRowMapper.newInstance(DatosProgramatica.class), idpresupuesto
+//                new PresupuestoMapper(), idpresupuesto
+        );
+    }
+
+    @Override
+    public Presupuesto getElementByIdWProgData(int idDeleg) {
+        logger.info("Get by id: " + QUERY_GET_PRESUPUESTO_BY_ID_W_PROG_DATA);
+        return jdbcTemplate.queryForObject(
+                QUERY_GET_PRESUPUESTO_BY_ID_W_PROG_DATA,
+//                BeanPropertyRowMapper.newInstance(Presupuesto.class), idDeleg
+               new PresupuestoMapper(), idDeleg
+        );
     }
 
     @Override
@@ -79,5 +86,32 @@ public class JdbcDatosProgramatica implements IDatosProgramaticaRepository {
             return generatedKey.intValue();
         }
         throw new SQLException("Expected one row insert.");
+    }
+
+    @Override
+    public int update(DatosProgramatica datosProgramatica) throws SQLException {
+        logger.info(QUERY_UPDATE_DATOS_PROG);
+        return jdbcTemplate.update(QUERY_UPDATE_DATOS_PROG,
+                new Object[] {
+                        datosProgramatica.getGf(),
+                        datosProgramatica.getFn(),
+                        datosProgramatica.getSf(),
+                        datosProgramatica.getPg(),
+                        datosProgramatica.getFf(),
+                        datosProgramatica.getAi(),
+                        datosProgramatica.getAp(),
+                        datosProgramatica.getSp(),
+                        datosProgramatica.getR(),
+                        datosProgramatica.getMun(),
+                        datosProgramatica.getFd(),
+                        datosProgramatica.getPtda(),
+                        datosProgramatica.getSbptd(),
+                        datosProgramatica.getTp(),
+                        datosProgramatica.getTpp(),
+                        datosProgramatica.getFdo(),
+                        datosProgramatica.getArea(),
+                        datosProgramatica.getTipo(),
+                        datosProgramatica.getId()
+        });
     }
 }
