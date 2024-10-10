@@ -410,5 +410,48 @@ public class JdbcDatosRepository implements IDatosRepository {
 		}
 	}
 
+	@Override
+	public List<String> getAi(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> ai = jdbcTemplate.queryForList(QUERY_GET_AI,String.class, tipo, ur, ct, aux);
+			return ai;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getAp(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> ap = jdbcTemplate.queryForList(QUERY_GET_AP,String.class, tipo, ur, ct, aux);
+			return ap;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getSp(String tipo,String ur, String ct, String aux) {
+		logger.info(tipo);
+		try {
+			List<String> sp = jdbcTemplate.queryForList(QUERY_GET_SP,String.class, tipo, ur, ct, aux);
+			return sp;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
+
+	@Override
+	public List<String> getR(String tipo,String ur, String ct, String aux) {
+		logger.info(QUERY_GET_R);
+		try {
+			List<String> r = jdbcTemplate.queryForList(QUERY_GET_R,String.class, tipo, ur, ct, aux);
+			return r;
+		}catch (IncorrectResultSizeDataAccessException e){
+			return null;
+		}
+	}
 
 }
