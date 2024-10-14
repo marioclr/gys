@@ -7,12 +7,12 @@ import gob.issste.gys.model.Presupuesto;
 
 public interface IPresupuestoRepository {
 
-	public String QUERY_ADD_PRESUPUESTO			    = "INSERT INTO gys_presupuesto (anio, mes, idDelegacion, idTipoPresup, saldo)\r\n"
-													+ "Values ( ?, ?, ?, ?, ? )";
+	public String QUERY_ADD_PRESUPUESTO			    = "INSERT INTO gys_presupuesto (anio, mes, quincena, idDelegacion, idTipoPresup, saldo)\r\n"
+													+ "Values ( ?, ?, ?, ?, ?, ? )";
 	int save(Presupuesto presupuesto) throws SQLException;
 
-	public String QUERY_ADD_PRESUPUESTO_CT		    = "INSERT INTO gys_presupuesto (anio, mes, idDelegacion, id_centro_trabajo, idTipoPresup, saldo)\r\n"
-													+ "Values ( ?, ?, ?, ?, ?, ? )";
+	public String QUERY_ADD_PRESUPUESTO_CT		    = "INSERT INTO gys_presupuesto (anio, mes, quincena, idDelegacion, id_centro_trabajo, idTipoPresup, saldo)\r\n"
+													+ "Values ( ?, ?, ?, ?, ?, ?, ? )";
 	int save_ct(Presupuesto presupuesto) throws SQLException;
 
 	public String QUERY_UPD_PRESUPUESTO			    = "Update gys_presupuesto\r\n"
@@ -88,6 +88,7 @@ public interface IPresupuestoRepository {
 													+ "From gys_presupuesto\r\n"
 													+ "Where anio = ?\r\n"
 													+ "  And mes = ?\r\n"
+													+ "  And quincena = ?\r\n"
 													+ "  And idDelegacion = ?\r\n"
 													+ "  And id_centro_trabajo = ?\r\n"
 													+ "  And idtipopresup = ?";
@@ -127,8 +128,9 @@ public interface IPresupuestoRepository {
 													+ "  And T.clave = ?\r\n"
 													+ "  And P.anio = ?\r\n"
 													+ "  And P.mes = ?\r\n"
+													+ "  And P.quincena = ?\r\n"
 													+ "  And P.id_centro_trabajo = ?";
-	public Presupuesto getDatosPresupCt(String idDelegacion, String idTipoPresup, Integer anio, Integer mes, String idCentTrab);
+	public Presupuesto getDatosPresupCt(String idDelegacion, String idTipoPresup, Integer anio, Integer mes, Integer quincena, String idCentTrab);
 
 	public String QUERY_GET_SALDO_DISTRIBUIDO		= "Select NVL(SUM(saldo), 0) saldo\r\n"
 													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"

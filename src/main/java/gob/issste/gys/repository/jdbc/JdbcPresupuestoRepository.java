@@ -42,9 +42,10 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
             PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_PRESUPUESTO, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, presupuesto.getAnio());
             preparedStatement.setInt(2, presupuesto.getMes());
-            preparedStatement.setString(3, presupuesto.getDelegacion().getId_div_geografica());
-            preparedStatement.setInt(4, presupuesto.getTipoPresup().getId());
-            preparedStatement.setDouble(5, presupuesto.getSaldo());
+            preparedStatement.setInt(3, presupuesto.getQuincena());
+            preparedStatement.setString(4, presupuesto.getDelegacion().getId_div_geografica());
+            preparedStatement.setInt(5, presupuesto.getTipoPresup().getId());
+            preparedStatement.setDouble(6, presupuesto.getSaldo());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -67,10 +68,11 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
             PreparedStatement preparedStatement = connection.prepareStatement(QUERY_ADD_PRESUPUESTO_CT, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, presupuesto.getAnio());
             preparedStatement.setInt(2, presupuesto.getMes());
-            preparedStatement.setString(3, presupuesto.getDelegacion().getId_div_geografica());
-            preparedStatement.setString(4, presupuesto.getCentroTrabajo().getClave());
-            preparedStatement.setInt(5, presupuesto.getTipoPresup().getId());
-            preparedStatement.setDouble(6, presupuesto.getSaldo());
+            preparedStatement.setInt(3, presupuesto.getQuincena());
+            preparedStatement.setString(4, presupuesto.getDelegacion().getId_div_geografica());
+            preparedStatement.setString(5, presupuesto.getCentroTrabajo().getClave());
+            preparedStatement.setInt(6, presupuesto.getTipoPresup().getId());
+            preparedStatement.setDouble(7, presupuesto.getSaldo());
             return preparedStatement;
         };
         int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -145,7 +147,7 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 	public int existe_presupuesto_ct(Presupuesto presupuesto) {
 		logger.info(QUERY_EXISTS_PRESUPUESTO_CT);
 		return jdbcTemplate.queryForObject(QUERY_EXISTS_PRESUPUESTO_CT, Integer.class,
-				new Object[] { presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getCentroTrabajo().getClave(), presupuesto.getTipoPresup().getId() } );
+				new Object[] { presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion().getId_div_geografica(), presupuesto.getCentroTrabajo().getClave(), presupuesto.getTipoPresup().getId() } );
 	}
 
 	@Override
@@ -234,9 +236,9 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 
 	@Override
 	public Presupuesto getDatosPresupCt(String idDelegacion, String idTipoPresup, Integer anio, Integer mes,
-			String idCentTrab) {
+			Integer quincena, String idCentTrab) {
 		logger.info(QUERY_GET_DATOS_PRESUP_CT);
-		Presupuesto presup = jdbcTemplate.queryForObject(QUERY_GET_DATOS_PRESUP_CT, BeanPropertyRowMapper.newInstance(Presupuesto.class), new Object [] { idDelegacion, idTipoPresup, anio, mes, idCentTrab } );
+		Presupuesto presup = jdbcTemplate.queryForObject(QUERY_GET_DATOS_PRESUP_CT, BeanPropertyRowMapper.newInstance(Presupuesto.class), new Object [] { idDelegacion, idTipoPresup, anio, mes, quincena, idCentTrab } );
 		return presup;
 	}
 

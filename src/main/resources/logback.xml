@@ -2,8 +2,8 @@
 <configuration>
     <timestamp key="myTimestamp" datePattern="dd-MM-yyyy"/>
     <!-- PARA DSARROLLO -->
-    <!--    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
-    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+<!--    <appender name="FILE-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
 <!--        <file>D:\backend\Logs\SIGYS-${myTimestamp}\Historial-SIGYS-${myTimestamp}.log</file>-->
                 <file>./backend/Logs/SIGYS-${myTimestamp}/SIGYS-${myTimestamp}.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -20,9 +20,9 @@
     </appender>
     <root level="INFO">
         <!-- PARA PRODUCCIÓN Y PRE-PRODUCCIÓN -->
-                <appender-ref ref="FILE-ROLLING" />
+<!--                <appender-ref ref="FILE-ROLLING" />-->
         <!-- PARA DSARROLLO -->
-<!--        <appender-ref ref="CONSOLE" />-->
+        <appender-ref ref="CONSOLE" />
     </root>
 </configuration>
 

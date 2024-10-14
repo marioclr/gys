@@ -6,6 +6,7 @@ public class Presupuesto {
 	private int id;
 	private int anio;
 	private int mes;
+	private int quincena;
 	private Delegacion delegacion;
 	private TiposPresupuesto tipoPresup;
 	private Double saldo;
@@ -16,23 +17,25 @@ public class Presupuesto {
 
 	public Presupuesto() {
 	}
-	public Presupuesto(int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, DatosProgramatica datosProgramatica,
+	public Presupuesto(int anio, int mes, int quincena, Delegacion delegacion, DatosAdscripcion centroTrabajo, DatosProgramatica datosProgramatica,
 					   TiposPresupuesto tipoPresup, Double saldo) {
 		super();
 		this.anio = anio;
 		this.mes = mes;
+		this.quincena = quincena;
 		this.delegacion = delegacion;
 		this.centroTrabajo = centroTrabajo;
 		this.datosProgramatica = datosProgramatica;
 		this.tipoPresup = tipoPresup;
 		this.saldo = saldo;
 	}
-	public Presupuesto(int id, int anio, int mes, Delegacion delegacion, DatosAdscripcion centroTrabajo, DatosProgramatica datosProgramatica,
+	public Presupuesto(int id, int anio, int mes, int quincena, Delegacion delegacion, DatosAdscripcion centroTrabajo, DatosProgramatica datosProgramatica,
 					   TiposPresupuesto tipoPresup, Double saldo) {
 		super();
 		this.id = id;
 		this.anio = anio;
 		this.mes = mes;
+		this.quincena = quincena;
 		this.delegacion = delegacion;
 		this.centroTrabajo = centroTrabajo;
 		this.datosProgramatica = datosProgramatica;
@@ -56,6 +59,12 @@ public class Presupuesto {
 	}
 	public void setMes(int mes) {
 		this.mes = mes;
+	}
+	public int getQuincena() {
+		return quincena;
+	}
+	public void setQuincena(int quincena) {
+		this.quincena = quincena;
 	}
 	public Delegacion getDelegacion() {
 		return delegacion;
@@ -96,7 +105,7 @@ public class Presupuesto {
 
 	@Override
 	public String toString() {
-		return "Presupuesto [id=" + id + ", anio=" + anio + ", mes=" + mes + ", delegacion=" + delegacion + ", tipoPresup="
+		return "Presupuesto [id=" + id + ", anio=" + anio + ", mes=" + mes + ", quincena=" + quincena + ", delegacion=" + delegacion + ", tipoPresup="
 				+ tipoPresup + ", saldo=" + saldo + ", centroTrabajo=" + centroTrabajo + "]";
 	}
 

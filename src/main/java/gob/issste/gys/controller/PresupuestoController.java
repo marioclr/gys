@@ -128,10 +128,10 @@ public class PresupuestoController {
 			}
 
 			if( presupuesto.getCentroTrabajo() == null ) {
-				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
+				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
 						, null ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
 			} else {				
-				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
+				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
 						, presupuesto.getDatosProgramatica() ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
 				int datosProg = datosProgRepository.save(new DatosProgramatica(
 						idPresup, presupuesto.getDatosProgramatica().getGf(), presupuesto.getDatosProgramatica().getFn(), presupuesto.getDatosProgramatica().getSf(), presupuesto.getDatosProgramatica().getPg(), presupuesto.getDatosProgramatica().getFf(),
@@ -237,13 +237,12 @@ public class PresupuestoController {
 	}
 	@Operation(summary = "Consulta elementos de presupuesto del Sistema", description = "Consulta elementos de presupuesto del Sistema", tags = { "Presupuesto" })
 	@GetMapping("/Presupuesto/ct")
-	//public ResponseEntity<List<Presupuesto>> getPresupuesto(
 	public ResponseEntity<Object> getPresupuestoCt(
 			@Parameter(description = "Parámetro para indicar el ID del Usuario del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer idUsuario,
 			@Parameter(description = "Parámetro para indicar el anio del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer anio,
 			@Parameter(description = "Parámetro para indicar el mes del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar la quincena de la que se desea consultar el presupuesto", required = true) @RequestParam(required = true) Integer quincena,
 			@Parameter(description = "Parámetro para indicar el ID de la delegación del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) String idDelegacion,
-			//@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
 			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = true) @RequestParam(required = true) String claveTipoPresup) {
 		try {
 			final String regexDeleg = "^[0-9]{2}$";
@@ -278,26 +277,21 @@ public class PresupuestoController {
 			}
 
 			if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()== 1 ) {
-				//List<Delegacion> delegaciones = datosRepository.getDatosDelegaciones();
-				//for(Delegacion del:delegaciones) {
 				try {
 					presupuesto = presupuestoRepository.getDatosPresup(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes);
 					presupuesto.setDelegacion(usuario.getDelegacion());
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
 				}
 				presupuestos.add(presupuesto);
-				//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-				//presupuesto = new Presupuesto(anio, mes, delegacion, null, tipoPresup, saldoDelegCt);
-				//presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscForDeleg(delegacion.getId_div_geografica());
 
 				for(DatosAdscripcion ct:adsc) {
 
 					try {
-						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, quincena, ct.getClave());
 						DatosProgramatica programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
 						presupuesto.setDatosProgramatica(programatica);
 						presupuesto.setDelegacion(usuario.getDelegacion());
@@ -305,7 +299,7 @@ public class PresupuestoController {
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
 						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, null, tipoPresup, saldoDelegCt);
+						presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), ct, null, tipoPresup, saldoDelegCt);
 					}
 					presupuestos.add(presupuesto);
 				}
@@ -319,16 +313,14 @@ public class PresupuestoController {
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
 				}
-				//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, null);
-				//presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
 				presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscForDeleg(usuario.getDelegacion().getId_div_geografica());
 				logger.info(adsc.toString());
 				for(DatosAdscripcion ct:adsc) {
 					try {
-						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, quincena, ct.getClave());
 						DatosProgramatica programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
 						presupuesto.setDatosProgramatica(programatica);
 						presupuesto.setDelegacion(usuario.getDelegacion());
@@ -336,7 +328,7 @@ public class PresupuestoController {
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
 						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct, null, tipoPresup, saldoDelegCt);
+						presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), ct, null, tipoPresup, saldoDelegCt);
 					}
 					presupuestos.add(presupuesto);
 				}
@@ -347,16 +339,13 @@ public class PresupuestoController {
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
 				}
 				presupuestos.add(presupuesto);
-				//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, null);
-				//presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), null, tipoPresup, saldoDelegCt);
-				//presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscripciones_ct(idUsuario);
 				for(DatosAdscripcion ct:adsc) {
 					try {
-						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, quincena, ct.getClave());
 						DatosProgramatica programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
 						presupuesto.setDatosProgramatica(programatica);
 						presupuesto.setDelegacion(usuario.getDelegacion());
@@ -364,7 +353,7 @@ public class PresupuestoController {
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
 						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, usuario.getDelegacion(), ct,null, tipoPresup, saldoDelegCt);
+						presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), ct,null, tipoPresup, saldoDelegCt);
 					}
 					presupuestos.add(presupuesto);
 				}
@@ -475,43 +464,10 @@ public class PresupuestoController {
 		}
 	}
 
-//	@Operation(summary = "Consulta elementos de presupuesto del Sistema", description = "Consulta elementos de presupuesto del Sistema", tags = { "Presupuesto" })
-//	@GetMapping("/Presupuesto/user")
-//	//public ResponseEntity<List<Presupuesto>> getPresupuesto(
-//	public ResponseEntity<Object> getPresupuestoByUser(
-//			@Parameter(description = "Bandera para indicar si se requiere incluir los movimientos presupuestales", required = false) @RequestParam(name = "movim", required = false, defaultValue = "false") boolean movim, 
-//			@Parameter(description = "ID del usuario para consultar el presupuesto asignado a su delegación y centros de trabajo", required = false) @RequestParam(required = false) int id,
-//			@Parameter(description = "ID de la delegación para obtener el presupuesto asignado", required = false) @RequestParam(required = false) String idDeleg ) {
-//		try {
-//			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
-//
-//			if ( idDeleg == null ) {
-//				presupuestos = presupuestoRepository.findAllByUser(id);
-//			} else {
-//				presupuestos = presupuestoRepository.findAll();
-//			}
-//			if (movim) {
-//				for (Presupuesto p:presupuestos)
-//					p.setMovimientos(movPresupuestoRepository.findByPresupuesto(p.getId()));
-//			}
-//			if (presupuestos.isEmpty()) {
-//				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NOT_FOUND, null);
-//			}
-//
-//			//return new ResponseEntity<>(presupuestos, HttpStatus.OK);
-//			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del Sistema", HttpStatus.OK, presupuestos);
-//		} catch (Exception e) {
-//			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-//			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
-//		}
-//	}
-
 	/* Tipos de Movimientos Presupuestales */
 
 	@Operation(summary = "Agrega un nuevo elemento de tipos de presupuesto al Sistema", description = "Agrega un nuevo elemento de tipos de presupuesto al Sistema", tags = { "Tipos de movimiento de presupuesto" })
 	@PostMapping("/TipoMovPresup")
-	//public ResponseEntity<String> createTipMovPresup(@RequestBody TipoMovPresupuesto TipoMovPresupuesto) {
 	public ResponseEntity<Object> createTipMovPresup(@RequestBody TipoMovPresupuesto TipoMovPresupuesto) {
 		try {
 			tipMovPresupRepository.save(new TipoMovPresupuesto(TipoMovPresupuesto.getClave(), TipoMovPresupuesto.getDescripcion()));
@@ -525,7 +481,6 @@ public class PresupuestoController {
 
 	@Operation(summary = "Modifica un elemento de tipo de presupuesto al Sistema", description = "Modifica un elemento de tipo de presupuesto al Sistema", tags = { "Tipos de movimiento de presupuesto" })
 	@PutMapping("/TipoMovPresup/{id}")
-	//public ResponseEntity<String> updateTipMovPresup(@PathVariable("id") Integer id, @RequestBody TipoMovPresupuesto TipoMovPresupuesto) {
 	public ResponseEntity<Object> updateTipMovPresup(@PathVariable("id") Integer id, @RequestBody TipoMovPresupuesto TipoMovPresupuesto) {
 		TipoMovPresupuesto _tipo = tipMovPresupRepository.findById(id);
 
@@ -534,17 +489,14 @@ public class PresupuestoController {
 			_tipo.setDescripcion(TipoMovPresupuesto.getDescripcion());
 
 			tipMovPresupRepository.update(_tipo);
-			//return new ResponseEntity<>("El tipo de movimiento ha sido modificado de manera exitosa", HttpStatus.OK);
 			return ResponseHandler.generateResponse("El tipo de movimiento ha sido modificado de manera exitosa", HttpStatus.OK, null);
 		} else {
-			//return new ResponseEntity<>("No se pudo encontrar el tipo de movimiento ha sido con id=" + id, HttpStatus.NOT_FOUND);
 			return ResponseHandler.generateResponse("Error al agregar nuevo elemento de tipos de presupuesto al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Consulta elementos de tipo de presupuesto al Sistema", description = "Consulta elementos de tipo de presupuesto al Sistema", tags = { "Tipos de movimiento de presupuesto" })
 	@GetMapping("/TipoMovPresup")
-	//public ResponseEntity<List<TipoMovPresupuesto>> getTipMovPresup(
 	public ResponseEntity<Object> getTipMovPresup(
 			@Parameter(description = "Descripcion del tipo de movimiento del que se desea obtener la información", required = false) @RequestParam(required = false) String desc) {
 		try {
@@ -556,49 +508,39 @@ public class PresupuestoController {
 				tipMovPresupRepository.findByDesc(desc).forEach(opciones::add);
 
 			if (opciones.isEmpty()) {
-				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No existen elementos del tipo de movimiento del que se desea obtener la información", HttpStatus.NOT_FOUND, null);
 			}
 
-			//return new ResponseEntity<>(opciones, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Existen elementos del tipo de movimiento del que se desea obtener la información", HttpStatus.OK, opciones);
 		} catch (Exception e) {
-			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al consultar elementos de tipo de presupuesto al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Obtiene un elemento de tipo de presupuesto del Sistema", description = "Obtiene un elemento de tipo de presupuesto del Sistema", tags = { "Tipos de movimiento de presupuesto" })
 	@GetMapping("/TipoMovPresup/{id}")
-	//public ResponseEntity<TipoMovPresupuesto> getTipMovPresupById(
 	public ResponseEntity<Object> getTipMovPresupById(
 			@Parameter(description = "ID del tipo de movimiento del que se desea obtener la información", required = true) @PathVariable("id") Integer id) {
 
 		TipoMovPresupuesto TipoMovPresupuesto = tipMovPresupRepository.findById(id);
 
 		if (TipoMovPresupuesto != null) {
-			//return new ResponseEntity<>(TipoMovPresupuesto, HttpStatus.OK);
 			return ResponseHandler.generateResponse("Existe el elemento de tipo de movimiento de presupuesto del Sistema", HttpStatus.OK, TipoMovPresupuesto);
 		} else {
-			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			return ResponseHandler.generateResponse("Error al obtener un elemento de tipo de movimiento de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
 	@Operation(summary = "Elimina un elemento de tipo de presupuesto del Sistema", description = "Elimina un elemento de tipo de presupuesto del Sistema", tags = { "Tipos de movimiento de presupuesto" })
 	@DeleteMapping("/TipoMovPresup/{id}")
-	//public ResponseEntity<String> deleteTipMovPresup(@PathVariable("id") Integer id) {
 	public ResponseEntity<Object> deleteTipMovPresup(@PathVariable("id") Integer id) {
 		try {
 			int result = tipMovPresupRepository.deleteById(id);
 			if (result == 0) {
-				//return new ResponseEntity<>("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se pudo encontrar el tipo de movimiento con el ID =" + id, HttpStatus.NOT_FOUND, null);
 			}
-			//return new ResponseEntity<>("El el tipo de movimiento fué eliminado exitósamente.", HttpStatus.OK);
 			return ResponseHandler.generateResponse("Existe el elemento de tipo de movimiento de presupuesto del Sistema", HttpStatus.OK, null);
 		} catch (Exception e) {
-			//return new ResponseEntity<>("No se borró el tipo de movimiento.", HttpStatus.INTERNAL_SERVER_ERROR);
 			return ResponseHandler.generateResponse("Error al eliminar un elemento de tipo de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
