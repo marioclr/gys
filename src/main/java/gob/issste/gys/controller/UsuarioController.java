@@ -3,6 +3,7 @@ package gob.issste.gys.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.service.SecurityService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,8 @@ public class UsuarioController {
 	@Autowired
 	private PlatformTransactionManager platformTransactionManager;
 
+	@Autowired
+	private SecurityService securityService;
 	@Operation(summary = "Agrega un nuevo usuario al Sistema", description = "Agrega un nuevo usuario al Sistema", tags = { "Usuario" })
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Successful operation", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class)) }),
@@ -72,7 +75,8 @@ public class UsuarioController {
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
 
 		try {
-			int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), usuario.getPassword(), usuario.getEmpleado(),
+			final String encryptedPwd = securityService.getEncryptedPwd(usuario.getPassword());
+			int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), encryptedPwd, usuario.getEmpleado(),
 					usuario.getDelegacion(), usuario.getCentrosTrabajo(), usuario.getNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getId_usuario()));
 			for(Perfil p:usuario.getPerfiles()) {
 				perfilRepository.addPerfilToUser(idUsuario, p.getIdPerfil());
