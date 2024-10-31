@@ -53,6 +53,19 @@ public class Usuario {
 		this.id_usuario = id_usuario;
 	}
 
+	//Para actualizacion
+	public Usuario(int idUsuario, Delegacion delegacion, List<Perfil> perfiles, List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad,
+				   int idTipoUsuario, String id_usuario) {
+		super();
+		this.idUsuario = idUsuario;
+		this.delegacion = delegacion;
+		this.perfiles= perfiles;
+		this.centrosTrabajo = centrosTrabajo;
+		this.nivelVisibilidad = nivelVisibilidad;
+		this.idTipoUsuario = idTipoUsuario;
+		this.id_usuario = id_usuario;
+	}
+
 	public int getIdUsuario() {
 		return idUsuario;
 	}

@@ -2,6 +2,7 @@ package gob.issste.gys.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import gob.issste.gys.service.SecurityService;
 import org.slf4j.Logger;
@@ -61,9 +62,10 @@ public class UsuarioController {
 
 	@Autowired
 	private SecurityService securityService;
-	@Operation(summary = "Agrega un nuevo usuario al Sistema", description = "Agrega un nuevo usuario al Sistema", tags = { "Usuario" })
+
+	@Operation(summary = "Agrega un nuevo usuario al Sistema", description = "Agrega un nuevo usuario al Sistema", tags = {"Usuario"})
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Successful operation", content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class)) }),
+			@ApiResponse(responseCode = "200", description = "Successful operation", content = {@Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class))}),
 			@ApiResponse(responseCode = "405", description = "Invalid input")
 	})
 	@PostMapping("/usuarios")
@@ -75,35 +77,106 @@ public class UsuarioController {
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
 
 		try {
-			final String encryptedPwd = securityService.getEncryptedPwd(usuario.getPassword());
-			int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), encryptedPwd, usuario.getEmpleado(),
-					usuario.getDelegacion(), usuario.getCentrosTrabajo(), usuario.getNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getId_usuario()));
-			for(Perfil p:usuario.getPerfiles()) {
-				perfilRepository.addPerfilToUser(idUsuario, p.getIdPerfil());
-				for(Opcion o:p.getOpciones()) {
-					usuarioRepository.savePermissions(idUsuario, p.getIdPerfil(), o.getIdOpcion(), o.getIdNivelAcceso());
+
+			Usuario userExist = usuarioRepository.findByName(usuario.getClave());
+
+//			System.out.println(userExist);
+
+			if (Objects.isNull( userExist )) {
+
+				final String encryptedPwd = securityService.getEncryptedPwd(usuario.getPassword());
+
+				int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), encryptedPwd, usuario.getEmpleado(),
+						usuario.getDelegacion(), usuario.getCentrosTrabajo(), usuario.getNivelVisibilidad(),
+						usuario.getIdTipoUsuario(), usuario.getId_usuario()));
+				for (Perfil p : usuario.getPerfiles()) {
+					perfilRepository.addPerfilToUser(idUsuario, p.getIdPerfil());
+					for (Opcion o : p.getOpciones()) {
+//						usuarioRepository.savePermissions(idUsuario, p.getIdPerfil(), o.getIdOpcion(), o.getIdNivelAcceso());
+						usuarioRepository.savePermissions(idUsuario, p.getIdPerfil(), o.getIdOpcion(), 15);
+					}
 				}
+				for (DatosAdscripcion ct : usuario.getCentrosTrabajo()) {
+					usuarioRepository.saveCentTrabForUsu(idUsuario, ct.getClave(), usuario.getId_usuario());
+				}
+				platformTransactionManager.commit(status);
+
+				return ResponseHandler.generateResponse("El Usuario ha sido creado de manera exitosa",
+						HttpStatus.OK, null);
+
+
+			} else {
+
+				return ResponseHandler.generateResponse("El usuario existe registrado en la base de datos",
+						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
-			for(DatosAdscripcion ct:usuario.getCentrosTrabajo()) {
-				usuarioRepository.saveCentTrabForUsu(idUsuario, ct.getClave(), usuario.getId_usuario());
-			}
-			platformTransactionManager.commit(status);
-			//return new ResponseEntity<>("El Usuario ha sido creado de manera exitosa", HttpStatus.OK);
-			return ResponseHandler.generateResponse("El Usuario ha sido creado de manera exitosa", HttpStatus.OK, null);
 
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-			return ResponseHandler.generateResponse("Error al agregar un nuevo usuario al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al agregar un nuevo usuario al Sistema",
+					HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 		}
 	}
+
+
+//	@Operation(summary = "Actualiza un usuario del Sistema", description = "Actualiza un usuario del Sistema", tags = { "Usuario" })
+//	@PutMapping("/usuarios/{id}")
+//	public ResponseEntity<Object> updateUsuario(
+//			@Parameter(description = "El ID del usuario a modificar.", required = true) @PathVariable("id") int id,
+//			@Parameter(description = "Actualizar un Usuario existente del Sistema") @RequestBody Usuario usuario) {
+//
+//		Usuario _usuario = usuarioRepository.findById(id);
+//
+//		DefaultTransactionDefinition paramTransactionDefinition = new DefaultTransactionDefinition();
+//		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
+//
+//		try {
+//
+//			if (_usuario != null) {
+//				_usuario.setIdUsuario(id);
+//				_usuario.setClave(usuario.getClave());
+//				_usuario.setPassword(usuario.getPassword());
+//				_usuario.setEmpleado(usuario.getEmpleado());
+//				_usuario.setDelegacion(usuario.getDelegacion());
+//				_usuario.setId_usuario(usuario.getId_usuario());
+//				_usuario.setNivelVisibilidad(usuario.getNivelVisibilidad());
+//				_usuario.setIdTipoUsuario(usuario.getIdTipoUsuario());
+//
+//				usuarioRepository.update(_usuario);
+//				// Delete Permissions
+//				usuarioRepository.removePermissions(id);
+//				perfilRepository.removePerfilesToUser(id);
+//				usuarioRepository.removeCentTrabForUsu(id);
+//				// Add Permissions
+//				for(Perfil p:usuario.getPerfiles()) {
+//					perfilRepository.addPerfilToUser(id, p.getIdPerfil());
+//					for(Opcion o:p.getOpciones()) {
+//						usuarioRepository.savePermissions(id, p.getIdPerfil(), o.getIdOpcion(), o.getIdNivelAcceso());
+//					}
+//				}
+//				for(DatosAdscripcion ct:usuario.getCentrosTrabajo()) {
+//					usuarioRepository.saveCentTrabForUsu(id, ct.getClave(), usuario.getId_usuario());
+//				}
+//				platformTransactionManager.commit(status);
+//				return ResponseHandler.generateResponse("El Usuario ha sido modificado de manera exitosa", HttpStatus.OK, null);
+//
+//			} else {
+//				return ResponseHandler.generateResponse("No se pudo encontrar el usuario con ID = " + id, HttpStatus.NOT_FOUND, null);
+//			}
+//		} catch (Exception e) {
+//			platformTransactionManager.rollback(status);
+//			return ResponseHandler.generateResponse("Error al actualizar un usuario del Sistema de manera exitosa", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//		}
+//	}
 
 	@Operation(summary = "Actualiza un usuario del Sistema", description = "Actualiza un usuario del Sistema", tags = { "Usuario" })
 	@PutMapping("/usuarios/{id}")
 	public ResponseEntity<Object> updateUsuario(
 			@Parameter(description = "El ID del usuario a modificar.", required = true) @PathVariable("id") int id,
 			@Parameter(description = "Actualizar un Usuario existente del Sistema") @RequestBody Usuario usuario) {
+
 
 		Usuario _usuario = usuarioRepository.findById(id);
 
@@ -114,15 +187,13 @@ public class UsuarioController {
 
 			if (_usuario != null) {
 				_usuario.setIdUsuario(id);
-				_usuario.setClave(usuario.getClave());
-				_usuario.setPassword(usuario.getPassword());
-				_usuario.setEmpleado(usuario.getEmpleado());
 				_usuario.setDelegacion(usuario.getDelegacion());
 				_usuario.setId_usuario(usuario.getId_usuario());
 				_usuario.setNivelVisibilidad(usuario.getNivelVisibilidad());
 				_usuario.setIdTipoUsuario(usuario.getIdTipoUsuario());
 
-				usuarioRepository.update(_usuario);
+				//usuarioRepository.update(_usuario);
+				usuarioRepository.updateDatosUsuario(_usuario);
 				// Delete Permissions
 				usuarioRepository.removePermissions(id);
 				perfilRepository.removePerfilesToUser(id);
@@ -281,7 +352,7 @@ public class UsuarioController {
 			usuario.setCentrosTrabajo(usuarioRepository.getCentTrabForUsu(usuario.getIdUsuario()));
 			usuario = usuarioRepository.getPermissionsForUser(usuario);
 			//return new ResponseEntity<>(usuario, HttpStatus.OK);
-			return ResponseHandler.generateResponse("Se obtienen los permisos del usuarios del Sistema", HttpStatus.OK, usuario);
+			return ResponseHandler.generateResponse("Se obtienen los permisos del usuarios de0l Sistema", HttpStatus.OK, usuario);
 
 		} else {
 			//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -301,6 +372,28 @@ public class UsuarioController {
 		} else {
 			return ResponseHandler.generateResponse("No existen los niveles de visibilidad de los usuarios del Sistema", HttpStatus.NOT_FOUND, null);
 		}
+	}
+
+	@Operation(summary = "Actualiza el password del usuario", description = "Actualiza la contraseña de usuario seleccionado", tags = { "Usuario" })
+	@PutMapping("/usuarios/pwd")
+	public ResponseEntity<Object> updatePasswordUsuario(
+			@Parameter(description = "El ID del usuario a modificar.", required = true) @RequestParam(required = true) int idUsuario,
+			@Parameter(description = "Clave de usuario nueva", required = true) @RequestParam(required = true) String pwd
+	) {
+
+		final String encryptedPwd = securityService.getEncryptedPwd(pwd);
+
+		int result = usuarioRepository.updatePassword(encryptedPwd,idUsuario);
+
+//		return ResponseHandler.generateResponse("FINALIZO", HttpStatus.OK, encryptedPwd);
+
+		if (result == 0) {
+			return ResponseHandler.generateResponse("No se actualizo la contraseña del usuario seleccionado", HttpStatus.NOT_FOUND, null);
+		}else{
+			return ResponseHandler.generateResponse("Se actualizo la contraseña el usuario en el Sistema", HttpStatus.OK, null);
+		}
+
+
 	}
 
 }
