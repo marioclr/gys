@@ -94,8 +94,8 @@ public interface GuardiaRepository {
 	public String QUERY_GET_SALDO_GUARDIA_INT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_guardias_emp\r\n"
 												+ "Where id<>? And id_centro_trabajo = ?\r\n"
-												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
-	double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio);
+												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ? And quincena = ?)";
+	double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio, int quincena);
 
 	public String QUERY_GET_SALDO_GUARDIA_EXT   = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_guardias_ext\r\n"
@@ -106,8 +106,8 @@ public interface GuardiaRepository {
 	public String QUERY_GET_SALDO_GUARDIA_EXT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_guardias_ext\r\n"
 												+ "Where id<>? And id_centro_trabajo = ?\r\n"
-												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
-	double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio);
+												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ? And quincena = ?)";
+	double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio, int quincena);
 
 	public String QUERY_GET_GUARDIA_EXTERNA     = "Select G.id, rfc As Clave_empleado, G.id_centro_trabajo, G.id_clave_servicio, G.id_puesto_plaza, 'GE' tipo_guardia,\r\n"
 												+ "G.id_nivel, G.id_sub_nivel, G.id_tipo_jornada, G.horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, G.coment, hora_inicio, hora_fin,\r\n"

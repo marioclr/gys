@@ -20,7 +20,7 @@ public interface IPresupuestoRepository {
 													+ "Where id = ?";
 	int update(int idPresupuesto, Double actualizacion);
 
-	public String QUERY_GET_PRESUPUESTO		    	= "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
+	public String QUERY_GET_PRESUPUESTO		    	= "Select P.id, P.anio, P.mes, P.quincena, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
 													+ "NVL(P.id_centro_trabajo, '00000') id_centro_trabajo, P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
 													+ "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
 													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
@@ -48,7 +48,7 @@ public interface IPresupuestoRepository {
 													+ "Order by idDelegacion";
 	List<Presupuesto> findAllByUser(int idUsuario, String ct);
 
-	public String QUERY_GET_PRESUPUESTO_BY_ID       = "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
+	public String QUERY_GET_PRESUPUESTO_BY_ID       = "Select P.id, P.anio, P.mes, P.quincena, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
 													+ "NVL(P.id_centro_trabajo, '00000') id_centro_trabajo, P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
 													+ "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
 													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
@@ -56,7 +56,7 @@ public interface IPresupuestoRepository {
 													+ "  And P.id=?";
 	Presupuesto getElementById(int id);
 
-	public String QUERY_GET_PRESUPUESTO_BY_TYPE     = "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
+	public String QUERY_GET_PRESUPUESTO_BY_TYPE     = "Select P.id, P.anio, P.mes, P.quincena, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
 													+ "NVL(P.id_centro_trabajo, '00000') id_centro_trabajo, P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
 													+ "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
 													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
@@ -65,7 +65,7 @@ public interface IPresupuestoRepository {
 													+ "  And T.clave = ?";
 	Presupuesto getElementByType(String idDeleg, Integer idTipo);
 
-	public String QUERY_GET_PRESUPUESTO_BY_TYPE_CT  = "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
+	public String QUERY_GET_PRESUPUESTO_BY_TYPE_CT  = "Select P.id, P.anio, P.mes, P.quincena, P.saldo, P.idDelegacion, D.n_div_geografica,\r\n"
 													+ "NVL(P.id_centro_trabajo, '00000') id_centro_trabajo, P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
 													+ "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
 													+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
@@ -103,7 +103,7 @@ public interface IPresupuestoRepository {
 													+ "  And idtipopresup = ?";
 	public double validaSumaPresupuestal(Presupuesto presupuesto);
 
-	public List<Presupuesto> get_dynamic_regs(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, String idCentTrab, boolean solo_deleg);
+	public List<Presupuesto> get_dynamic_regs(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, Integer quincena, String idCentTrab, boolean solo_deleg);
 
 	public double getSaldoDelegCt(String idDelegacion, String idTipoPresup, Integer anio, Integer mes, String idCentTrab);
 

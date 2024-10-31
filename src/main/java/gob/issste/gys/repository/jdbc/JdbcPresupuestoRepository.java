@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import gob.issste.gys.model.DatosSuplencia;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -159,10 +157,10 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 
 
 	@Override
-	public List<Presupuesto> get_dynamic_regs(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, String idCentTrab, boolean solo_deleg) {
+	public List<Presupuesto> get_dynamic_regs(String idDelegacion, String claveTipoPresup, Integer anio, Integer mes, Integer quincena, String idCentTrab, boolean solo_deleg) {
 
 		String QUERY_CONDITION = ""; // , ADSC_TABLE = "", ADSC_FIELDS = "", ADSC_WHERE = "";
-		List<Object> objects = new ArrayList<Object>();
+		//List<Object> objects = new ArrayList<Object>();
 
 		if (idDelegacion != null) {
 			QUERY_CONDITION += "And P.idDelegacion = ?\r\n";
@@ -180,6 +178,10 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 			QUERY_CONDITION += "And P.mes = ?\r\n";
 		}
 
+		if (quincena != null) {
+			QUERY_CONDITION += "And P.quincena = ?\r\n";
+		}
+
 		if (idCentTrab != null) {
 			QUERY_CONDITION += "And P.id_centro_trabajo = ?\r\n";
 		}
@@ -188,13 +190,15 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 			QUERY_CONDITION += "And P.id_centro_trabajo Is NULL\r\n";
 		}
 
-		final String QUERY_GET_DYNAMIC_PRESUPUESTO = "Select P.id, P.anio, P.mes, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
+		final String QUERY_GET_DYNAMIC_PRESUPUESTO = "Select P.id, P.anio, P.mes, P.quincena, P.saldo, P.idDelegacion, D.n_div_geografica, NVL(P.id_centro_trabajo, '00000') id_centro_trabajo,\r\n"
 				+ "P.idTipoPresup, T.clave clave_tipo_presup, T.descripcion descripcion_tipo_presup,\r\n"
 				+ "NVL(C.id_centro_trabajo, '') Clave, NVL(n_centro_trabajo, '') Descripcion, NVL(id_tipo_ct, '') Tipo, NVL(id_zona, '') Zona\r\n"
 				+ "From gys_presupuesto P Left Join m4t_centros_trab C ON P.id_centro_trabajo = C.id_centro_trabajo, gys_tip_presupuesto T, m4t_delegaciones D\r\n"
 				+ "Where P.idTipoPresup=T.id And P.idDelegacion=D.id_div_geografica\r\n"
 				+ QUERY_CONDITION
 				+ "Order by idDelegacion";
+
+		logger.info(QUERY_GET_DYNAMIC_PRESUPUESTO);
 
 		return jdbcTemplate.query(QUERY_GET_DYNAMIC_PRESUPUESTO, ps -> {
             int count = 0;
@@ -216,6 +220,11 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
             if (mes != null) {
 				count ++;
                 ps.setString(count, mes.toString());
+            }
+
+            if (quincena != null) {
+				count ++;
+                ps.setString(count, (solo_deleg || idCentTrab == null) ? "0": quincena.toString());
             }
 
             if (idCentTrab != null) {

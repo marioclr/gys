@@ -134,8 +134,8 @@ public interface ISuplenciaRepository {
 	public String QUERY_GET_SALDO_SUPLENCIA_INT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_emp\r\n"
 												+ "Where id<>? And id_centro_trabajo = ?\r\n"
-												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
-	double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio);
+												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ? And quincena = ?)";
+	double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio, int quincena);
 	
 	public String QUERY_GET_SALDO_SUPLENCIA_EXT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_ext\r\n"
@@ -146,8 +146,8 @@ public interface ISuplenciaRepository {
 	public String QUERY_GET_SALDO_SUPLENCIA_EXT_CT = "Select NVL(SUM(importe), 0) importe\r\n"
 												+ "From gys_suplencias_ext\r\n"
 												+ "Where id<>? And id_centro_trabajo = ?\r\n"
-												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ?)";
-	double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio);
+												+ "And fec_paga IN (Select fec_pago From gys_fechas_control Where anio_ejercicio = ? And mes_ejercicio = ? And quincena = ?)";
+	double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio, int quincena);
 
 	public String QUERY_EXISTS_SUPL_INT         = "Select COUNT(*) \r\n"
 												+ "From gys_suplencias_emp\r\n"

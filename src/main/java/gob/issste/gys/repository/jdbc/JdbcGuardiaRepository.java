@@ -1,19 +1,13 @@
 package gob.issste.gys.repository.jdbc;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 
-import gob.issste.gys.response.ResponseHandler;
 import gob.issste.gys.service.ParamsValidatorService;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -24,8 +18,6 @@ import org.springframework.stereotype.Repository;
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.DatosGuardia;
 import gob.issste.gys.repository.GuardiaRepository;
-
-import static java.sql.DriverManager.*;
 
 @Repository
 public class JdbcGuardiaRepository implements GuardiaRepository {
@@ -131,9 +123,9 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio) {
+	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio, int quincena) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_INT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio);
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio, quincena);
 	}
 
 	@Override
@@ -143,9 +135,9 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio) {
+	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio, int quincena) {
 		logger.info(QUERY_GET_SALDO_GUARDIA_EXT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio);
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_GUARDIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio, quincena);
 	}
 
 	@Override

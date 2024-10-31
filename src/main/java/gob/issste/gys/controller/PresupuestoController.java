@@ -114,7 +114,7 @@ public class PresupuestoController {
 					return ResponseHandler.generateResponse("Existe un registro de presupuesto en este mismo periodo", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 				List<Presupuesto> presupuestos= presupuestoRepository.get_dynamic_regs(presupuesto.getDelegacion().getId_div_geografica(), 
-						presupuesto.getTipoPresup().getClave(), presupuesto.getAnio(), presupuesto.getMes(), null, true);
+						presupuesto.getTipoPresup().getClave(), presupuesto.getAnio(), presupuesto.getMes(), 0, null, true);
 				if (presupuestos == null || presupuestos.size() == 0) {
 					platformTransactionManager.rollback(status);
 					return ResponseHandler.generateResponse("No existe presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -128,11 +128,11 @@ public class PresupuestoController {
 			}
 
 			if( presupuesto.getCentroTrabajo() == null ) {
-				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
-						, null ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
+						null ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
 			} else {				
-				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
-						, presupuesto.getDatosProgramatica() ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
+						presupuesto.getDatosProgramatica() ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
 				int datosProg = datosProgRepository.save(new DatosProgramatica(
 						idPresup, presupuesto.getDatosProgramatica().getGf(), presupuesto.getDatosProgramatica().getFn(), presupuesto.getDatosProgramatica().getSf(), presupuesto.getDatosProgramatica().getPg(), presupuesto.getDatosProgramatica().getFf(),
 						presupuesto.getDatosProgramatica().getAi(), presupuesto.getDatosProgramatica().getAp(), presupuesto.getDatosProgramatica().getSp(), presupuesto.getDatosProgramatica().getR(), presupuesto.getDatosProgramatica().getMun(), presupuesto.getDatosProgramatica().getFd(), presupuesto.getDatosProgramatica().getPtda(),
@@ -211,14 +211,15 @@ public class PresupuestoController {
 			@Parameter(description = "Bandera para indicar si se requiere incluir los centros de trabajo de la delegación", required = true) @RequestParam(name = "solo_deleg", required = true, defaultValue = "true") boolean solo_deleg,
 			@Parameter(description = "Parámetro opcional para indicar el anio del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer anio,
 			@Parameter(description = "Parámetro opcional para indicar el mes del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer mes,
+			@Parameter(description = "Parámetro opcional para indicar la quincena de la que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer quincena,
 			@Parameter(description = "Parámetro opcional para indicar el ID de la delegación del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idDelegacion,
 			@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
 			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String claveTipoPresup) {
 		try {
 			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
 
-			if ( (idDelegacion != null) || (claveTipoPresup != null) || (anio != null) || (idCentTrab != null) ) {
-				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, claveTipoPresup, anio, mes, idCentTrab, solo_deleg);
+			if ( (idDelegacion != null) || (claveTipoPresup != null) || (anio != null) || (quincena != null) || (idCentTrab != null) ) {
+				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, claveTipoPresup, anio, mes, quincena, idCentTrab, solo_deleg);
 			} else {
 				presupuestos = presupuestoRepository.findAll();
 			}
@@ -276,14 +277,14 @@ public class PresupuestoController {
 				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
 			}
 
-			if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()== 1 ) {
+			if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad() == 1 ) {
 				try {
 					presupuesto = presupuestoRepository.getDatosPresup(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes);
-					presupuesto.setDelegacion(usuario.getDelegacion());
+					presupuesto.setDelegacion(delegacion);
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, quincena, delegacion, null, null, tipoPresup, saldoDelegCt);
 				}
 				presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscForDeleg(delegacion.getId_div_geografica());
@@ -294,26 +295,26 @@ public class PresupuestoController {
 						presupuesto = presupuestoRepository.getDatosPresupCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, quincena, ct.getClave());
 						DatosProgramatica programatica = datosProgRepository.getProgDataByIdPresupuesto(presupuesto.getId());
 						presupuesto.setDatosProgramatica(programatica);
-						presupuesto.setDelegacion(usuario.getDelegacion());
+						presupuesto.setDelegacion(delegacion);
 						presupuesto.setTipoPresup(tipoPresup);
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
-						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), ct, null, tipoPresup, saldoDelegCt);
+						//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+						presupuesto = new Presupuesto(anio, mes, quincena, delegacion, ct, null, tipoPresup, 0.0);
 					}
 					presupuestos.add(presupuesto);
 				}
-			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==2 ) {
+			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad() == 2 ) {
 				if ( usuario.getDelegacion().getId_div_geografica().compareTo(idDelegacion) != 0 ) {
 					return ResponseHandler.generateResponse("El usuario tiene visibilidad por Delegación y la Delegación indicada no corresponde con la que tiene asignada", HttpStatus.NOT_FOUND, null);
 				}
 				try {
 					presupuesto = presupuestoRepository.getDatosPresup(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes);
-					presupuesto.setDelegacion(usuario.getDelegacion());
+					presupuesto.setDelegacion(delegacion);
 					presupuesto.setTipoPresup(tipoPresup);
 				} catch (EmptyResultDataAccessException e) {
 					saldoDelegCt = presupuestoRepository.getSaldoDelegCt(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes, null);
-					presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), null, null, tipoPresup, saldoDelegCt);
+					presupuesto = new Presupuesto(anio, mes, quincena, delegacion, null, null, tipoPresup, saldoDelegCt);
 				}
 				presupuestos.add(presupuesto);
 				adsc = datosRepository.getDatosAdscForDeleg(usuario.getDelegacion().getId_div_geografica());
@@ -327,12 +328,15 @@ public class PresupuestoController {
 						presupuesto.setTipoPresup(tipoPresup);
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
-						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), ct, null, tipoPresup, saldoDelegCt);
+						//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+						presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), ct, null, tipoPresup, 0.0);
 					}
 					presupuestos.add(presupuesto);
 				}
-			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad()==3 ) {
+			} else if ( usuario.getNivelVisibilidad().getIdNivelVisibilidad() == 3 ) {
+				if ( usuario.getDelegacion().getId_div_geografica().compareTo(idDelegacion) != 0 ) {
+					return ResponseHandler.generateResponse("El usuario tiene visibilidad por CT y la Delegación indicada no corresponde con la que tiene asignada para ver los CT", HttpStatus.NOT_FOUND, null);
+				}
 				try {
 					presupuesto = presupuestoRepository.getDatosPresup(delegacion.getId_div_geografica(), claveTipoPresup, anio, mes);
 					presupuesto.setDelegacion(usuario.getDelegacion());
@@ -352,8 +356,8 @@ public class PresupuestoController {
 						presupuesto.setTipoPresup(tipoPresup);
 						presupuesto.setCentroTrabajo(ct);
 					} catch (EmptyResultDataAccessException e) {
-						saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
-						presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), ct,null, tipoPresup, saldoDelegCt);
+						//saldoDelegCt = presupuestoRepository.getSaldoDelegCt(usuario.getDelegacion().getId_div_geografica(), claveTipoPresup, anio, mes, ct.getClave());
+						presupuesto = new Presupuesto(anio, mes, quincena, usuario.getDelegacion(), ct, null, tipoPresup, 0.0);
 					}
 					presupuestos.add(presupuesto);
 				}
@@ -372,16 +376,17 @@ public class PresupuestoController {
 			@Parameter(description = "Bandera para indicar si se requiere incluir sólo la delegación en los resultados", required = true) @RequestParam(name = "solo_deleg", required = true, defaultValue = "true") boolean solo_deleg,
 			@Parameter(description = "Parámetro opcional para indicar el anio del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer anio,
 			@Parameter(description = "Parámetro opcional para indicar el mes del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer mes,
+			@Parameter(description = "Parámetro opcional para indicar la quincena en que se desea consultar el presupuesto", required = false) @RequestParam(required = false) Integer quincena,
 			@Parameter(description = "Parámetro opcional para indicar el ID de la delegación del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idDelegacion,
 			@Parameter(description = "Parámetro opcional para indicar el ID del Centro de trabajo del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String idCentTrab,
-			@Parameter(description = "Parámetro opcional para indicar el ID del Tipo de presupuesto del que se desea consultar el presupuesto", required = false) @RequestParam(required = false) String claveTipoPresup) {
+			@Parameter(description = "Parámetro opcional para indicar la Clave del Tipo de presupuesto que se desea consultar (GI: guardia interna, GE: guardia externa, SI: suplencia interna, SE: suplencia externa)", required = false) @RequestParam(required = false) String claveTipoPresup) {
 		try {
 			List<Presupuesto> presupuestos = new ArrayList<Presupuesto>();
 			List<PresupuestoUtilizado> presupuestosUtilizado = new ArrayList<PresupuestoUtilizado>();
 			double saldo_utilizado=0;
 
-			if ( (idDelegacion != null) || (claveTipoPresup != null) || (anio != null) || (idCentTrab != null) ) {
-				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, claveTipoPresup, anio, mes, idCentTrab, solo_deleg);
+			if ( (idDelegacion != null) || (claveTipoPresup != null) || (anio != null) || (mes != null) || (quincena != null) || (idCentTrab != null) ) {
+				presupuestos= presupuestoRepository.get_dynamic_regs(idDelegacion, claveTipoPresup, anio, mes, quincena, idCentTrab, solo_deleg);
 			} else {
 				presupuestos = presupuestoRepository.findAll();
 			}
@@ -400,16 +405,16 @@ public class PresupuestoController {
 				pu.setPresupuesto(p);
 				if (p.getTipoPresup().getClave().equals(String.valueOf("GI"))) {
 					if (p.getCentroTrabajo() != null)
-						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes());
+						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes(), p.getQuincena());
 				} else if (p.getTipoPresup().getClave().equals(String.valueOf("GE"))) {
 					if (p.getCentroTrabajo() != null)
-						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes());
+						saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes(), p.getQuincena());
 				} else if (p.getTipoPresup().getClave().equals(String.valueOf("SI"))) {
 					if (p.getCentroTrabajo() != null)
-						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes());
+						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes(), p.getQuincena());
 				} else if (p.getTipoPresup().getClave().equals(String.valueOf("SE"))) {
 					if (p.getCentroTrabajo() != null)
-						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes());
+						saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, p.getCentroTrabajo().getClave(), p.getAnio(), p.getMes(), p.getQuincena());
 				}
 				pu.setSaldo(saldo_utilizado);
 				presupuestosUtilizado.add(pu);
@@ -425,7 +430,7 @@ public class PresupuestoController {
 			@Parameter(description = "Año del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer anio_ejercicio,
 			@Parameter(description = "Mes del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer mes_ejercicio,
 			@Parameter(description = "ID de la Delegación que se consulta el saldo utilizado", required = true) @RequestParam(required = true) String idDelegacion,
-			@Parameter(description = "Tipo para obtener las guardidas del empleado (internas o externas)", required = true) @RequestParam(required = true) String claveTipoPresupuesto) {
+			@Parameter(description = "Clave del tipo de presupuesto para obtener el saldo (GI: guardia interna, GE: guardia externa, SI: suplencia interna, SE: suplencia externa)", required = true) @RequestParam(required = true) String claveTipoPresupuesto) {
 
 		double saldo=0;
 
@@ -616,7 +621,7 @@ public class PresupuestoController {
 								presup.getAnio(), presup.getMes());
 					} else {
 						saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, presup.getCentroTrabajo().getClave(),
-								presup.getAnio(), presup.getMes());
+								presup.getAnio(), presup.getMes(), presup.getQuincena());
 					}
 					break;
 				case "GE":
@@ -625,7 +630,7 @@ public class PresupuestoController {
 								presup.getAnio(), presup.getMes());
 					} else {
 						saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, presup.getCentroTrabajo().getClave(),
-								presup.getAnio(), presup.getMes());
+								presup.getAnio(), presup.getMes(), presup.getQuincena());
 					}
 					break;
 				case "SI":
@@ -634,7 +639,7 @@ public class PresupuestoController {
 								presup.getAnio(), presup.getMes());
 					} else {
 						saldo = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, presup.getCentroTrabajo().getClave(),
-								presup.getAnio(), presup.getMes());
+								presup.getAnio(), presup.getMes(), presup.getQuincena());
 					}
 					break;
 				case "SE":
@@ -643,7 +648,7 @@ public class PresupuestoController {
 								presup.getAnio(), presup.getMes());
 					} else {
 						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, presup.getCentroTrabajo().getClave(),
-								presup.getAnio(), presup.getMes());
+								presup.getAnio(), presup.getMes(), presup.getQuincena());
 					}
 					break;
 				default:

@@ -17,7 +17,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -183,6 +182,7 @@ public class GuardiaController {
 			@Parameter(description = "ID de la Delegación que se consulta el saldo utilizado", required = true) @RequestParam(required = true) String idDelegacion,
 			@Parameter(description = "Año del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer anio_ejercicio,
 			@Parameter(description = "Mes del ejercicio del que se consulta el saldo utilizado", required = true) @RequestParam(required = true) Integer mes_ejercicio,
+			@Parameter(description = "Quincena del ejercicio del que se consulta el saldo utilizado", required = false) @RequestParam(required = true) Integer quincena,
 			@Parameter(description = "Tipo para obtener las guardidas del empleado ('GI': Internas o 'GE': Externas)", required = true) @RequestParam(required = true) String tipoGuardia,
 			@Parameter(description = "ID del Centro de Trabajo del que se consulta el saldo utilizado", required = false) @RequestParam(required = false) String idCentroTrab) {
 
@@ -194,7 +194,7 @@ public class GuardiaController {
 				if (idCentroTrab == null) {
 					saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
 				} else {
-					saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
+					saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio, quincena);
 				}
 				break;
 
@@ -202,7 +202,7 @@ public class GuardiaController {
 				if (idCentroTrab == null) {
 					saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
 				} else {
-					saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
+					saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio, quincena);
 				}
 				break;
 
@@ -369,12 +369,12 @@ public class GuardiaController {
 
 				case "GI":
 					saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(),
-							presup.getMes());
+							presup.getMes(), presup.getQuincena());
 					break;
 
 				case "GE":
 					saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(),
-							presup.getMes());
+							presup.getMes(), presup.getQuincena());
 					break;
 
 				default:
@@ -557,12 +557,12 @@ public class GuardiaController {
 
 				case "GI":
 					saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizado_ct(guardia.getId(), idCentroTrab,
-							presup.getAnio(), presup.getMes());
+							presup.getAnio(), presup.getMes(), presup.getQuincena());
 					break;
 
 				case "GE":
 					saldo_utilizado = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(guardia.getId(), idCentroTrab,
-							presup.getAnio(), presup.getMes());
+							presup.getAnio(), presup.getMes(), presup.getQuincena());
 					break;
 
 				default:

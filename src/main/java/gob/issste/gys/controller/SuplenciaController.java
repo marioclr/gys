@@ -16,7 +16,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -254,7 +253,8 @@ public class SuplenciaController {
 			@Parameter(description = "ID de la Delegación que se consulta el presupuesto", required = true) @RequestParam(required = true) String idDelegacion,
 			@Parameter(description = "Año del ejercicio en que se consulta el presupuesto", required = true) @RequestParam(required = true) Integer anio_ejercicio,
 			@Parameter(description = "Mes del ejercicio en que se consulta el presupuesto", required = true) @RequestParam(required = true) Integer mes_ejercicio,
-			@Parameter(description = "Tipo para obtener las suplencias del empleado (internas o externas)", required = false) @RequestParam(required = false) String tipoSuplencia,
+			@Parameter(description = "Quincena del ejercicio del que se consulta el saldo utilizado", required = false) @RequestParam(required = true) Integer quincena,
+			@Parameter(description = "Tipo para obtener las suplencias del empleado ('SI': Internas o 'SE': Externas)", required = false) @RequestParam(required = false) String tipoSuplencia,
 			@Parameter(description = "ID del Centro de Trabajo del que se consulta el saldo utilizado", required = false) @RequestParam(required = false) String idCentroTrab) {
 
 		double saldo=0;
@@ -267,7 +267,7 @@ public class SuplenciaController {
 					if (idCentroTrab == null) {
 						saldo = suplenciaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
 					} else {
-						saldo = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
+						saldo = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio, quincena);
 					}
 					break;
 
@@ -275,7 +275,7 @@ public class SuplenciaController {
 					if (idCentroTrab == null) {
 						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
 					} else {
-						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio);
+						saldo = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio, quincena);
 					}
 					break;
 
@@ -450,10 +450,10 @@ public class SuplenciaController {
 
 			switch (suplencia.getTipo_suplencia()) {
 				case "SI":
-					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(), presup.getMes() );
+					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, presup.getAnio(), presup.getMes(), presup.getQuincena() );
 					break;
 				case "SE":
-					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(), presup.getMes());
+					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, presup.getAnio(), presup.getMes(), presup.getQuincena());
 					break;
 				default:
 					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -666,11 +666,11 @@ public class SuplenciaController {
 			switch (suplencia.getTipo_suplencia()) {
 
 				case "SI":
-					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
+					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizado_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes(), presup.getQuincena());
 					break;
 
 				case "SE":
-					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes());
+					saldo_utilizado = suplenciaRepository.ObtenerSaldoUtilizadoExt_ct(suplencia.getId(), idCentroTrab, presup.getAnio(), presup.getMes(), presup.getQuincena());
 					break;
 
 				default:

@@ -1,7 +1,6 @@
 package gob.issste.gys.repository.jdbc;
 
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -21,19 +20,15 @@ import gob.issste.gys.model.DatosSuplencia;
 import gob.issste.gys.model.FactoresSuplencia;
 import gob.issste.gys.repository.ISuplenciaRepository;
 
-import javax.sql.DataSource;
-
 @Repository
 public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 
 	Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
-	private final DataSource dataSource;
 
 	@Autowired
 	JdbcTemplate jdbcTemplate;
 
-	public JdbcSuplenciaRepository(DataSource dataSource) {
-		this.dataSource = dataSource;
+	public JdbcSuplenciaRepository() {
 	}
 
 	@Override
@@ -305,9 +300,9 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio) {
+	public double ObtenerSaldoUtilizado_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio, int quincena) {
 		logger.info(QUERY_GET_SALDO_SUPLENCIA_INT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_INT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio, quincena );
 	}
 
 	@Override
@@ -317,9 +312,9 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
-	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio) {
+	public double ObtenerSaldoUtilizadoExt_ct(int id, String id_centro_trabajo, int anio_ejercicio, int mes_ejercicio, int quincena) {
 		logger.info(QUERY_GET_SALDO_SUPLENCIA_EXT_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio );
+		return jdbcTemplate.queryForObject(QUERY_GET_SALDO_SUPLENCIA_EXT_CT, Double.class, id, id_centro_trabajo, anio_ejercicio, mes_ejercicio, quincena );
 	}
 
 	@Override
