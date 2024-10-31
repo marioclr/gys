@@ -823,7 +823,7 @@ public class GuardiaController {
 						idDelegacion, idCentroTrab, claveServicio, puesto, estatus);
 
 				if (guardias.isEmpty()) {
-					return ResponseHandler.generateResponse("No se encontraron los registros de suplencias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
+					return ResponseHandler.generateResponse("No se encontraron los registros de guardias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
 				}
 
 				return ResponseHandler.generateResponse(

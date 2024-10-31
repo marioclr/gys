@@ -85,7 +85,7 @@ public class PresupuestoController {
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
 		int idPresup;
 		double saldo_global=0, saldo_utilizado=0;
-
+		List<String> listOfParams = new ArrayList<>();
 		try {
 
 			if( presupuesto.getCentroTrabajo() == null ) {
@@ -128,20 +128,62 @@ public class PresupuestoController {
 			}
 
 			if( presupuesto.getCentroTrabajo() == null ) {
-				idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
-						null ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
-			} else {				
-				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo(),
-						presupuesto.getDatosProgramatica() ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+
+				listOfParams.addAll(List.of(
+						presupuesto.getDelegacion().getId_div_geografica(),
+						presupuesto.getDelegacion().getN_div_geografica(),
+						presupuesto.getTipoPresup().getClave(),
+						presupuesto.getTipoPresup().getDescripcion()
+				));
+				if(ParamsValidatorService.csvInjectionObjectValidator(listOfParams) || ParamsValidatorService.csvInjectionValidator(comentarios)){
+					return ResponseHandler.generateResponse("Algunos datos contienen caracteres no permitidos",
+							HttpStatus.INTERNAL_SERVER_ERROR, null);
+				}else{
+					idPresup = presupuestoRepository.save(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
+							, null ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+				}
+			} else {
+				listOfParams.addAll(List.of(
+						presupuesto.getDelegacion().getId_div_geografica(),
+						presupuesto.getDelegacion().getN_div_geografica(),
+						presupuesto.getTipoPresup().getDescripcion(),
+						presupuesto.getDatosProgramatica().getGf(),
+						presupuesto.getDatosProgramatica().getFn(),
+						presupuesto.getDatosProgramatica().getSf(),
+						presupuesto.getDatosProgramatica().getPg(),
+						presupuesto.getDatosProgramatica().getFf(),
+						presupuesto.getDatosProgramatica().getAi(),
+						presupuesto.getDatosProgramatica().getAp(),
+						presupuesto.getDatosProgramatica().getSp(),
+						presupuesto.getDatosProgramatica().getR(),
+						presupuesto.getDatosProgramatica().getMun(),
+						presupuesto.getDatosProgramatica().getFd(),
+						presupuesto.getDatosProgramatica().getPtda(),
+						presupuesto.getDatosProgramatica().getSbptd(),
+						presupuesto.getDatosProgramatica().getTp(),
+						presupuesto.getDatosProgramatica().getTpp(),
+						presupuesto.getDatosProgramatica().getFdo(),
+						presupuesto.getDatosProgramatica().getArea(),
+						presupuesto.getDatosProgramatica().getTipo()
+				));
+				idPresup = presupuestoRepository.save_ct(new Presupuesto(presupuesto.getAnio(), presupuesto.getMes(), presupuesto.getQuincena(), presupuesto.getDelegacion(), presupuesto.getCentroTrabajo()
+						, presupuesto.getDatosProgramatica() ,presupuesto.getTipoPresup(), presupuesto.getSaldo()));
+
 				int datosProg = datosProgRepository.save(new DatosProgramatica(
 						idPresup, presupuesto.getDatosProgramatica().getGf(), presupuesto.getDatosProgramatica().getFn(), presupuesto.getDatosProgramatica().getSf(), presupuesto.getDatosProgramatica().getPg(), presupuesto.getDatosProgramatica().getFf(),
 						presupuesto.getDatosProgramatica().getAi(), presupuesto.getDatosProgramatica().getAp(), presupuesto.getDatosProgramatica().getSp(), presupuesto.getDatosProgramatica().getR(), presupuesto.getDatosProgramatica().getMun(), presupuesto.getDatosProgramatica().getFd(), presupuesto.getDatosProgramatica().getPtda(),
 						presupuesto.getDatosProgramatica().getSbptd(), presupuesto.getDatosProgramatica().getTp(), presupuesto.getDatosProgramatica().getTpp(), presupuesto.getDatosProgramatica().getFdo(), presupuesto.getDatosProgramatica().getArea(), presupuesto.getDatosProgramatica().getTipo()
 				));
 			}
-			int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));
-			platformTransactionManager.commit(status);
-			return ResponseHandler.generateResponse("El Presupuesto con ID " + idPresup + " ha sido creado de manera exitosa. Con número de movimiento: " + idMovPresup, HttpStatus.OK, null);
+			if (ParamsValidatorService.csvInjectionObjectValidator(listOfParams)
+					|| ParamsValidatorService.csvInjectionValidator(comentarios)){
+				return ResponseHandler.generateResponse("Algunos datos contienen caracteres no permitidos",
+						HttpStatus.INTERNAL_SERVER_ERROR, null);
+			} else {
+				int idMovPresup = movPresupuestoRepository.save(new MovimientosPresupuesto(idPresup, presupuesto.getSaldo(), comentarios, 1));
+				platformTransactionManager.commit(status);
+				return ResponseHandler.generateResponse("El Presupuesto con ID " + idPresup + " ha sido creado de manera exitosa. Con número de movimiento: " + idMovPresup, HttpStatus.OK, null);
+			}
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
 			return ResponseHandler.generateResponse("Error al realizar el registro de presupuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);

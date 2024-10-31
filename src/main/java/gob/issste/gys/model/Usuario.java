@@ -3,7 +3,6 @@ package gob.issste.gys.model;
 import java.util.List;
 
 public class Usuario {
-
 	private int idUsuario;
 	private String clave;
 	private String password;
@@ -28,6 +27,19 @@ public class Usuario {
 		this.id_usuario = id_usuario;
 	}
 
+	public Usuario(int idUsuario, String clave, Delegacion delegacion, List<Perfil> perfiles,List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad,
+				   int idTipoUsuario, String id_usuario) {
+		super();
+		this.idUsuario = idUsuario;
+		this.clave = clave;
+		this.delegacion = delegacion;
+		this.perfiles= perfiles;
+		this.centrosTrabajo = centrosTrabajo;
+		this.nivelVisibilidad = nivelVisibilidad;
+		this.idTipoUsuario = idTipoUsuario;
+		this.id_usuario = id_usuario;
+	}
+
 	public Usuario(String clave, String password, Empleado empleado, Delegacion delegacion, List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad,
 				   int idTipoUsuario, String id_usuario) {
 		super();
@@ -35,6 +47,19 @@ public class Usuario {
 		this.password = password;
 		this.empleado = empleado;
 		this.delegacion = delegacion;
+		this.centrosTrabajo = centrosTrabajo;
+		this.nivelVisibilidad = nivelVisibilidad;
+		this.idTipoUsuario = idTipoUsuario;
+		this.id_usuario = id_usuario;
+	}
+
+	//Para actualizacion
+	public Usuario(int idUsuario, Delegacion delegacion, List<Perfil> perfiles, List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad,
+				   int idTipoUsuario, String id_usuario) {
+		super();
+		this.idUsuario = idUsuario;
+		this.delegacion = delegacion;
+		this.perfiles= perfiles;
 		this.centrosTrabajo = centrosTrabajo;
 		this.nivelVisibilidad = nivelVisibilidad;
 		this.idTipoUsuario = idTipoUsuario;

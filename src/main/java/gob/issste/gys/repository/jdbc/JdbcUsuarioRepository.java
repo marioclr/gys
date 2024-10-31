@@ -77,6 +77,27 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 	}
 
 	@Override
+	public int updateDatosUsuario(Usuario usuario) {
+		logger.info(QUERY_UPDATE_USUARIO);
+
+		return jdbcTemplate.update(QUERY_UPDATE_USUARIO,
+				new Object[] { usuario.getDelegacion().getId_div_geografica(),
+						usuario.getNivelVisibilidad().getIdNivelVisibilidad(), usuario.getIdTipoUsuario(), usuario.getId_usuario(), usuario.getIdUsuario() });
+	}
+
+	@Override
+	public int updatePassword(String password, int idUsuario) {
+		logger.info(QUERY_UPDATE_PWD_USUARIO);
+
+		return jdbcTemplate.update(QUERY_UPDATE_PWD_USUARIO,
+				new Object[] {
+						password,
+						idUsuario
+				}
+		);
+	}
+
+	@Override
 	public Usuario findById(int id) {
 		logger.info(QUERY_FIND_USU_BY_ID);
 		try {

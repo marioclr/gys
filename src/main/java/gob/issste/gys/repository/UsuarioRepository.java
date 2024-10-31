@@ -16,6 +16,9 @@ public interface UsuarioRepository {
 	public String QUERY_UPDATE_USU          = "UPDATE gys_Usuarios Set Clave=?, Password=?, IdEmpleado=?, IdDelegacion=?, IdNivelVisibilidad=?, IdTipoUsuario=?, id_usuario=? Where IdUsuario=?";
 	int update(Usuario usuario);
 
+	public String QUERY_UPDATE_USUARIO          = "UPDATE gys_Usuarios Set IdDelegacion=?, IdNivelVisibilidad=?, IdTipoUsuario=?, id_usuario=? Where IdUsuario=?";
+	int updateDatosUsuario(Usuario usuario);
+
 	public String QUERY_FIND_USU_BY_ID      = "SELECT u.*, e.id_sociedad, e.id_empleado, e.nombre, e.apellido_1, e.apellido_2, e.id_legal,\r\n"
 			+ "  d.id_div_geografica, n_div_geografica, n.Descripcion\r\n"
 			+ "FROM gys_Usuarios u, m4t_empleados e, m4t_delegaciones d, gys_NivelVisibilidad n\r\n"
@@ -87,5 +90,8 @@ public interface UsuarioRepository {
 	public String QUERY_GET_NIVEL_VIS_USU	= "SELECT IdNivelVisibilidad, Descripcion\r\n"
 			+ "FROM gys_NivelVisibilidad";
 	List<NivelVisibilidad> getNivelVisibilidadUsuarios();
+
+	public String QUERY_UPDATE_PWD_USUARIO		= "Update gys_Usuarios Set password = ? Where idusuario = ?";
+	int updatePassword(String password, int idUsuario);
 
 }
