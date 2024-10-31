@@ -5,6 +5,7 @@ import gob.issste.gys.model.Programatica;
 import gob.issste.gys.repository.IDatosProgramaticaRepository;
 import gob.issste.gys.repository.IProgramaticaRepository;
 import gob.issste.gys.response.ResponseHandler;
+import gob.issste.gys.service.ParamsValidatorService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ public class ProgramaticaController {
      IProgramaticaRepository iProgramaticaRepository;
     @Autowired
     IDatosProgramaticaRepository iDatosProgramaticaRepository;
+
     @Operation(summary = "Trae la programatica presupuestal usando valores de paginador como referencia",
             description = "Método que trae programatica presupuestal",
             tags = { "Programatica presupuestal" })
@@ -62,6 +64,32 @@ public class ProgramaticaController {
     @PutMapping("/Programatica")
     public ResponseEntity<Object> updateProgramaticaById(@RequestBody Programatica programatica){
         try {
+        List<String> programaticaList = new ArrayList<>(List.of(
+                programatica.getGf(),
+                programatica.getFn(),
+                programatica.getSf(),
+                programatica.getPg(),
+                programatica.getFf(),
+                programatica.getAi(),
+                programatica.getAp(),
+                programatica.getSp(),
+                programatica.getR(),
+                programatica.getMun(),
+                programatica.getFd(),
+                programatica.getPtda(),
+                programatica.getSbptd(),
+                programatica.getTp(),
+                programatica.getTpp(),
+                programatica.getFdo(),
+                programatica.getArea(),
+                programatica.getTipo(),
+                programatica.getAnio()
+        ));
+        ParamsValidatorService.csvInjectionObjectValidator(programaticaList);
+        if(ParamsValidatorService.csvInjectionObjectValidator(programaticaList)){
+            return ResponseHandler.generateResponse("Algunos datos contienen caracteres no permitidos",
+                    HttpStatus.INTERNAL_SERVER_ERROR, null);
+        }
             iProgramaticaRepository.upadteProgramatica(programatica);
             return ResponseHandler.generateResponse("Elemento " + programatica.getRowid() + " actualizado con exito", HttpStatus.OK, null);
         }   catch (Exception e) {
@@ -70,7 +98,8 @@ public class ProgramaticaController {
     }
 
     @PutMapping("/Programatica/datosCt")
-    public ResponseEntity<Object> updateDatosProgramaticaCt(@RequestBody DatosProgramatica datosProgramatica) {
+    public ResponseEntity<Object> updateDatosProgramaticaCt(@RequestBody DatosProgramatica datosProgramatica)
+    {
         try {
            iDatosProgramaticaRepository.update(datosProgramatica);
            return ResponseHandler.generateResponse("Elemento actualizado con éxito", HttpStatus.OK, null);

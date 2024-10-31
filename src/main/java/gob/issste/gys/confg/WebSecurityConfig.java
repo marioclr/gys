@@ -29,10 +29,12 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowedOrigins(List.of(
-                        "http://localhost:4200",
-                        "https://sigysdev.issste.gob.mx",
-                        "https://sigys.issste.gob.mx"));
-                configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE, HEAD, OPTIONS"));
+                        "http://localhost:4200"
+//                        Descomentar del listado dependiendo el ambiente
+//                        ,"https://sigys.issste.gob.mx:8443"
+//                        ,"https://sigysdev.issste.gob.mx:8443"
+                ));
+                configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"));
                 configuration.setAllowedHeaders(List.of("*"));
                 return configuration;
                 }))
@@ -44,6 +46,9 @@ public class WebSecurityConfig {
                         ).authenticated()
                         .requestMatchers(
                                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, SecurityService.LOGIN_URL)
+                                //Comentar lienas para activar swagger cuando sea deploy
+//                                ,AntPathRequestMatcher.antMatcher("/swagger-ui/**"),
+//                                AntPathRequestMatcher.antMatcher("/v3/api-docs/**")
                         )
                         .permitAll()
                 )
