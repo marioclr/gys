@@ -129,9 +129,9 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 	}
 
 	@Override
-	public Presupuesto getElementByType_ct(String idCentroTrab, String idTipo, Integer anio, Integer mes) {
+	public Presupuesto getElementByType_ct(String idCentroTrab, String idTipo, Integer anio, Integer mes, Integer quincena) {
 		logger.info(QUERY_GET_PRESUPUESTO_BY_TYPE_CT);
-		return jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_BY_TYPE_CT, new PresupuestoMapper(), idCentroTrab, idTipo, anio, mes);
+		return jdbcTemplate.queryForObject(QUERY_GET_PRESUPUESTO_BY_TYPE_CT, new PresupuestoMapper(), idCentroTrab, idTipo, anio, mes, quincena);
 	}
 
 	@Override

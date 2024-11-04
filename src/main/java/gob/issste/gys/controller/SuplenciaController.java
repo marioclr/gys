@@ -296,7 +296,7 @@ public class SuplenciaController {
 			@Parameter(description = "Objeto de Suplencia que se creará en el Sistema") @RequestBody DatosSuplencia suplencia) {
 		try {
 
-			int id = 0, anio, mes;
+			int id = 0, anio, mes, quincena;
 			int maxHorasEnQnaInt = 0, maxHorasEnQnaExt = 0,
 				maxDiasEnQnaInt = 0,  maxDiasEnQnaExt = 0;
 			double saldo_utilizado=0, saldo=0;
@@ -310,6 +310,7 @@ public class SuplenciaController {
 				paga   = pagaRepository.findByFecha(fec_pago);
 				anio   = paga.getAnio_ejercicio();
 				mes    = paga.getMes_ejercicio();
+				quincena = paga.getQuincena();
 				inicio = paga.getFec_inicio();
 				fin    = paga.getFec_fin();
 			} catch (EmptyResultDataAccessException e) {
@@ -441,7 +442,7 @@ public class SuplenciaController {
 
 			// Validaciones presupuestales
 			try {			
-				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes);
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes, quincena);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
@@ -503,7 +504,7 @@ public class SuplenciaController {
 			@Parameter(description = "Objeto de la guardia a actualizarse en el Sistema") @RequestBody DatosSuplencia suplencia) {
 		try {
 
-			int anio, mes;
+			int anio, mes, quincena;
 			int maxHorasEnQnaInt = 0, maxHorasEnQnaExt = 0,
 					maxDiasEnQnaInt = 0,  maxDiasEnQnaExt = 0;
 			double saldo_utilizado=0, saldo=0;
@@ -517,6 +518,7 @@ public class SuplenciaController {
 				paga   = pagaRepository.findByFecha(fec_pago);
 				anio   = paga.getAnio_ejercicio();
 				mes    = paga.getMes_ejercicio();
+				quincena = paga.getQuincena();
 				inicio = paga.getFec_inicio();
 				fin    = paga.getFec_fin();
 			} catch (EmptyResultDataAccessException e) {
@@ -656,7 +658,7 @@ public class SuplenciaController {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			try {			
-				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes);
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes, quincena);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}

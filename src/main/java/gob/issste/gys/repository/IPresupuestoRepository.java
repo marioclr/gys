@@ -73,8 +73,9 @@ public interface IPresupuestoRepository {
 													+ "  And P.id_centro_trabajo = ?\r\n"
 													+ "  And T.clave = ?\r\n"
 													+ "  And P.anio = ?\r\n"
-													+ "  And P.mes = ?\r\n";
-	Presupuesto getElementByType_ct(String idCentroTrab, String idTipo, Integer anio, Integer mes);
+													+ "  And P.mes = ?\r\n"
+													+ "  And P.quincena = ?\r\n";
+	Presupuesto getElementByType_ct(String idCentroTrab, String idTipo, Integer anio, Integer mes, Integer quincena);
 
 	public String QUERY_EXISTS_PRESUPUESTO          = "Select COUNT(*) \r\n"
 													+ "From gys_presupuesto\r\n"

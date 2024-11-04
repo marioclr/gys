@@ -222,7 +222,7 @@ public class GuardiaController {
 			@Parameter(description = "Objeto de la guardia a crearse en el Sistema") @RequestBody DatosGuardia guardia) {
 		try {
 
-			int id = 0, anio, mes;
+			int id = 0, anio, mes, quincena;
 			int horasEnDiaInt = 0,    horasEnDiaExt = 0,
 				maxHorasEnQnaInt = 0, maxHorasEnQnaExt = 0, 
 				maxDiasEnQnaInt = 0,  maxDiasEnQnaExt = 0;
@@ -238,6 +238,7 @@ public class GuardiaController {
 				paga   = pagaRepository.findByFecha(fec_pago);
 				anio   = paga.getAnio_ejercicio();
 				mes    = paga.getMes_ejercicio();
+				quincena = paga.getQuincena();
 				inicio = paga.getFec_inicio();
 				fin    = paga.getFec_fin();
 			} catch (EmptyResultDataAccessException e) {
@@ -356,7 +357,8 @@ public class GuardiaController {
 			}
 
 			try {
-				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes);
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes, quincena);
+				System.out.println(presup);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse(
 						"No existe presupuesto registrado para realizar este tipo de movimiento",
@@ -412,7 +414,7 @@ public class GuardiaController {
 			@Parameter(description = "Objeto de la guardia a actualizarse en el Sistema") @RequestBody DatosGuardia guardia) {
 		try {
 
-			int anio, mes;
+			int anio, mes, quincena;
 			int horasEnDiaInt = 0,    horasEnDiaExt = 0,
 					maxHorasEnQnaInt = 0, maxHorasEnQnaExt = 0, 
 					maxDiasEnQnaInt = 0,  maxDiasEnQnaExt = 0;
@@ -428,6 +430,7 @@ public class GuardiaController {
 				paga   = pagaRepository.findByFecha(fec_pago);
 				anio   = paga.getAnio_ejercicio();
 				mes    = paga.getMes_ejercicio();
+				quincena = paga.getQuincena();
 				inicio = paga.getFec_inicio();
 				fin    = paga.getFec_fin();
 			} catch (EmptyResultDataAccessException e) {
@@ -544,7 +547,7 @@ public class GuardiaController {
 			}
 
 			try {
-				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes);
+				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes, quincena);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse(
 						"No existe presupuesto registrado para realizar este tipo de movimiento",
