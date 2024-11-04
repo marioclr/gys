@@ -25,7 +25,7 @@ public class ParamsValidatorService {
     private static final String[] CSV_INJECTIONS = {
             "=", "+", "-", "@", "#", "|", "%", "^", "&", "*", "(", ")", "[", "]", "{", "}", ";", ":", "'",
             "\"", ",", "\\", "/", "?", "!", "~", "<", ">", "\t", "\r", "\n",
-            "SUMA", "PROMEDIO", "SI", "BUSCAR", "BUSCARV", "BUSCARH", "INDICE", "COINCIDIR", "CONCATENAR",
+            "SUMA", "PROMEDIO", "SI(", "BUSCAR", "BUSCARV", "BUSCARH", "INDICE", "COINCIDIR", "CONCATENAR",
             "SUBTOTALES", "DESREF", "HOY", "AHORA", "FECHA", "TEXTO", "VALOR", "CELDA", "INFO", "HIPERVINCULO",
             "suma", "promedio", "si", "buscar", "buscarv", "buscarh", "indice", "coincidir", "concatenar", "subtotales",
             "desref", "hoy", "ahora", "fecha", "texto", "valor", "celda", "info", "hipervinculo"
@@ -34,11 +34,11 @@ public class ParamsValidatorService {
         List<String> list = new ArrayList<>();
         for (String inputDataElement : inputData) {
             if(inputDataElement != null)
-             for (String sqlInjection : SQL_INJECTIONS) {
-                if (inputDataElement.toUpperCase().contains(sqlInjection)) {
-                    list.add(inputDataElement.toUpperCase());
+                for (String sqlInjection : SQL_INJECTIONS) {
+                    if (inputDataElement.toUpperCase().contains(sqlInjection)) {
+                        list.add(inputDataElement.toUpperCase());
+                    }
                 }
-            }
         }
         return list.toArray().length != 0;
     }
