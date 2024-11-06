@@ -188,28 +188,37 @@ public class GuardiaController {
 
 		double saldo = 0;
 
-		switch (tipoGuardia) {
+		try{
 
-			case "GI":
-				if (idCentroTrab == null) {
-					saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
-				} else {
-					saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio, quincena);
-				}
-				break;
+			switch (tipoGuardia) {
 
-			case "GE":
-				if (idCentroTrab == null) {
-					saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
-				} else {
-					saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio, quincena);
-				}
-				break;
+				case "GI":
+					if (idCentroTrab == null) {
+						saldo = guardiaRepository.ObtenerSaldoUtilizado(idDelegacion, anio_ejercicio, mes_ejercicio);
+					} else {
+						saldo = guardiaRepository.ObtenerSaldoUtilizado_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio, quincena);
+					}
+					break;
 
-			default:
-				return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				case "GE":
+					if (idCentroTrab == null) {
+						saldo = guardiaRepository.ObtenerSaldoUtilizadoExt(idDelegacion, anio_ejercicio, mes_ejercicio);
+					} else {
+						saldo = guardiaRepository.ObtenerSaldoUtilizadoExt_ct(0, idCentroTrab, anio_ejercicio, mes_ejercicio, quincena);
+					}
+					break;
 
+				default:
+					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+
+			}
+
+		}catch (Exception e ){
+			return ResponseHandler.generateResponse(
+					"No se pudo consulta el saldo", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
+
+
 
 		return ResponseHandler.generateResponse(
 				"Se obtuvo el saldo utilizado para guardias para las condiciones indicadas", HttpStatus.OK, saldo);
@@ -399,7 +408,7 @@ public class GuardiaController {
 			}
 
 			return ResponseHandler.generateResponse(
-					"El registro de guardia ha sido guardado de manera exitosa, con ID = " + id, 
+					"El registro de guardia ha sido guardado de manera exitosa.",
 					HttpStatus.OK, null);
 		} catch (Exception e) {
 
@@ -643,7 +652,7 @@ public class GuardiaController {
 		try {
 			guardiaService.eliminarGuardia(idGuardia, tipoGuardia);
 
-			return ResponseHandler.generateResponse("El un registro de guardia fué eliminado exitosamente.",
+			return ResponseHandler.generateResponse("El registro de guardia fué eliminado exitosamente.",
 					HttpStatus.OK, null);
 		} catch (Exception e) {
 
