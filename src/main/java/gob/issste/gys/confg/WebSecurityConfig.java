@@ -29,10 +29,9 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration configuration = new CorsConfiguration();
                 configuration.setAllowedOrigins(List.of(
-                        "http://localhost:4200"
-//                        Descomentar del listado dependiendo el ambiente
-//                        ,"https://sigys.issste.gob.mx:8443"
-//                        ,"https://sigysdev.issste.gob.mx:8443"
+                        SecurityService.LOCAL_SERVER_URL,
+                        SecurityService.DEV_SERVER_URL,
+                        SecurityService.PROD_SERVER_URL
                 ));
                 configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"));
                 configuration.setAllowedHeaders(List.of("*"));
@@ -53,6 +52,12 @@ public class WebSecurityConfig {
                         .permitAll()
                 )
                 .headers(headers -> headers
+                        .addHeaderWriter(
+                                new StaticHeadersWriter(
+                                        "Access-Control-Allow-Origin",
+                                        "https://sigysdev.issste.gob.mx," +
+                                                    "https://sigysdev.issste.gob.mx," +
+                                                    "http://localhost:4200"))
                         .addHeaderWriter(
                                 new StaticHeadersWriter(
                                         "Access-Control-Max-Age", "3600"))

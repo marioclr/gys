@@ -203,16 +203,28 @@ public class PresupuestoGlobalController {
 	@DeleteMapping("/PresupuestoGlobal/{id}")
 	public ResponseEntity<Object> deletePresupuestoGlobal(@PathVariable("id") Integer id) {
 		try {
-			int result = presGlobalRepository.deleteById(id);
-			if (result == 0) {
+			PresupuestoGlobal presupuestosGlobal = presGlobalRepository.findById(id);
+			double saldo = presupuestoRepository.suma_presupuestos(presupuestosGlobal.getAnio(),
+					presupuestosGlobal.getDelegacion().getId_div_geografica());
+			PresupuestoGlobalDesglozado pd = new PresupuestoGlobalDesglozado();
+			pd.setPresupuestoGlobal(presupuestosGlobal);
+			pd.setSaldoDesglozado(saldo);
 
-				return ResponseHandler.generateResponse("No se pudo encontrar el elemento de Presupuesto global con el ID =" + id, HttpStatus.NOT_FOUND, null);
+			if(pd.getSaldoDesglozado() > 0.0){
+				return ResponseHandler.generateResponse(
+						"No se puede borrar un presupuesto con saldo desglozado.",
+						HttpStatus.INTERNAL_SERVER_ERROR,
+						null);
+			} else {
+				int result = presGlobalRepository.deleteById(id);
+				return ResponseHandler.generateResponse(
+						"El elemento de presupuesto global fué eliminado exitósamente.",
+						HttpStatus.OK,
+						null);
 			}
-
-			return ResponseHandler.generateResponse("El elemento de Presupuesto global fué eliminado exitósamente.", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("No se borró el elemento de Presupuesto global.", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("No se borró el elemento de presupuesto global.", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 }
