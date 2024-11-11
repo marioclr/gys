@@ -53,7 +53,9 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 			preparedStatement.setString(4, usuario.getDelegacion().getId_div_geografica());
 			preparedStatement.setInt(5, usuario.getNivelVisibilidad().getIdNivelVisibilidad());
 			preparedStatement.setInt(6, usuario.getIdTipoUsuario());
-			preparedStatement.setString(7, usuario.getId_usuario());
+			preparedStatement.setBoolean(7, usuario.isActivo());
+			preparedStatement.setInt(8, usuario.getIntentos());
+			preparedStatement.setString(9, usuario.getId_usuario());
 			return preparedStatement;
 		};
 		int updatesCount = jdbcTemplate.update(statementCreator, keyHolder);
@@ -291,6 +293,28 @@ public class JdbcUsuarioRepository implements UsuarioRepository {
 						BeanPropertyRowMapper.newInstance(NivelVisibilidad.class));
 
 		return nivelVisibilidadList;
+	}
+
+	@Override
+	public int updateAttemps(int intentos, int idusuario) throws SQLException {
+		try {
+			return jdbcTemplate.update(QUERY_UPDATE_ATTEMPS,
+					new Object[] { intentos, idusuario});
+
+		} catch (Exception e) {
+			throw new SQLException("Expected one row insert.");
+		}
+	}
+
+	@Override
+	public int updateActive(boolean isActive, int idusuario) throws SQLException {
+		try {
+			return jdbcTemplate.update(QUERY_UPDATE_ISACTIVE,
+					new Object[] { isActive, idusuario});
+
+		} catch (Exception e) {
+			throw new SQLException("Expected one row insert.");
+		}
 	}
 
 }

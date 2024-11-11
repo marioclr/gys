@@ -1,5 +1,6 @@
 package gob.issste.gys.controller;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,18 +78,13 @@ public class UsuarioController {
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
 
 		try {
-
 			Usuario userExist = usuarioRepository.findByName(usuario.getClave());
-
-//			System.out.println(userExist);
-
 			if (Objects.isNull( userExist )) {
-
 				final String encryptedPwd = securityService.getEncryptedPwd(usuario.getPassword());
 
 				int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), encryptedPwd, usuario.getEmpleado(),
 						usuario.getDelegacion(), usuario.getCentrosTrabajo(), usuario.getNivelVisibilidad(),
-						usuario.getIdTipoUsuario(), usuario.getId_usuario()));
+						usuario.getIdTipoUsuario(), true, 0, usuario.getId_usuario()));
 				for (Perfil p : usuario.getPerfiles()) {
 					perfilRepository.addPerfilToUser(idUsuario, p.getIdPerfil());
 					for (Opcion o : p.getOpciones()) {
@@ -392,7 +388,27 @@ public class UsuarioController {
 		}else{
 			return ResponseHandler.generateResponse("Se actualizo la contraseña el usuario en el Sistema", HttpStatus.OK, null);
 		}
+	}
 
+	@Operation(summary = "Activar o desactivar usuario",
+			description = "Función que bloauea o desbloquea a un usuario del sistema", tags = { "Usuario" })
+	@PutMapping("/usuarios/active")
+	public ResponseEntity<Object> updateActiveUser(
+			@Parameter(description = "El ID del usuario a modificar.", required = true) @RequestParam(required = true) int idUsuario,
+			@Parameter(description = "Bloqueo o desbloqueo", required = true) @RequestParam(required = true) boolean active
+	) throws SQLException {
+		try {
+			if(active){
+				int activeUser = usuarioRepository.updateActive(active, idUsuario);
+				int resetAttemps = usuarioRepository.updateAttemps(0, idUsuario);
+				return ResponseHandler.generateResponse("Usuario activado con éxito", HttpStatus.OK, null);
+			}else{
+				int result = usuarioRepository.updateActive(active, idUsuario);
+				return ResponseHandler.generateResponse("Usuario bloqueado con éxito", HttpStatus.OK, result);
+			}
+		}catch (Exception e){
+			return ResponseHandler.generateResponse("Error al bloquear / desbloquear usuario", HttpStatus.INTERNAL_SERVER_ERROR, e);
+		}
 
 	}
 

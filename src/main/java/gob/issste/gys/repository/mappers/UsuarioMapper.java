@@ -40,7 +40,8 @@ public class UsuarioMapper implements RowMapper<Usuario> {
 		nivelVisibilidad.setDescripcion(rs.getString("Descripcion"));
 		usuario.setNivelVisibilidad(nivelVisibilidad);
 		usuario.setIdTipoUsuario(rs.getInt("IdTipoUsuario"));
-
+		usuario.setActivo(rs.getBoolean("activo"));
+		usuario.setIntentos(rs.getInt("intentos"));
 		return usuario;
 	}
 

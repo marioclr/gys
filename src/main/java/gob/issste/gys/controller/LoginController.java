@@ -13,9 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RestController
 public class LoginController {
@@ -33,36 +37,55 @@ public class LoginController {
             @RequestBody Login login) {
         try {
             Usuario user = usuarioRepository.findByName(login.getClaveUser());
-            boolean validate = securityService.getPwdValidation(login.getPwd(), user.getPassword());
-            if (!validate){
+
+            if (Objects.isNull( user )){
                 return  ResponseHandler.generateResponse(
-                        "No autorizado, usuario y/o contraseña invalidos", HttpStatus.UNAUTHORIZED, null);
-            } else {
-                List<Perfil> perfiles = usuarioRepository.getPerfilesForUsuario(user);
-                for (Perfil perfil : perfiles) {
-                    List<Opcion> opciones = perfilRepository.getOpcionesForPerfil(perfil);
-                    perfil.setOpciones(opciones);
+                        "Usuario no encontrado", HttpStatus.NOT_FOUND, null);
+            } else if(user.isActivo()) {
+                boolean validate = securityService.getPwdValidation(login.getPwd(), user.getPassword());
+                if (!validate){
+                    System.out.println(user.getIntentos());
+                    if(user.getIntentos() < 3 ) {
+                        usuarioRepository.updateAttemps(user.getIntentos()+1, user.getIdUsuario());
+                    } else if(user.getIntentos() == 3){
+                        usuarioRepository.updateActive(false, user.getIdUsuario());
+                        return  ResponseHandler.generateResponse(
+                                "Usuario bloqueado, contacte a un administrador", HttpStatus.FORBIDDEN, null);
+                    }
+                    return  ResponseHandler.generateResponse(
+                            "No autorizado, usuario y/o contraseña invalidos", HttpStatus.FORBIDDEN, null);
+                } else {
+                    List<Perfil> perfiles = usuarioRepository.getPerfilesForUsuario(user);
+                    for (Perfil perfil : perfiles) {
+                        List<Opcion> opciones = perfilRepository.getOpcionesForPerfil(perfil);
+                        perfil.setOpciones(opciones);
+                    }
+                    user.setPerfiles(perfiles);
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    Usuario constructedUser = new Usuario(
+                            user.getIdUsuario(),
+                            user.getClave(),
+                            user.getDelegacion(),
+                            user.getPerfiles(),
+                            user.getCentrosTrabajo(),
+                            user.getNivelVisibilidad(),
+                            user.getIdTipoUsuario(),
+                            user.getId_usuario()
+                    );
+                    map.put("info", constructedUser);
+                    String token = jwtAuthenticationConfig.getJWTToken(login.getClaveUser());
+                    map.put("auth", token);
+                    usuarioRepository.updateAttemps(0, user.getIdUsuario());
+                    return ResponseHandler.generateResponse("Autorizado", HttpStatus.OK, map);
                 }
-                user.setPerfiles(perfiles);
-                Map<String, Object> map = new HashMap<String, Object>();
-                Usuario constructedUser = new Usuario(
-                        user.getIdUsuario(),
-                        user.getClave(),
-                        user.getDelegacion(),
-                        user.getPerfiles(),
-                        user.getCentrosTrabajo(),
-                        user.getNivelVisibilidad(),
-                        user.getIdTipoUsuario(),
-                        user.getId_usuario()
-                );
-                map.put("info", constructedUser);
-                String token = jwtAuthenticationConfig.getJWTToken(login.getClaveUser());
-                map.put("auth", token);
-                return ResponseHandler.generateResponse("Autorizado", HttpStatus.OK, map);
+            }else{
+                return ResponseHandler.generateResponse("El usuario está bloqueado, contactar a un administrador", HttpStatus.FORBIDDEN, null);
             }
         }catch (NullPointerException e) {
             return ResponseHandler.generateResponse(
-                    "El usuario no existe en la base de datos", HttpStatus.NOT_FOUND, null);
+                    "Error al realizar inicio de sesión", HttpStatus.INTERNAL_SERVER_ERROR, null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
