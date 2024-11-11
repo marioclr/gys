@@ -55,12 +55,8 @@ public class LoginController {
                     return  ResponseHandler.generateResponse(
                             "No autorizado, usuario y/o contraseña invalidos", HttpStatus.FORBIDDEN, null);
                 } else {
-                    List<Perfil> perfiles = usuarioRepository.getPerfilesForUsuario(user);
-                    for (Perfil perfil : perfiles) {
-                        List<Opcion> opciones = perfilRepository.getOpcionesForPerfil(perfil);
-                        perfil.setOpciones(opciones);
-                    }
-                    user.setPerfiles(perfiles);
+                    user.setCentrosTrabajo(usuarioRepository.getCentTrabForUsu(user.getIdUsuario()));
+                    user = usuarioRepository.getPermissionsForUser(user);
                     Map<String, Object> map = new HashMap<String, Object>();
                     Usuario constructedUser = new Usuario(
                             user.getIdUsuario(),
