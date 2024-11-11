@@ -1,9 +1,7 @@
 package gob.issste.gys.controller;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import gob.issste.gys.service.SecurityService;
 import org.slf4j.Logger;
@@ -218,19 +216,35 @@ public class UsuarioController {
 
 	@Operation(summary = "Obtiene todos los usuarios del Sistema", description = "Obtiene todos los usuarios del Sistema", tags = { "Usuario" })
 	@GetMapping("/usuarios")
-	//public ResponseEntity<List<Usuario>> getUsuarios(
 	public ResponseEntity<Object> getUsuarios(
 			@Parameter(description = "Cadena para obtener los usuarios en que coincida con su clave", required = false) @RequestParam(required = false) String clave,
 			@Parameter(description = "Boolean para indicar si se incluyen los Perfiles", required = true) @RequestParam(value = "conPerfiles", required = true) Boolean conPerfiles) {
 
 		try {
-			List<Usuario> usuarios = new ArrayList<Usuario>();
-
+//			List<Usuario> usuarios = new ArrayList<Usuario>();
+			List<Object> usuarios = new ArrayList<>();
 			if (clave == null)
-				usuarioRepository.findAll(conPerfiles).forEach(usuarios::add);
+//				usuarioRepository.findAll(conPerfiles).forEach(usuarios::add);
+				usuarioRepository.findAll(conPerfiles)
+						.forEach(usuario -> {
+							Map<String, Object> userForTable = new HashMap<>();
+							userForTable.put("idUsuario", usuario.getIdUsuario());
+							userForTable.put("clave", usuario.getClave());
+							userForTable.put("active", usuario.isActivo());
+							userForTable.put("perfiles", usuario.getPerfiles());
+							usuarios.add(userForTable);
+						});
 			else
-				usuarioRepository.findByClave(clave, conPerfiles).forEach(usuarios::add);
-
+//				usuarioRepository.findByClave(clave, conPerfiles).forEach(usuarios::add);
+				usuarioRepository.findByClave(clave, conPerfiles)
+						.forEach(usuario ->{
+							Map<String, Object> userForTable = new HashMap<>();
+							userForTable.put("idUsuario", usuario.getIdUsuario());
+							userForTable.put("clave", usuario.getClave());
+							userForTable.put("active", usuario.isActivo());
+							userForTable.put("perfiles", usuario.getPerfiles());
+							usuarios.add(userForTable);
+						});
 			if (usuarios.isEmpty()) {
 				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se obtuvieron los usuarios del Sistema", HttpStatus.NOT_FOUND, null);
