@@ -23,12 +23,12 @@ public class ParamsValidatorService {
     };
 
     private static final String[] CSV_INJECTIONS = {
-            "=", "+", "-", "@", "#", "|", "%", "^", "&", "*", "(", ")", "[", "]", "{", "}", ";", ":", "'",
-            "\"", ",", "\\", "/", "?", "!", "~", "<", ">", "\t", "\r", "\n",
-            "SUMA", "PROMEDIO", "SI(", "BUSCAR", "BUSCARV", "BUSCARH", "INDICE", "COINCIDIR", "CONCATENAR",
-            "SUBTOTALES", "DESREF", "HOY", "AHORA", "FECHA", "TEXTO", "VALOR", "CELDA", "INFO", "HIPERVINCULO",
-            "suma", "promedio", "si", "buscar", "buscarv", "buscarh", "indice", "coincidir", "concatenar", "subtotales",
-            "desref", "hoy", "ahora", "fecha", "texto", "valor", "celda", "info", "hipervinculo"
+            "+", "-", "@", "#", "|", "%", "^", "&", "*", "[", "]", "{", "}", ";", ":", "'",
+            "\"", "\\", "?", "!", "~", "<", ">", "\t", "\r", "\n",
+            "SUMA(", "PROMEDIO(", "SI(", "BUSCAR(", "BUSCARV(", "BUSCARH(", "INDICE(", "COINCIDIR(", "CONCATENAR(",
+            "SUBTOTALES(", "DESREF(", "HOY(", "AHORA(", "FECHA(", "TEXTO(", "VALOR(", "CELDA(", "INFO(", "HIPERVINCULO(",
+            "suma(", "promedio(", "si(", "buscar(", "buscarv(", "buscarh(", "indice(", "coincidir(", "concatenar(", "subtotales(",
+            "desref(", "hoy(", "ahora(", "fecha(", "texto(", "valor(", "celda(", "info(", "hipervinculo("
     };
     public boolean sqlInjectionObjectValidator(List<String> inputData) {
         List<String> list = new ArrayList<>();

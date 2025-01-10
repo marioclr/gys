@@ -12,6 +12,8 @@ public class Usuario {
 	private List<DatosAdscripcion> centrosTrabajo;
 	private NivelVisibilidad nivelVisibilidad;
 	private int idTipoUsuario;
+	private boolean activo;
+	private int intentos;
 	private String id_usuario;
 
 	public Usuario() {
@@ -40,8 +42,11 @@ public class Usuario {
 		this.id_usuario = id_usuario;
 	}
 
+	/**
+	 *Post
+	 */
 	public Usuario(String clave, String password, Empleado empleado, Delegacion delegacion, List<DatosAdscripcion> centrosTrabajo, NivelVisibilidad nivelVisibilidad,
-				   int idTipoUsuario, String id_usuario) {
+				   int idTipoUsuario, boolean activo, int intentos, String id_usuario) {
 		super();
 		this.clave = clave;
 		this.password = password;
@@ -50,6 +55,8 @@ public class Usuario {
 		this.centrosTrabajo = centrosTrabajo;
 		this.nivelVisibilidad = nivelVisibilidad;
 		this.idTipoUsuario = idTipoUsuario;
+		this.activo = activo;
+		this.intentos = intentos;
 		this.id_usuario = id_usuario;
 	}
 
@@ -136,6 +143,22 @@ public class Usuario {
 
 	public void setIdTipoUsuario(int idTipoUsuario) {
 		this.idTipoUsuario = idTipoUsuario;
+	}
+
+	public boolean isActivo() {
+		return activo;
+	}
+
+	public void setActivo(boolean activo) {
+		this.activo = activo;
+	}
+
+	public int getIntentos() {
+		return intentos;
+	}
+
+	public void setIntentos(int intentos) {
+		this.intentos = intentos;
 	}
 
 	public String getId_usuario() {

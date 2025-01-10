@@ -229,7 +229,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	public int updateGuardiaExt(DatosGuardia guardia) {
 		return jdbcTemplate.update(QUERY_UPD_GUARDIA_EXT,
 				new Object[]{guardia.getImporte(), guardia.getFolio(), guardia.getMotivo(), guardia.getId_clave_movimiento(), guardia.getHoras(),
-						guardia.getComent(), guardia.getId_usuario(), guardia.getId()});
+						guardia.getComent(), guardia.getId_usuario(), guardia.getHora_inicio(), guardia.getHora_fin(), guardia.getId()});
 	}
 
 	@Override
@@ -356,7 +356,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		try {
 			int horas = jdbcTemplate.queryForObject(QUERY_GET_HORAS_GUARDIA_EXT_UPD, Integer.class,
 					new Object[]{clave_empleado,
-							inicio, id, fin, inicio, fin, inicio, fin});
+							id, inicio, fin, inicio, fin, inicio, fin});
 			return horas;
 		} catch (NullPointerException Ex) {
 			return 0;
@@ -408,7 +408,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		try {
 			int dias = jdbcTemplate.queryForObject(QUERY_GET_DIAS_GUARDIA_EXT_UPD, Integer.class,
 					new Object[]{clave_empleado,
-							inicio, id, fin, inicio, fin, inicio, fin, inicio1});
+							inicio, fin, inicio, fin, inicio, fin, inicio1});
 			return dias;
 		} catch (NullPointerException Ex) {
 			return 0;

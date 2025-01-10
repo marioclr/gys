@@ -91,7 +91,10 @@ public class BolsaTrabajoController {
 
 			int idBolsa = bolsaTrabajoRepository.save(elemento);
 
-			return ResponseHandler.generateResponse("Se ha creado elemento en bolsa de trabajo con ID " + idBolsa, HttpStatus.OK, null);
+			return ResponseHandler.generateResponse(
+//					"Se ha creado elemento en bolsa de trabajo con ID " + idBolsa,
+					"Se registro correctamente al prestador de servicios",
+					HttpStatus.OK, null);
 
 		} catch (Exception ex) {
 
@@ -115,7 +118,10 @@ public class BolsaTrabajoController {
 			_elemento.setConsecutivo(elemento.getConsecutivo());
 			bolsaTrabajoRepository.update(_elemento);
 
-			return ResponseHandler.generateResponse("El elemento de la bolsa de trabajo ha sido modificado de manera exitosa", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse(
+//					"El elemento de la bolsa de trabajo ha sido modificado de manera exitosa",
+					"Modificacion realizada",
+					HttpStatus.OK, null);
 		} else {
 
 			return ResponseHandler.generateResponse("No se pudo encontrar el elemento de la bolsa de trabajo con el ID =" + id, HttpStatus.NOT_FOUND, null);
@@ -132,7 +138,10 @@ public class BolsaTrabajoController {
 				return ResponseHandler.generateResponse("No se pudo encontrar el elemento de la bolsa de trabajo con el ID =" + id, HttpStatus.NOT_FOUND, null);
 			}
 
-			return ResponseHandler.generateResponse("El elemento de la bolsa de trabajo fué eliminado exitosamente.", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse(
+//					"El elemento de la bolsa de trabajo fué eliminado exitosamente.",
+					"Se elimino correctamente al prestador de servicios ",
+					HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("No se borró el elemento de la bolsa de trabajo", HttpStatus.INTERNAL_SERVER_ERROR, null);

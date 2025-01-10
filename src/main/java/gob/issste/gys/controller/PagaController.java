@@ -135,7 +135,11 @@ public class PagaController {
 					break;
 
 			}
-			return ResponseHandler.generateResponse("La fecha de control de pagos de GyS ha sido modificado de manera exitosa", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse(
+//					"La fecha de control de pagos de GyS ha sido modificado de manera exitosa",
+					"La fecha control ha sido modificada correctamente",
+					HttpStatus.OK,
+					null);
 		} else {
 
 			return ResponseHandler.generateResponse("No se pudo encontrar fecha de control de pagos con id=" + id, HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -239,7 +243,11 @@ public class PagaController {
 				return ResponseHandler.generateResponse("No se pudo encontrar la fecha de control de pagos de GyS con el ID =" + id, HttpStatus.NOT_FOUND, null);
 			}
 
-			return ResponseHandler.generateResponse("La fecha de control de pagos de GyS fué eliminado exitósamente.", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse(
+//					"La fecha de control de pagos de GyS fué eliminado exitósamente.",
+					"La fecha control se eliminó correctamente",
+					HttpStatus.OK,
+					null);
 
 		} catch (Exception e) {
 

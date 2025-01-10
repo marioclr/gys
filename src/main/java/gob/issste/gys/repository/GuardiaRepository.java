@@ -25,9 +25,9 @@ public interface GuardiaRepository {
 												+ "Where id = ?";
 	int updateGuardia(DatosGuardia guardia);
 
-	public String QUERY_UPD_GUARDIA_EXT			= "Update gys_guardias_ext Set importe = ?, folio = ?, motivo = ?, id_clave_movimiento = ?, horas = ?, coment = ?, id_usuario = ?\r\n"
+	public String QUERY_UPD_GUARDIA_EXT			= "Update gys_guardias_ext Set importe = ?, folio = ?, motivo = ?, id_clave_movimiento = ?, horas = ?, coment = ?, id_usuario = ?, hora_inicio = ?, hora_fin = ?\r\n"
 												+ "Where id = ?";
-	int updateGuardiaExt(DatosGuardia guardia);
+	int                                             updateGuardiaExt(DatosGuardia guardia);
 
 	public String QUERY_DELETE_GUARDIA			= "Delete From gys_guardias_emp\r\n"
 												+ "Where id = ?";
@@ -228,7 +228,7 @@ public interface GuardiaRepository {
 												+ "    Or ((fec_fin>=?)    And (fec_inicio <= ?)))";
 	public int get_horas_guardia_ext(String clave_empleado, String inicio, String fin);
 
-	public String QUERY_GET_HORAS_GUARDIA_EXT_UPD = "Select SUM(horas) \r\n"
+	public String QUERY_GET_HORAS_GUARDIA_EXT_UPD = "Select SUM(horas)                                                                 \r\n"
 												+ "From gys_guardias_ext\r\n"
 												+ "Where rfc = ? \r\n"
 												+ "  And id<>? \r\n"

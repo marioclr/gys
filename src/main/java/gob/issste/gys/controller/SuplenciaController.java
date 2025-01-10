@@ -444,7 +444,10 @@ public class SuplenciaController {
 			try {			
 				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes, quincena);
 			} catch (EmptyResultDataAccessException e) {
-				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				return ResponseHandler.generateResponse(
+//						"No existe presupuesto registrado para realizar este tipo de movimiento",
+						"No se encontro presupuesto distribuido para este centro de trabajo",
+						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			saldo = (presup != null) ? presup.getSaldo(): 0; 
@@ -660,7 +663,10 @@ public class SuplenciaController {
 			try {			
 				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, suplencia.getTipo_suplencia(), anio, mes, quincena);
 			} catch (EmptyResultDataAccessException e) {
-				return ResponseHandler.generateResponse("No existe presupuesto registrado para realizar este tipo de movimiento", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				return ResponseHandler.generateResponse(
+//						"No existe presupuesto registrado para realizar este tipo de movimiento",
+						"No se encontro presupuesto distribuido para este centro de trabajo",
+						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			saldo = (presup != null) ? presup.getSaldo(): 0; 

@@ -158,10 +158,16 @@ public class EmpleadoController {
 
 		if (horario != null) {
 
-			return ResponseHandler.generateResponse("El empleado cubre el horario indicado.", HttpStatus.OK, horario);
+			return ResponseHandler.generateResponse(
+//					"El empleado cubre el horario indicado.",
+					"El empleado no puede realizar guardias dentro de su jornada laboral",
+					HttpStatus.OK, horario);
 		} else {
 
-			return ResponseHandler.generateResponse("No se encontró el empleado en el horario indicado.", HttpStatus.NOT_FOUND, null);
+			return ResponseHandler.generateResponse(
+//					"No se encontró el empleado en el horario indicado.",
+					"El empleado puede realizar guardias en este horario",
+					HttpStatus.NOT_FOUND, null);
 		}
 	}
 

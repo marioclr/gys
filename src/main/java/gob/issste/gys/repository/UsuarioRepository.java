@@ -10,7 +10,7 @@ import gob.issste.gys.model.Usuario;
 
 public interface UsuarioRepository {
 
-	public String QUERY_ADD_NEW_USU         = "INSERT INTO gys_Usuarios (Clave, Password, IdEmpleado, IdDelegacion, IdNivelVisibilidad, IdTipoUsuario, id_usuario) VALUES ( ?, ?, ?, ?, ?, ?, ? )";
+	public String QUERY_ADD_NEW_USU         = "INSERT INTO gys_Usuarios (Clave, Password, IdEmpleado, IdDelegacion, IdNivelVisibilidad, IdTipoUsuario, activo, intentos, id_usuario) VALUES ( ?,?,?, ?, ?, ?, ?, ?, ? )";
 	int save(Usuario usuario) throws SQLException;
 
 	public String QUERY_UPDATE_USU          = "UPDATE gys_Usuarios Set Clave=?, Password=?, IdEmpleado=?, IdDelegacion=?, IdNivelVisibilidad=?, IdTipoUsuario=?, id_usuario=? Where IdUsuario=?";
@@ -93,5 +93,12 @@ public interface UsuarioRepository {
 
 	public String QUERY_UPDATE_PWD_USUARIO		= "Update gys_Usuarios Set password = ? Where idusuario = ?";
 	int updatePassword(String password, int idUsuario);
+
+	public final String QUERY_UPDATE_ATTEMPS = "UPDATE gys_usuarios SET intentos = ? WHERE idusuario = ?";
+	int updateAttemps (int intentos, int idusuario) throws SQLException;
+
+	public final String QUERY_UPDATE_ISACTIVE = "UPDATE gys_usuarios SET activo = ? WHERE idusuario = ?";
+	int updateActive (boolean isActive, int idusuario) throws SQLException;
+
 
 }

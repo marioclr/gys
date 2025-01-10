@@ -1,8 +1,7 @@
 package gob.issste.gys.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.sql.SQLException;
+import java.util.*;
 
 import gob.issste.gys.service.SecurityService;
 import org.slf4j.Logger;
@@ -77,18 +76,13 @@ public class UsuarioController {
 		TransactionStatus status = platformTransactionManager.getTransaction(paramTransactionDefinition);
 
 		try {
-
 			Usuario userExist = usuarioRepository.findByName(usuario.getClave());
-
-//			System.out.println(userExist);
-
 			if (Objects.isNull( userExist )) {
-
 				final String encryptedPwd = securityService.getEncryptedPwd(usuario.getPassword());
 
 				int idUsuario = usuarioRepository.save(new Usuario(usuario.getClave(), encryptedPwd, usuario.getEmpleado(),
 						usuario.getDelegacion(), usuario.getCentrosTrabajo(), usuario.getNivelVisibilidad(),
-						usuario.getIdTipoUsuario(), usuario.getId_usuario()));
+						usuario.getIdTipoUsuario(), true, 0, usuario.getId_usuario()));
 				for (Perfil p : usuario.getPerfiles()) {
 					perfilRepository.addPerfilToUser(idUsuario, p.getIdPerfil());
 					for (Opcion o : p.getOpciones()) {
@@ -101,13 +95,13 @@ public class UsuarioController {
 				}
 				platformTransactionManager.commit(status);
 
-				return ResponseHandler.generateResponse("El Usuario ha sido creado de manera exitosa",
+				return ResponseHandler.generateResponse("Usuario creado correctamente ",
 						HttpStatus.OK, null);
 
 
 			} else {
 
-				return ResponseHandler.generateResponse("El usuario existe registrado en la base de datos",
+				return ResponseHandler.generateResponse("El Usuario ya ha sido registrado anteriormente",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
@@ -222,19 +216,35 @@ public class UsuarioController {
 
 	@Operation(summary = "Obtiene todos los usuarios del Sistema", description = "Obtiene todos los usuarios del Sistema", tags = { "Usuario" })
 	@GetMapping("/usuarios")
-	//public ResponseEntity<List<Usuario>> getUsuarios(
 	public ResponseEntity<Object> getUsuarios(
 			@Parameter(description = "Cadena para obtener los usuarios en que coincida con su clave", required = false) @RequestParam(required = false) String clave,
 			@Parameter(description = "Boolean para indicar si se incluyen los Perfiles", required = true) @RequestParam(value = "conPerfiles", required = true) Boolean conPerfiles) {
 
 		try {
-			List<Usuario> usuarios = new ArrayList<Usuario>();
-
+//			List<Usuario> usuarios = new ArrayList<Usuario>();
+			List<Object> usuarios = new ArrayList<>();
 			if (clave == null)
-				usuarioRepository.findAll(conPerfiles).forEach(usuarios::add);
+//				usuarioRepository.findAll(conPerfiles).forEach(usuarios::add);
+				usuarioRepository.findAll(conPerfiles)
+						.forEach(usuario -> {
+							Map<String, Object> userForTable = new HashMap<>();
+							userForTable.put("idUsuario", usuario.getIdUsuario());
+							userForTable.put("clave", usuario.getClave());
+							userForTable.put("active", usuario.isActivo());
+							userForTable.put("perfiles", usuario.getPerfiles());
+							usuarios.add(userForTable);
+						});
 			else
-				usuarioRepository.findByClave(clave, conPerfiles).forEach(usuarios::add);
-
+//				usuarioRepository.findByClave(clave, conPerfiles).forEach(usuarios::add);
+				usuarioRepository.findByClave(clave, conPerfiles)
+						.forEach(usuario ->{
+							Map<String, Object> userForTable = new HashMap<>();
+							userForTable.put("idUsuario", usuario.getIdUsuario());
+							userForTable.put("clave", usuario.getClave());
+							userForTable.put("active", usuario.isActivo());
+							userForTable.put("perfiles", usuario.getPerfiles());
+							usuarios.add(userForTable);
+						});
 			if (usuarios.isEmpty()) {
 				//return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 				return ResponseHandler.generateResponse("No se obtuvieron los usuarios del Sistema", HttpStatus.NOT_FOUND, null);
@@ -296,7 +306,7 @@ public class UsuarioController {
 				return ResponseHandler.generateResponse("No se pudo encontrar el Usuario con el ID = " + id, HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>("El Usuario fué eliminada exitosamente", HttpStatus.OK);
-			return ResponseHandler.generateResponse("El Usuario fué eliminada exitosamente", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("Usuario eliminado", HttpStatus.OK, null);
 
 		} catch (Exception e) {
 			//return new ResponseEntity<>("No se borró el Usuario", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -392,7 +402,27 @@ public class UsuarioController {
 		}else{
 			return ResponseHandler.generateResponse("Se actualizo la contraseña el usuario en el Sistema", HttpStatus.OK, null);
 		}
+	}
 
+	@Operation(summary = "Activar o desactivar usuario",
+			description = "Función que bloauea o desbloquea a un usuario del sistema", tags = { "Usuario" })
+	@PutMapping("/usuarios/active")
+	public ResponseEntity<Object> updateActiveUser(
+			@Parameter(description = "El ID del usuario a modificar.", required = true) @RequestParam(required = true) int idUsuario,
+			@Parameter(description = "Bloqueo o desbloqueo", required = true) @RequestParam(required = true) boolean active
+	) throws SQLException {
+		try {
+			if(active){
+				int activeUser = usuarioRepository.updateActive(active, idUsuario);
+				int resetAttemps = usuarioRepository.updateAttemps(0, idUsuario);
+				return ResponseHandler.generateResponse("Usuario activado", HttpStatus.OK, null);
+			}else{
+				int result = usuarioRepository.updateActive(active, idUsuario);
+				return ResponseHandler.generateResponse("Usuario bloqueado", HttpStatus.OK, result);
+			}
+		}catch (Exception e){
+			return ResponseHandler.generateResponse("Error al bloquear / desbloquear usuario", HttpStatus.INTERNAL_SERVER_ERROR, e);
+		}
 
 	}
 

@@ -56,10 +56,10 @@ public class PresupuestoGlobalController {
 			presGlobalRepository.save(new PresupuestoGlobal(presupuestoGlobal.getAnio(), presupuestoGlobal.getDelegacion(), 
 					presupuestoGlobal.getSaldo(), presupuestoGlobal.getComentarios(), presupuestoGlobal.getId_usuario()));
 
-			return ResponseHandler.generateResponse("El elemento de Presupuesto global ha sido creado de manera exitosa", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("La asignación de presupuesto anual se ha guardado con éxito", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al agregar nuevo elemento de Presupuesto global al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al agregar el presupuesto anual", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -81,18 +81,18 @@ public class PresupuestoGlobalController {
 					presGlobalRepository.save(new PresupuestoGlobal(presGlob.getAnio(), presGlob.getDelegacion(), 
 							presGlob.getSaldo(), presGlob.getComentarios(), presGlob.getId_usuario()));
 
-					messages.add("El elemento de Presupuesto global ha sido creado de manera exitosa" + presGlob);
+					messages.add("La asignacion de presupuesto anual se ha guardado con éxito" + presGlob);
 
 				} catch (Exception e) {
 
-					messages.add("Error al agregar nuevo elemento de Presupuesto global al Sistema" + presGlob);
+					messages.add("Error al agregar nuevo elemento de presupuesto anual" + presGlob);
 					continue;
 				}
 			}
-			return ResponseHandler.generateResponse("El elemento de Presupuesto global ha sido creado de manera exitosa", HttpStatus.OK, messages);
+			return ResponseHandler.generateResponse("El elemento de presupuesto anual ha sido creado con éxito", HttpStatus.OK, messages);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al agregar nuevo elemento de Presupuesto global al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al agregar el presupuesto anual", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -108,10 +108,10 @@ public class PresupuestoGlobalController {
 
 			presGlobalRepository.update(_presGlobal);
 
-			return ResponseHandler.generateResponse("El elemento de Presupuesto global ha sido modificado de manera exitosa", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("Presupuesto anual modificado con éxito", HttpStatus.OK, null);
 		} else {
 
-			return ResponseHandler.generateResponse("No se pudo encontrar el elemento de Presupuesto global con id=" + id, HttpStatus.NOT_FOUND, null);
+			return ResponseHandler.generateResponse("No se pudo encontrar el elemento de Presupuesto global", HttpStatus.NOT_FOUND, null);
 		}
 	}
 
@@ -156,7 +156,7 @@ public class PresupuestoGlobalController {
 
 			if (presupuestosGlobal.isEmpty()) {
 
-				return ResponseHandler.generateResponse("No se obtuvieron registros de Presupuesto global en el Sistema", HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse("No se obtuvieron registros de presupuesto anual", HttpStatus.NOT_FOUND, null);
 			}
 			
 			if (conDesgloce == true) {
@@ -192,10 +192,10 @@ public class PresupuestoGlobalController {
 
 		if (presupuestosGlobal != null) {
 
-			return ResponseHandler.generateResponse("Se obtuvo la información de un elemento de Presupuesto global en el Sistema", HttpStatus.OK, presupuestosGlobal);
+			return ResponseHandler.generateResponse("Presupuesto anual encontrado", HttpStatus.OK, presupuestosGlobal);
 		} else {
 
-			return ResponseHandler.generateResponse("No se encontró el elemento de Presupuesto global en el Sistema", HttpStatus.NOT_FOUND, null);
+			return ResponseHandler.generateResponse("No se encontró el elemento de presupuesto anual", HttpStatus.NOT_FOUND, null);
 		}
 	}
 
@@ -218,7 +218,7 @@ public class PresupuestoGlobalController {
 			} else {
 				int result = presGlobalRepository.deleteById(id);
 				return ResponseHandler.generateResponse(
-						"El elemento de presupuesto global fué eliminado exitósamente.",
+						"El elemento de presupuesto anual fué eliminado exitósamente.",
 						HttpStatus.OK,
 						null);
 			}
