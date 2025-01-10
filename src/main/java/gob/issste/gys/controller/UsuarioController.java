@@ -95,13 +95,13 @@ public class UsuarioController {
 				}
 				platformTransactionManager.commit(status);
 
-				return ResponseHandler.generateResponse("El Usuario ha sido creado de manera exitosa",
+				return ResponseHandler.generateResponse("Usuario creado correctamente ",
 						HttpStatus.OK, null);
 
 
 			} else {
 
-				return ResponseHandler.generateResponse("El usuario existe registrado en la base de datos",
+				return ResponseHandler.generateResponse("El Usuario ya ha sido registrado anteriormente",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
@@ -306,7 +306,7 @@ public class UsuarioController {
 				return ResponseHandler.generateResponse("No se pudo encontrar el Usuario con el ID = " + id, HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>("El Usuario fué eliminada exitosamente", HttpStatus.OK);
-			return ResponseHandler.generateResponse("El Usuario fué eliminada exitosamente", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("Usuario eliminado", HttpStatus.OK, null);
 
 		} catch (Exception e) {
 			//return new ResponseEntity<>("No se borró el Usuario", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -415,10 +415,10 @@ public class UsuarioController {
 			if(active){
 				int activeUser = usuarioRepository.updateActive(active, idUsuario);
 				int resetAttemps = usuarioRepository.updateAttemps(0, idUsuario);
-				return ResponseHandler.generateResponse("Usuario activado con éxito", HttpStatus.OK, null);
+				return ResponseHandler.generateResponse("Usuario activado", HttpStatus.OK, null);
 			}else{
 				int result = usuarioRepository.updateActive(active, idUsuario);
-				return ResponseHandler.generateResponse("Usuario bloqueado con éxito", HttpStatus.OK, result);
+				return ResponseHandler.generateResponse("Usuario bloqueado", HttpStatus.OK, result);
 			}
 		}catch (Exception e){
 			return ResponseHandler.generateResponse("Error al bloquear / desbloquear usuario", HttpStatus.INTERNAL_SERVER_ERROR, e);

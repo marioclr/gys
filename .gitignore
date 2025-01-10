@@ -37,3 +37,5 @@ src/main/resources/*.p12
 
 #### backend ####
 backend/
+
+Dockerfile

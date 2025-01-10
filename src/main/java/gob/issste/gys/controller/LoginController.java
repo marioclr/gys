@@ -53,7 +53,7 @@ public class LoginController {
                                 "Usuario bloqueado, contacte a un administrador", HttpStatus.FORBIDDEN, null);
                     }
                     return  ResponseHandler.generateResponse(
-                            "No autorizado, usuario y/o contraseña invalidos", HttpStatus.FORBIDDEN, null);
+                            "Usuario y/o contraseña incorrectos", HttpStatus.FORBIDDEN, null);
                 } else {
                     user.setCentrosTrabajo(usuarioRepository.getCentTrabForUsu(user.getIdUsuario()));
                     user = usuarioRepository.getPermissionsForUser(user);

@@ -259,7 +259,9 @@ public class GuardiaController {
 
 				case "GI":
 					if (guardiaRepository.existe_guardia(guardia) > 0)
-						return ResponseHandler.generateResponse("Existe un registro de Guardia en ese mismo horario",
+						return ResponseHandler.generateResponse(
+//								"Existe un registro de Guardia en ese mismo horario",
+								"Existe un registro de guardia en este mismo horario",
 								HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 					horasEnDiaInt    = guardiaRepository.get_horas_guardia(guardia.getClave_empleado(), guardia.getFec_inicio(), guardia.getFec_fin());
@@ -370,7 +372,8 @@ public class GuardiaController {
 				System.out.println(presup);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse(
-						"No existe presupuesto registrado para realizar este tipo de movimiento",
+//						"No existe presupuesto registrado para realizar este tipo de movimiento",
+						"No se encontro presupuesto distribuido para este centro de trabajo",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
@@ -408,7 +411,8 @@ public class GuardiaController {
 			}
 
 			return ResponseHandler.generateResponse(
-					"El registro de guardia ha sido guardado de manera exitosa.",
+//					"El registro de guardia ha sido guardado de manera exitosa.",
+					"Registro guardado correctamente",
 					HttpStatus.OK, null);
 		} catch (Exception e) {
 
@@ -442,6 +446,7 @@ public class GuardiaController {
 				quincena = paga.getQuincena();
 				inicio = paga.getFec_inicio();
 				fin    = paga.getFec_fin();
+				System.out.println("=============>"+guardia.getId() +" "+ guardia.getImporte());
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -559,7 +564,8 @@ public class GuardiaController {
 				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes, quincena);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse(
-						"No existe presupuesto registrado para realizar este tipo de movimiento",
+//						"No existe presupuesto registrado para realizar este tipo de movimiento",
+						"No se encontro presupuesto distribuido para este centro de trabajo",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
@@ -595,7 +601,9 @@ public class GuardiaController {
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			return ResponseHandler.generateResponse("El registro de guardia ha sido actualizado de manera exitosa.",
+			return ResponseHandler.generateResponse(
+//					"El registro de guardia ha sido actualizado de manera exitosa.",
+					"Modificacion de registro realizada",
 					HttpStatus.OK, null);
 		} catch (Exception e) {
 
@@ -835,7 +843,11 @@ public class GuardiaController {
 						idDelegacion, idCentroTrab, claveServicio, puesto, estatus);
 
 				if (guardias.isEmpty()) {
-					return ResponseHandler.generateResponse("No se encontraron los registros de guardias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
+//					return ResponseHandler.generateResponse("No se encontraron los registros de guardias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
+					return ResponseHandler.generateResponse(
+//							"No existe presupuesto registrado para realizar este tipo de movimiento",
+							"No se encontraron registros previos",
+							HttpStatus.NOT_FOUND, null);
 				}
 
 				return ResponseHandler.generateResponse(
