@@ -1,9 +1,6 @@
 package gob.issste.gys.controller;
-
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import gob.issste.gys.model.*;
 import gob.issste.gys.repository.*;
 import gob.issste.gys.service.ParamsValidatorService;
@@ -16,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.response.ResponseHandler;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -95,13 +90,13 @@ public class PresupuestoController {
 				// TODO Validar que haya registro del Global
 				if (saldo_global == 0) {
 					platformTransactionManager.rollback(status);
-					return ResponseHandler.generateResponse("No existe presupuesto global para la delegación en el año indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No existe presupuesto anual para la of. de representación en el año indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 
 				// TODO Validar que el saldo a ingresar + saldo utilizado no exceda el saldo global
 				if (presupuesto.getSaldo() + saldo_utilizado > saldo_global) {
 					platformTransactionManager.rollback(status);
-					return ResponseHandler.generateResponse("La suma del importe a registrar, más los demas presupuestos de la delegación, excede el presupuesto global de la delegación.", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("La suma del importe a registrar, más los demas presupuestos de la delegación, excede el presupuesto anual de la of. de representación.", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 
 				if(presupuestoRepository.existe_presupuesto(presupuesto)>0) {
@@ -117,13 +112,13 @@ public class PresupuestoController {
 						presupuesto.getTipoPresup().getClave(), presupuesto.getAnio(), presupuesto.getMes(), 0, null, true);
 				if (presupuestos == null || presupuestos.size() == 0) {
 					platformTransactionManager.rollback(status);
-					return ResponseHandler.generateResponse("No existe presupuesto asignado a la Delegación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("No existe presupuesto asignado a la of. de representación para asignar al centro de trabajo indicado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 
 				double suma_dist_ct = presupuestoRepository.validaSumaPresupuestal(presupuesto);
 				if( suma_dist_ct > presupuestos.get(0).getSaldo() ) {
 					platformTransactionManager.rollback(status);
-					return ResponseHandler.generateResponse("La suma del importe asignado al centro de trabajo indicado excede el presupuesto asignado a la Delegación", HttpStatus.INTERNAL_SERVER_ERROR, null);
+					return ResponseHandler.generateResponse("La suma del importe asignado al centro de trabajo indicado excede el presupuesto asignado", HttpStatus.INTERNAL_SERVER_ERROR, null);
 				}
 			}
 
@@ -270,12 +265,12 @@ public class PresupuestoController {
 					p.setMovimientos(movPresupuestoRepository.findByPresupuesto(p.getId()));
 			}
 			if (presupuestos.isEmpty()) {
-				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NOT_FOUND, presupuestos);
+				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el sistema", HttpStatus.NOT_FOUND, presupuestos);
 			}
 
-			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del Sistema", HttpStatus.OK, presupuestos);
+			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del sistema", HttpStatus.OK, presupuestos);
 		} catch (Exception e) {
-			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 	@Operation(summary = "Consulta elementos de presupuesto del Sistema", description = "Consulta elementos de presupuesto del Sistema", tags = { "Presupuesto" })
@@ -437,7 +432,7 @@ public class PresupuestoController {
 					p.setMovimientos(movPresupuestoRepository.findByPresupuesto(p.getId()));
 			}
 			if (presupuestos.isEmpty()) {
-				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el Sistema", HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse("No existen elementos de presupuesto en el sistema", HttpStatus.NOT_FOUND, null);
 			}
 			logger.info(presupuestos.toString());
 
@@ -461,9 +456,9 @@ public class PresupuestoController {
 				pu.setSaldo(saldo_utilizado);
 				presupuestosUtilizado.add(pu);
 			}
-			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del Sistema", HttpStatus.OK, presupuestosUtilizado);
+			return ResponseHandler.generateResponse("Se obtienen los elementos de presupuesto del sistema", HttpStatus.OK, presupuestosUtilizado);
 		} catch (Exception e) {
-			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del sistema", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 	@Operation(summary = "Obtener el saldo utilizado por registro de guardias para una delegación en un año determinado", description = "Obtener el saldo utilizado por registro de guardias para una delegación en un año determinado", tags = { "Presupuesto" })
@@ -484,11 +479,11 @@ public class PresupuestoController {
 
 		} catch (EmptyResultDataAccessException e) {
 
-			return ResponseHandler.generateResponse("No existe presupuesto desglozado a la delegación seleccionada", HttpStatus.NOT_FOUND, 0);
+			return ResponseHandler.generateResponse("No existe presupuesto desglozado a la of. de representación seleccionada", HttpStatus.NOT_FOUND, 0);
 
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 		}
 	}
@@ -507,7 +502,7 @@ public class PresupuestoController {
 			return ResponseHandler.generateResponse("Se obtuvo el saldo presupuestal para las condiciones indicadas", HttpStatus.OK, saldo);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al consultar elementos de presupuesto del sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
