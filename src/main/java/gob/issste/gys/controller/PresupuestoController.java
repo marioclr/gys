@@ -202,10 +202,10 @@ public class PresupuestoController {
 			List<Presupuesto> presup = presupuestos.getPresupuestos();
 			List<String> coments = presupuestos.getComentarios();
 
-			for (int i = 0; i < presup.size(); i ++) {
-	            System.out.println("Presupuesto " + presup.get(i) + " is located at index " + i);
-	            System.out.println("Comentario " + coments.get(i) + " is located at index " + i);
-	        }
+//			for (int i = 0; i < presup.size(); i ++) {
+//	            System.out.println("Presupuesto " + presup.get(i) + " is located at index " + i);
+//	            System.out.println("Comentario " + coments.get(i) + " is located at index " + i);
+//	        }
 
 //			if( presupuesto.getCentroTrabajo() == null ) {
 //				if(presupuestoRepository.existe_presupuesto(presupuesto)>0) {

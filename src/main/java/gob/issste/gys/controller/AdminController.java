@@ -74,13 +74,13 @@ public class AdminController {
 			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
 			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
 
-			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
+			return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
 			cifras = new ArrayList<CifrasDeImpuestos>();
-			return ResponseHandler.generateResponse("No se generó calculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, null);
+			return ResponseHandler.generateResponse("No se generó el calculo de impuesto con las condiciones especificadas", HttpStatus.NOT_FOUND, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuestos", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -124,14 +124,14 @@ public class AdminController {
 
 			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl, strMinDate, strMaxDate);
 
-			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
+			return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
 
 			cifras = new ArrayList<CifrasDeImpuestos>();
-			return ResponseHandler.generateResponse("No se generó calculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, null);
+			return ResponseHandler.generateResponse("No se generó el calculo de impuesto con las condiciones especificadas", HttpStatus.NOT_FOUND, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuestos", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -154,17 +154,21 @@ public class AdminController {
 			try {
 				cifra = adminRepository.consultaCifrasDeImpuestosByOrdinal(anio, mes, tipoFechaControl, id_ordinal);
 			} catch (Exception e) {
-				return ResponseHandler.generateResponse("No se pudo obtener el cálculo previo de ISR para obtener complementar los nuevos registros", HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse("No se realizó el cálculo de impuesto de los nuevos registros complementados", HttpStatus.NOT_FOUND, null);
 			}
 
 			Date fechaMax = dateFormat.parse(cifra.getFec_max());
 
 			if( fechaPago.compareTo(fechaMax) <= 0) {
-				return ResponseHandler.generateResponse("La fecha que quiere complementar al cálculo de ISR es menor o igual a las del cálculo, no es posible complementar sus registros", HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse(
+						"No se pudo realizar el cálculo de impuesto de los nuevos registros complementados debido a que la fecha es igual o menor",
+						HttpStatus.NOT_FOUND,
+						null
+				);
 			}
 
 			if(pagaService.validaPagasAlComplementar(strPagoDate, anio, mes, tipoFechaControl, id_ordinal)) {
-				return ResponseHandler.generateResponse("LA fecha esta en un periodo entre fechas ya existentes", HttpStatus.INTERNAL_SERVER_ERROR, null);
+				return ResponseHandler.generateResponse("Esta fecha actualmente se encuentra calculada", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
 			//adminRepository.elimina_cifras_impuesto_x_rec(anio, mes, tipoFechaControl, cifra.getFec_min(), cifra.getFec_max());
@@ -183,13 +187,13 @@ public class AdminController {
 
 			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl, cifra.getFec_min(), strPagoDate);
 
-			return ResponseHandler.generateResponse("El cálculo de impuestos finalizó de manera exitósa.", HttpStatus.OK, cifras);
+			return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
 			cifras = new ArrayList<CifrasDeImpuestos>();
-			return ResponseHandler.generateResponse("No se generó calculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, null);
+			return ResponseHandler.generateResponse("No se generó el calculo de impuesto con las condiciones especificadas", HttpStatus.NOT_FOUND, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuestos", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -208,20 +212,20 @@ public class AdminController {
 
 			if (cifras.isEmpty()) {
 				cifras = new ArrayList<CifrasDeImpuestos>();
-				return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifras);
+				return ResponseHandler.generateResponse("No existe cálculo de impuestos", HttpStatus.NOT_FOUND, cifras);
 			}
 
 		} catch (EmptyResultDataAccessException e) {
 
 			cifras = new ArrayList<CifrasDeImpuestos>();
-			return ResponseHandler.generateResponse("No existe cálculo de impuestos con las condiciones seleccionadas", HttpStatus.NOT_FOUND, cifras);
+			return ResponseHandler.generateResponse("No existe cálculo de impuestos", HttpStatus.NOT_FOUND, cifras);
 
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al obtener las cifras de ISR del Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al obtener las cifras del cálculo de impuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 
-		return ResponseHandler.generateResponse("Se obtubieron las cifras de ISR de manera exitosa", HttpStatus.OK, cifras);
+		return ResponseHandler.generateResponse("Se obtubieron las cifras del cálculo de impuesto correctamente", HttpStatus.OK, cifras);
 	}
 
 	@Operation(summary = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", description = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })

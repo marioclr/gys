@@ -777,7 +777,8 @@ public class SuplenciaController {
 			@Parameter(description = "Fecha de control para validar las suplencias", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fec_pago,
 			@Parameter(description = "Estatus a actualizar de las suplencias (1 - Autorización, 3 - Confirmación)", required = true) @RequestParam(required = true) Integer estatus,
 			@Parameter(description = "Tipo de Suplencia para realizar la validación", required = true) @RequestParam(required = true) String tipo,
-			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario ) {
+			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario,
+			@Parameter(description = "Delegacion a la que pertenece el usuario que autoriza", required = true) @RequestParam(required = true) String idDeleg) {
 
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String strFecha = dateFormat.format(fec_pago);
@@ -791,11 +792,11 @@ public class SuplenciaController {
 					switch (tipo) {
 					
 						case "SI":
-								suplenciaRepository.updateAuthStatusSuplencias1(tipo, strFecha, idUsuario);
+								suplenciaRepository.updateAuthStatusSuplencias1(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 							break;
 
 						case "SE":
-								suplenciaRepository.updateAuthStatusSuplencias1Ext(tipo, strFecha, idUsuario);
+								suplenciaRepository.updateAuthStatusSuplencias1Ext(tipo, strFecha, idDeleg, idDeleg,idUsuario);
 							break;
 
 						default:
@@ -808,11 +809,11 @@ public class SuplenciaController {
 					switch (tipo) {
 					
 						case "SI":
-								suplenciaRepository.updateAuthStatusSuplencias2(tipo, strFecha, idUsuario);
+								suplenciaRepository.updateAuthStatusSuplencias2(tipo, strFecha,  idDeleg, idDeleg, idUsuario);
 							break;
 	
 						case "SE":
-								suplenciaRepository.updateAuthStatusSuplencias2Ext(tipo, strFecha, idUsuario);
+								suplenciaRepository.updateAuthStatusSuplencias2Ext(tipo, strFecha,  idDeleg, idDeleg, idUsuario);
 							break;
 
 						default:
@@ -828,7 +829,7 @@ public class SuplenciaController {
 			return ResponseHandler.generateResponse("El estatus de la suplencia se actualizó de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 

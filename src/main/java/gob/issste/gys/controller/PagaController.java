@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import gob.issste.gys.repository.GuardiaRepository;
+import gob.issste.gys.repository.IDatosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,8 @@ public class PagaController {
 	PagaService pagaService;
 	@Autowired
 	UsuarioRepository usuarioRepository;
+	@Autowired
+	IDatosRepository datosRepository;
 	@Autowired
 	private PlatformTransactionManager platformTransactionManager;
 
@@ -90,7 +94,7 @@ public class PagaController {
 			}
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
-			return ResponseHandler.generateResponse("Error al agregar un nuevo usuario al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al agregar un nueva fecha al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 		}
 	}
@@ -134,6 +138,18 @@ public class PagaController {
 
 					break;
 
+//				case 3:
+//					int existenGuardiasConfirmadas = datosRepository.validaGuardiasConfirmadas(paga.getFec_pago());
+//					if(existenGuardiasConfirmadas != 0){
+//						return ResponseHandler.generateResponse(
+//								"No se puede actualizar la fecha a la siguiente fase debido a que aun hay registros sin confirmar",
+//								HttpStatus.NOT_FOUND,
+//								null
+//						);
+//
+//					}
+//					break;
+//
 			}
 			return ResponseHandler.generateResponse(
 //					"La fecha de control de pagos de GyS ha sido modificado de manera exitosa",
@@ -314,7 +330,7 @@ public class PagaController {
 
 			if (pagas.isEmpty()) {
 
-				return ResponseHandler.generateResponse("No exixten fechas de control de pagos de GyS abiertas, en el Sistema", HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse("No existen fechas de control de pagos de GyS abiertas, en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 
 			return ResponseHandler.generateResponse("Se obtuvo la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.OK, pagas);

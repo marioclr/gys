@@ -369,7 +369,7 @@ public class GuardiaController {
 
 			try {
 				presup = presupuestoRepository.getElementByType_ct(idCentroTrab, guardia.getTipo_guardia(), anio, mes, quincena);
-				System.out.println(presup);
+//				System.out.println(presup);
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse(
 //						"No existe presupuesto registrado para realizar este tipo de movimiento",
@@ -446,7 +446,7 @@ public class GuardiaController {
 				quincena = paga.getQuincena();
 				inicio = paga.getFec_inicio();
 				fin    = paga.getFec_fin();
-				System.out.println("=============>"+guardia.getId() +" "+ guardia.getImporte());
+//				System.out.println("=============>"+guardia.getId() +" "+ guardia.getImporte());
 			} catch (EmptyResultDataAccessException e) {
 				return ResponseHandler.generateResponse("No existe la fecha de pago indicada",
 						HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -702,7 +702,7 @@ public class GuardiaController {
 			return ResponseHandler.generateResponse("El estatus de la guardia se actualizó de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al actualizar el estatus de las guardias", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 
@@ -712,7 +712,8 @@ public class GuardiaController {
 			@Parameter(description = "Fecha de control para validar las guardias", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fec_pago,
 			@Parameter(description = "Estatus a actualizar de las guardias (1 - Autorización, 3 - Confirmación)", required = true) @RequestParam(required = true) Integer estatus,
 			@Parameter(description = "Tipo de Guardias para realizar la validación", required = true) @RequestParam(required = true) String tipo,
-			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario ) {
+			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario,
+			@Parameter(description = "Delegacion a la que pertenece el usuario que autoriza", required = true) @RequestParam(required = true) String idDeleg) {
 
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String strFecha = dateFormat.format(fec_pago);
@@ -726,11 +727,11 @@ public class GuardiaController {
 					switch (tipo) {
 					
 						case "GI":
-							guardiaRepository.updateAuthStatusGuardias1(tipo, strFecha, idUsuario);
+							guardiaRepository.updateAuthStatusGuardias1(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 							break;
 
 						case "GE":
-							guardiaRepository.updateAuthStatusGuardias1Ext(tipo, strFecha, idUsuario);
+							guardiaRepository.updateAuthStatusGuardias1Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 							break;
 					}
 					break;
@@ -740,11 +741,11 @@ public class GuardiaController {
 					switch (tipo) {
 					
 						case "GI":
-							guardiaRepository.updateAuthStatusGuardias2(tipo, strFecha, idUsuario);
+							guardiaRepository.updateAuthStatusGuardias2(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 							break;
 	
 						case "GE":
-							guardiaRepository.updateAuthStatusGuardias2Ext(tipo, strFecha, idUsuario);
+							guardiaRepository.updateAuthStatusGuardias2Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 							break;
 					}
 					break;
@@ -757,7 +758,7 @@ public class GuardiaController {
 			return ResponseHandler.generateResponse("El estatus de las guardias se actualizó de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al actualizar el estatus en las guardias", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 
