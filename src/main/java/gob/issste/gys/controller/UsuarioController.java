@@ -1,9 +1,23 @@
 package gob.issste.gys.controller;
 
-import java.sql.SQLException;
-import java.util.*;
-
+import gob.issste.gys.JdbcTemplateDemo01Application;
+import gob.issste.gys.model.*;
+import gob.issste.gys.repository.IEmpleadoRepository;
+import gob.issste.gys.repository.PerfilRepository;
+import gob.issste.gys.repository.UsuarioRepository;
+import gob.issste.gys.response.ResponseHandler;
 import gob.issste.gys.service.SecurityService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,35 +26,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import gob.issste.gys.JdbcTemplateDemo01Application;
-import gob.issste.gys.model.DatosAdscripcion;
-import gob.issste.gys.model.Empleado;
-import gob.issste.gys.model.NivelVisibilidad;
-import gob.issste.gys.model.Opcion;
-import gob.issste.gys.model.Perfil;
-import gob.issste.gys.model.Usuario;
-import gob.issste.gys.repository.IEmpleadoRepository;
-import gob.issste.gys.repository.PerfilRepository;
-import gob.issste.gys.repository.UsuarioRepository;
-import gob.issste.gys.response.ResponseHandler;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.security.SignatureException;
+import java.sql.SQLException;
+import java.util.*;
+
+import javax.crypto.SecretKey;
+
 
 //@CrossOrigin(origins = "*")
 @RestController
@@ -395,7 +388,6 @@ public class UsuarioController {
 
 		int result = usuarioRepository.updatePassword(encryptedPwd,idUsuario);
 
-//		return ResponseHandler.generateResponse("FINALIZO", HttpStatus.OK, encryptedPwd);
 
 		if (result == 0) {
 			return ResponseHandler.generateResponse("No se actualizo la contraseña del usuario seleccionado", HttpStatus.NOT_FOUND, null);

@@ -25,9 +25,9 @@ public class JdbcTemplateDemo01Application {
 		return "Application is running...!!!";
 	}
 
-	public void print() {
-		System.out.println("Current Time : " + new Date());
-	}
+//	public void print() {
+//		System.out.println("Current Time : " + new Date());
+//	}
 
 	public static void main(String[] args) throws NoSuchAlgorithmException {
 		SpringApplication.run(JdbcTemplateDemo01Application.class, args);

@@ -32,7 +32,7 @@ public class LoginController {
             } else if(user.isActivo()) {
                 boolean validate = securityService.getPwdValidation(login.getPwd(), user.getPassword());
                 if (!validate){
-                    System.out.println(user.getIntentos());
+//                    System.out.println(user.getIntentos());
                     if(user.getIntentos() < 3 ) {
                         usuarioRepository.updateAttemps(user.getIntentos()+1, user.getIdUsuario());
                     } else if(user.getIntentos() == 3){

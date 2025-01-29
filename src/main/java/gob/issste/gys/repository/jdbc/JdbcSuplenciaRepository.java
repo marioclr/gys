@@ -569,31 +569,31 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
-	public int updateAuthStatusSuplencias1(String tipo, String fec_pago, int idUsuario) {
+	public int updateAuthStatusSuplencias1(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_1);
-		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1,
-	            new Object[] { tipo, fec_pago, idUsuario });
+	return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1,
+	            new Object[] { tipo, fec_pago, idDeleg, idDeleg1, idUsuario });
 	}
 
 	@Override
-	public int updateAuthStatusSuplencias1Ext(String tipo, String fec_pago, int idUsuario) {
+	public int updateAuthStatusSuplencias1Ext(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_1ext);
 		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1ext,
-	            new Object[] { tipo, fec_pago, idUsuario });
+	            new Object[] { tipo, fec_pago, idDeleg, idDeleg1, idUsuario });
 	}
 
 	@Override
-	public int updateAuthStatusSuplencias2(String tipo, String fec_pago, int idUsuario) {
+	public int updateAuthStatusSuplencias2(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_2);
 		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_2,
-	            new Object[] { tipo, fec_pago, idUsuario });
+	            new Object[] { tipo, fec_pago, idDeleg, idDeleg1, idUsuario });
 	}
 
 	@Override
-	public int updateAuthStatusSuplencias2Ext(String tipo, String fec_pago, int idUsuario) {
+	public int updateAuthStatusSuplencias2Ext(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_2ext);
 		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_2ext,
-	            new Object[] { tipo, fec_pago, idUsuario });
+	            new Object[] { tipo, fec_pago, idDeleg, idDeleg1, idUsuario });
 	}
 
 	@Override

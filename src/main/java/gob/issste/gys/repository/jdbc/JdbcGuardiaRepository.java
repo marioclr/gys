@@ -444,31 +444,31 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 	}
 
 	@Override
-	public int updateAuthStatusGuardias1(String tipo, String fec_pago, int idUsuario) {
+	public int updateAuthStatusGuardias1(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_1);
 		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1,
-				new Object[]{tipo, fec_pago, idUsuario});
+				new Object[]{tipo, fec_pago, idDeleg, idDeleg1, idUsuario});
 	}
 
 	@Override
-	public int updateAuthStatusGuardias1Ext(String tipo, String fec_pago, int idUsuario) {
+	public int updateAuthStatusGuardias1Ext(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_1ext);
 		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_1ext,
-				new Object[]{tipo, fec_pago, idUsuario});
+				new Object[]{tipo, fec_pago, idDeleg, idDeleg1, idUsuario});
 	}
 
 	@Override
-	public int updateAuthStatusGuardias2(String tipo, String fec_pago, int idUsuario) {
+	public int updateAuthStatusGuardias2(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_2);
 		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_2,
-				new Object[]{tipo, fec_pago, idUsuario});
+				new Object[]{tipo, fec_pago, idDeleg, idDeleg1, idUsuario});
 	}
 
 	@Override
-	public int updateAuthStatusGuardias2Ext(String tipo, String fec_pago, int idUsuario) {
+	public int updateAuthStatusGuardias2Ext(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_2ext);
 		return jdbcTemplate.update(STMT_UPDATES_AUTH_STATUS_2ext,
-				new Object[]{tipo, fec_pago, idUsuario});
+				new Object[]{tipo, fec_pago, idDeleg, idDeleg1, idUsuario});
 	}
 
 	@Override
@@ -555,19 +555,16 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 				if (fechaPago != null) {
 					cont++;
 					ps.setString(cont, fechaPago);
-					System.out.println(cont);
 				}
 
 				if (clave_empleado != null) {
 					cont++;
 					ps.setString(cont, clave_empleado);
-					System.out.println(cont);
 				}
 
 				if (importe_min != null) {
 					cont++;
 					ps.setDouble(cont, importe_min);
-					System.out.println(cont);
 				}
 
 				if (importe_max != null) {
