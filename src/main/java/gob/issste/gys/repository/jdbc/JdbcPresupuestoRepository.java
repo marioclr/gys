@@ -349,4 +349,11 @@ public class JdbcPresupuestoRepository implements IPresupuestoRepository {
 				new Object[] { anio_ejercicio, idDelegacion } );
 	}
 
+	@Override
+	public int validProgramatica(String ur, String ct, String aux, String tipo) {
+		logger.info(QUERY_VALID_PROGRAMATICA_BY_CT);
+		return jdbcTemplate.queryForObject(QUERY_VALID_PROGRAMATICA_BY_CT, Integer.class,
+				new Object[]{ur, ct, aux, tipo});
+	}
+
 }

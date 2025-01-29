@@ -35,7 +35,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
 //@CrossOrigin(origins = "*")
-@CrossOrigin(origins = {"https://sigysdev.issste.gob.mx:8443, https://sigys.issste.gob.mx:8443, http://localhost:4200"})
 @RestController
 @RequestMapping("/api")
 public class PagaController {
@@ -314,7 +313,7 @@ public class PagaController {
 
 			if (pagas.isEmpty()) {
 
-				return ResponseHandler.generateResponse("No exixten fechas de control de pagos de GyS abiertas, en el Sistema", HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse("No existen fechas de control de pagos de GyS abiertas, en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 
 			return ResponseHandler.generateResponse("Se obtuvo la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.OK, pagas);

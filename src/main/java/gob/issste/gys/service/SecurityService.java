@@ -3,21 +3,14 @@ package gob.issste.gys.service;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
-import gob.issste.gys.model.Usuario;
-import gob.issste.gys.response.ResponseHandler;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -33,8 +26,9 @@ public class SecurityService {
     public static final String HEADER_AUTHORIZACION_KEY = "Authorization";
     public static final String TOKEN_BEARER_PREFIX = "Bearer ";
     public static String SUPER_SECRET_KEY = "";
-    public static final long TOKEN_EXPIRATION_TIME = 43_200_000; // 1 day
+    public static final long TOKEN_EXPIRATION_TIME = 900_000; // 15 minutos en milisegundos
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+    private Set<String> invalidatedTokens = new HashSet<>();
 
     public static String generateSecretKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA512");
@@ -66,6 +60,23 @@ public class SecurityService {
             return false;
         }
 
+    }
+
+    /**
+     * Invalida los token metiendolos dentro una blacklist
+     * @param token token de la sesión cerrada
+     */
+    public void invalidateToken(String token) {
+        invalidatedTokens.add(token);
+    }
+
+    /**
+     * Valida el token contra la balcklist
+     * @param token token de solicitud
+     * @return booleano
+     */
+    public boolean isTokenValid(String token) {
+        return !invalidatedTokens.contains(token);
     }
 
 }

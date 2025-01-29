@@ -425,5 +425,17 @@ public class UsuarioController {
 		}
 
 	}
+	@PostMapping("/logout")
+	public ResponseEntity<Object> logout(@RequestBody Map<String, Object> requestBody) {
+		try {
+			// Extrae el token del cuerpo de la solicitud
+			String token = (String) requestBody.get("token");
+			// Invalida el token al cerrar la sesión
+			 securityService.invalidateToken(token);
+			return ResponseHandler.generateResponse("Token invalidado con éxito", HttpStatus.OK, token);
+		} catch (Exception e) {
+			return ResponseHandler.generateResponse("No se pudo cerrar sesión", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+		}
+	}
 
 }

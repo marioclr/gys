@@ -1,10 +1,7 @@
 package gob.issste.gys.controller;
 
 import gob.issste.gys.model.Login;
-import gob.issste.gys.model.Opcion;
-import gob.issste.gys.model.Perfil;
 import gob.issste.gys.model.Usuario;
-import gob.issste.gys.repository.PerfilRepository;
 import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
 import gob.issste.gys.security.JWTAuthenticationConfig;
@@ -13,23 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.sql.SQLException;
-import java.sql.SQLOutput;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
+import java.util.*;
 @RestController
 public class LoginController {
     @Autowired
     JWTAuthenticationConfig jwtAuthenticationConfig;
     @Autowired
     UsuarioRepository usuarioRepository;
-    @Autowired
-    PerfilRepository perfilRepository;
-
     @Autowired
     private SecurityService securityService;
     @PostMapping("/login")

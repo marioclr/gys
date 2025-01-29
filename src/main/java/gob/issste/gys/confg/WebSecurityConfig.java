@@ -56,7 +56,7 @@ public class WebSecurityConfig {
                                 new StaticHeadersWriter(
                                         "Access-Control-Allow-Origin",
                                         "https://sigysdev.issste.gob.mx," +
-                                                    "https://sigysdev.issste.gob.mx," +
+                                                    "https://sigys.issste.gob.mx," +
                                                     "http://localhost:4200"))
                         .addHeaderWriter(
                                 new StaticHeadersWriter(
@@ -68,7 +68,8 @@ public class WebSecurityConfig {
                                 new StaticHeadersWriter(
                                         "Access-Control-Allow-Headers",
                                 "Origin,Accept,X-Requested-With,Content-Type," +
-                                        "Access-Control-Request-Method,Access-Control-Request-Headers,Authorization")));
+                                        "Access-Control-Request-Method,Access-Control-Request-Headers,Authorization"))
+                );
         return http.build();
     }
 }
