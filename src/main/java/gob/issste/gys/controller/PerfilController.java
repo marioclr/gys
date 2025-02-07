@@ -164,7 +164,7 @@ public class PerfilController {
 	@DeleteMapping("/perfiles/{id}")
 	//public ResponseEntity<String> deletePerfil(@PathVariable("id") int id) {
 	public ResponseEntity<Object> deletePerfil(@PathVariable("id") int id) {
-		String mensaje = ""; 
+		String mensaje = "";
 		try {
 			int result = perfilRepository.deleteById(id);
 			if (result == 0) {
@@ -174,10 +174,10 @@ public class PerfilController {
 			//return new ResponseEntity<>("El Perfil fué eliminado exitosamente", HttpStatus.OK);
 			return ResponseHandler.generateResponse("El Perfil fué eliminado exitosamente", HttpStatus.OK, null);
 		} catch (Exception e) {
-			if (e.getMessage().contains("-245")) 
-				mensaje = " Debido a que existen opciones asignadas a este.";
-			//return new ResponseEntity<>("No se borró el Perfil." + mensaje, HttpStatus.INTERNAL_SERVER_ERROR);
-			return ResponseHandler.generateResponse("No se borró el Perfil." + mensaje, HttpStatus.INTERNAL_SERVER_ERROR, null);
+			if (e.getMessage().contains("-245"))
+				System.out.println(e.getCause());
+			 mensaje = " debido a que existen opciones asignadas al mismo.";
+			return ResponseHandler.generateResponse("No se borró el perfil" + mensaje, HttpStatus.INTERNAL_SERVER_ERROR, e.getCause());
 		}
 	}
 

@@ -1,15 +1,10 @@
 package gob.issste.gys.security;
 
-import gob.issste.gys.service.SecurityService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-
-import javax.crypto.SecretKey;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,8 +16,7 @@ public class JWTAuthenticationConfig {
 
     public String getJWTToken(String username) {
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils
-                .commaSeparatedStringToAuthorityList("ROLE_USER");
-
+                .commaSeparatedStringToAuthorityList("ADMIN, SUPERVISOR, OPERATIVO");
         String token = Jwts
                 .builder()
                 .setId("5i6y$")
@@ -37,4 +31,15 @@ public class JWTAuthenticationConfig {
 
         return "Bearer " + token;
     }
+
+    public String getKeyJWTToken(String sck, String encodedIv) {
+        String token = Jwts
+                .builder()
+                .claim("sck", sck)
+                .claim("iv", encodedIv)
+                .signWith(getSigningKey(SUPER_SECRET_KEY),  SignatureAlgorithm.HS512).compact();
+        return "Bearer " + token;
+    }
+
+
 }

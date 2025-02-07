@@ -1,16 +1,18 @@
 package gob.issste.gys.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gob.issste.gys.model.Login;
 import gob.issste.gys.model.Usuario;
 import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
 import gob.issste.gys.security.JWTAuthenticationConfig;
+import gob.issste.gys.service.EncryptionService;
 import gob.issste.gys.service.SecurityService;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.sql.SQLException;
 import java.util.*;
 @RestController
 public class LoginController {
@@ -20,10 +22,17 @@ public class LoginController {
     UsuarioRepository usuarioRepository;
     @Autowired
     private SecurityService securityService;
+
+    @Autowired
+    EncryptionService encryptionService;
+
     @PostMapping("/login")
     public ResponseEntity<Object> login(
-            @RequestBody Login login) {
+            @RequestParam String data) {
         try {
+            String originalData = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
+            ObjectMapper objectMapper = new ObjectMapper();
+            Login login = objectMapper.readValue(originalData, Login.class);
             Usuario user = usuarioRepository.findByName(login.getClaveUser());
 
             if (Objects.isNull( user )){
@@ -32,7 +41,6 @@ public class LoginController {
             } else if(user.isActivo()) {
                 boolean validate = securityService.getPwdValidation(login.getPwd(), user.getPassword());
                 if (!validate){
-//                    System.out.println(user.getIntentos());
                     if(user.getIntentos() < 3 ) {
                         usuarioRepository.updateAttemps(user.getIntentos()+1, user.getIdUsuario());
                     } else if(user.getIntentos() == 3){
@@ -59,8 +67,11 @@ public class LoginController {
                     map.put("info", constructedUser);
                     String token = jwtAuthenticationConfig.getJWTToken(login.getClaveUser());
                     map.put("auth", token);
+                    JSONObject jsonArray = new JSONObject(map);
+                    String jsonString = jsonArray.toString();
+                    String encryptedUser = encryptionService.encrypt(jsonString, EncryptionService.BINDING_KEY);
                     usuarioRepository.updateAttemps(0, user.getIdUsuario());
-                    return ResponseHandler.generateResponse("Autorizado", HttpStatus.OK, map);
+                    return ResponseHandler.generateResponse("Autorizado", HttpStatus.OK, encryptedUser);
                 }
             }else{
                 return ResponseHandler.generateResponse("El usuario está bloqueado, contactar a un administrador", HttpStatus.FORBIDDEN, null);
@@ -68,8 +79,9 @@ public class LoginController {
         }catch (NullPointerException e) {
             return ResponseHandler.generateResponse(
                     "Error al realizar inicio de sesión", HttpStatus.INTERNAL_SERVER_ERROR, null);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse(
+                    e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR, null);
         }
     }
 }
