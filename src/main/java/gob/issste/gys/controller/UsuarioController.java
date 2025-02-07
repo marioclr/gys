@@ -6,11 +6,8 @@ import gob.issste.gys.repository.IEmpleadoRepository;
 import gob.issste.gys.repository.PerfilRepository;
 import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
+import gob.issste.gys.service.EncryptionService;
 import gob.issste.gys.service.SecurityService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +25,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.SignatureException;
 import java.sql.SQLException;
 import java.util.*;
 
-import javax.crypto.SecretKey;
 
 
 //@CrossOrigin(origins = "*")
@@ -51,6 +46,8 @@ public class UsuarioController {
 	IEmpleadoRepository empleadoRepository;
 	@Autowired
 	private PlatformTransactionManager platformTransactionManager;
+	@Autowired
+	EncryptionService encryptionService;
 
 	@Autowired
 	private SecurityService securityService;
@@ -230,7 +227,7 @@ public class UsuarioController {
 			else
 //				usuarioRepository.findByClave(clave, conPerfiles).forEach(usuarios::add);
 				usuarioRepository.findByClave(clave, conPerfiles)
-						.forEach(usuario ->{
+						.forEach(usuario -> {
 							Map<String, Object> userForTable = new HashMap<>();
 							userForTable.put("idUsuario", usuario.getIdUsuario());
 							userForTable.put("clave", usuario.getClave());
@@ -243,9 +240,14 @@ public class UsuarioController {
 				return ResponseHandler.generateResponse("No se obtuvieron los usuarios del Sistema", HttpStatus.NOT_FOUND, null);
 
 			}
-
-			//return new ResponseEntity<>(usuarios, HttpStatus.OK);
-			return ResponseHandler.generateResponse("Obtiene todos los usuarios del Sistema de manera exitosa", HttpStatus.OK, usuarios);
+			JSONArray jsonArray = new JSONArray(usuarios);
+			String jsonString = jsonArray.toString();
+			String encryptedUsers = encryptionService.encrypt(jsonString, EncryptionService.BINDING_KEY);
+			return
+					ResponseHandler
+							.generateResponse("Obtiene todos los usuarios del Sistema de manera exitosa"
+									, HttpStatus.OK
+									, encryptedUsers);
 
 		} catch (Exception e) {
 			//return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -45,6 +45,7 @@ public class WebSecurityConfig {
                         ).authenticated()
                         .requestMatchers(
                                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, SecurityService.LOGIN_URL)
+                                ,AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/gs3c73t")
                                 //Comentar lienas para activar swagger cuando sea deploy
 //                                ,AntPathRequestMatcher.antMatcher("/swagger-ui/**"),
 //                                AntPathRequestMatcher.antMatcher("/v3/api-docs/**")

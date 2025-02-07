@@ -6,14 +6,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
-
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-
 @Service
 public class SecurityService {
 
@@ -35,11 +32,6 @@ public class SecurityService {
         keyGenerator.init(512); // Usando una clave de 256 bits
         SecretKey secretKey = keyGenerator.generateKey();
         return Base64.getEncoder().encodeToString(secretKey.getEncoded());
-    }
-
-    public Key getSigningKeyB64(String secret) {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public static Key getSigningKey(String secret) {
