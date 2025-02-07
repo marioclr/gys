@@ -296,14 +296,14 @@ public class UsuarioController {
 			int result = usuarioRepository.deleteById(id);
 			if (result == 0) {
 				//return new ResponseEntity<>("No se pudo encontrar el Usuario con el ID = " + id, HttpStatus.NOT_FOUND);
-				return ResponseHandler.generateResponse("No se pudo encontrar el Usuario con el ID = " + id, HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse("Usuario no encontrado", HttpStatus.NOT_FOUND, null);
 			}
 			//return new ResponseEntity<>("El Usuario fué eliminada exitosamente", HttpStatus.OK);
 			return ResponseHandler.generateResponse("Usuario eliminado", HttpStatus.OK, null);
 
 		} catch (Exception e) {
 			//return new ResponseEntity<>("No se borró el Usuario", HttpStatus.INTERNAL_SERVER_ERROR);
-			return ResponseHandler.generateResponse("No se borró el Usuario", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Para eliminar el usuario es necesario desasignar sus perfiles", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 		}
 	}

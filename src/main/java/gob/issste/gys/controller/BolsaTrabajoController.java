@@ -223,12 +223,29 @@ public class BolsaTrabajoController {
 
 	@Operation(summary = "Almacenar bolsa de trabajo masivamente desde un excel", description = "Guarda bolsa de trabajo", tags = { "Bolsa de Trabajo" })
 	@PostMapping("/bolsatrabajo/guardaMasivo")
-	public ResponseEntity<Object> guardarBolsatrabajoMasivo(@RequestBody List<BolsaTrabajo> arrayBolsa){
+	public ResponseEntity<Object> guardarBolsatrabajoMasivo(
+			@RequestBody List<BolsaTrabajo> arrayBolsa,
+			@RequestParam int nivelVisibilidad,
+			@RequestParam String idDelegacion
+	){
 	try {
 		for (BolsaTrabajo bolsaTrabajo : arrayBolsa)
 		{
-				logger.info("Elemento: " + bolsaTrabajo.toString());
-				this.agregarElemento(bolsaTrabajo);
+			switch (nivelVisibilidad){
+				case 1:
+					logger.info("Elemento: " + bolsaTrabajo.toString());
+					this.agregarElemento(bolsaTrabajo);
+					break;
+
+				case 2:
+					if (idDelegacion.equals(bolsaTrabajo.getDelegacion().getId_div_geografica())){
+						logger.info("Elemento: " + bolsaTrabajo.toString());
+						this.agregarElemento(bolsaTrabajo);
+					}
+					break;
+				default:
+			}
+
 		}
 
 	}catch (Exception e){
