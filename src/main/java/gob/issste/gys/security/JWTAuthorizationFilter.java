@@ -12,9 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +25,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     SecurityService securityService;
     private Claims setSigningKey(HttpServletRequest request) {
         String jwtToken = request.
-                getHeader(HEADER_AUTHORIZACION_KEY).
+                getHeader(HEADER_AUTHORIZATION_KEY).
                 replace(TOKEN_BEARER_PREFIX, "");
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey(SUPER_SECRET_KEY))
@@ -45,7 +43,7 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private boolean isJWTValid(HttpServletRequest request, HttpServletResponse res) {
-        String authenticationHeader = request.getHeader(HEADER_AUTHORIZACION_KEY);
+        String authenticationHeader = request.getHeader(HEADER_AUTHORIZATION_KEY);
         if (authenticationHeader == null || !authenticationHeader.startsWith(TOKEN_BEARER_PREFIX)) {
             return false;
         }
@@ -70,8 +68,8 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             return;
         }
     }

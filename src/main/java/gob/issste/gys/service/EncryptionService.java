@@ -1,6 +1,7 @@
 package gob.issste.gys.service;
 
 import org.springframework.stereotype.Service;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
@@ -23,7 +24,6 @@ public class EncryptionService {
             return "Error al cifrar el valor";
         }
     }
-
 
     public String decrypt(String encrypted, String secretKey) throws Exception {
         byte[] keyBytes = secretKey.getBytes("UTF-8");

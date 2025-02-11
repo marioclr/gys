@@ -293,7 +293,6 @@ public class UsuarioController {
 	//public ResponseEntity<String> deleteUsuario(
 	public ResponseEntity<Object> deleteUsuario(
 			@Parameter(description = "El ID del usuario a eliminar", required = true) @PathVariable("id") int id) {
-
 		try {
 			int result = usuarioRepository.deleteById(id);
 			if (result == 0) {
