@@ -358,7 +358,40 @@ public String STMT_UPDATES_AUTH_STATUS_1ext	= "MERGE INTO gys_autorizacion_guard
 											+ "		A.fec_validacion = CURRENT YEAR TO SECOND";
 	int updateAuthStatusGuardias1Ext(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario);
 
-//	public String STMT_UPDATES_AUTH_STATUS_2	= "Merge Into gys_autorizacion_guardias A\r\n"
+	public String STMT_COUNT_AUTH_STATUS_INT = "SELECT COUNT(*) as gua_reg_int_conf\r\n"
+										 + "  FROM gys_autorizacion_guardias A\r\n"
+										 + "  INNER JOIN gys_guardias_emp \r\n"
+										 + "    ON A.id_guardia = S.id \r\n"
+										 + "  INNER JOIN m4t_centros_trab C \r\n"
+										 + "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+										 + "  INNER JOIN m4t_conv_ct V\r\n"
+										 + "  ON C.id_centro_trabajo = V.ct5\r\n"
+										 + "  WHERE fec_pago = ?\r\n"
+										 + "  	and id_tipo='GI'\r\n"
+										 + " 	 and C.id_area_generadora = ?\r\n"
+										 + "  	and C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+										 + "  	and C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+										 + "  AND estatus1 IN (0)\r\n";
+
+	Integer countAuthGuardiasStatusInt(String fec_pago, String IdDeleg);
+
+	public String STMT_COUNT_AUTH_STATUS_EXT = "SELECT COUNT(*) as gua_reg_ext_conf\r\n"
+											+ "  FROM gys_autorizacion_guardias A\r\n"
+											+ "  INNER JOIN gys_guardias_ext \r\n"
+											+ "    ON A.id_guardia = S.id \r\n"
+											+ "  INNER JOIN m4t_centros_trab C \r\n"
+											+ "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+											+ "  INNER JOIN m4t_conv_ct V\r\n"
+											+ "  ON C.id_centro_trabajo = V.ct5\r\n"
+											+ "  WHERE fec_pago = ?\r\n"
+											+ "  	and id_tipo='GE'\r\n"
+											+ " 	 and C.id_area_generadora = ?\r\n"
+											+ "  	and C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+											+ "  	and C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+											+ "  AND estatus1 IN (0)\r\n";
+
+	Integer countAuthGuardiasStatusExt(String fec_pago, String IdDeleg);
+	//	public String STMT_UPDATES_AUTH_STATUS_2	= "Merge Into gys_autorizacion_guardias A\r\n"
 //												+ "Using gys_guardias_emp S\r\n"
 //												+ "  ON  A.id_guardia = S.id\r\n"
 //												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"

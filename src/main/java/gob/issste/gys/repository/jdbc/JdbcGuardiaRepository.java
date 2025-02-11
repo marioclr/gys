@@ -457,6 +457,45 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 				new Object[]{tipo, fec_pago, idDeleg, idDeleg1, idUsuario});
 	}
 
+//	@Override
+//	public int countAuthGuardiasStatusInt(String fec_pago, String idDeleg) {
+//		logger.info(STMT_COUNT_AUTH_STATUS_INT);
+//		try {
+//			int dias = jdbcTemplate.queryForObject(STMT_COUNT_AUTH_STATUS_INT, Integer.class,
+//					new Object[]{ fec_pago, idDeleg, idDeleg });
+//			return dias;
+//		} catch (NullPointerException Ex) {
+//			return 0;
+//		}
+//
+//	}
+
+	@Override
+	public Integer countAuthGuardiasStatusInt(String fec_pago, String idDeleg) {
+		logger.info(STMT_COUNT_AUTH_STATUS_INT);
+		try {
+			Integer dias = jdbcTemplate.queryForObject(STMT_COUNT_AUTH_STATUS_INT, Integer.class,
+					new Object[]{ fec_pago, idDeleg, idDeleg });
+			return (dias != null) ? dias : 0;
+		} catch (Exception ex) {
+			logger.error("Error al contar el estado de los guardias internas: ", ex);
+			return 0;
+		}
+	}
+
+	@Override
+	public Integer countAuthGuardiasStatusExt(String fec_pago, String idDeleg) {
+		logger.info(STMT_COUNT_AUTH_STATUS_EXT);
+		try {
+			Integer dias = jdbcTemplate.queryForObject(STMT_COUNT_AUTH_STATUS_EXT, Integer.class,
+					new Object[]{ fec_pago, idDeleg, idDeleg });
+			return (dias != null) ? dias : 0;
+		} catch (Exception ex) {
+			logger.error("Error al contar el estado de los guardias externas: ", ex);
+			return 0;
+		}
+	}
+
 	@Override
 	public int updateAuthStatusGuardias2(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario) {
 		logger.info(STMT_UPDATES_AUTH_STATUS_2);

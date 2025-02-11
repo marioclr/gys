@@ -597,6 +597,33 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 	}
 
 	@Override
+	public Integer countAuthSuplenciasStatusInt(String fec_pago, String idDeleg) {
+		logger.info(STMT_COUNT_AUTH_STATUS_INT);
+		try {
+			Integer dias = jdbcTemplate.queryForObject(STMT_COUNT_AUTH_STATUS_INT, Integer.class,
+					new Object[]{ fec_pago, idDeleg, idDeleg });
+			return (dias != null) ? dias : 0;
+		} catch (Exception ex) {
+			logger.error("Error al contar los registros de las suplencias internas: ", ex);
+			return 0;
+		}
+	}
+
+	@Override
+	public Integer countAuthSuplenciasStatusExt(String fec_pago, String idDeleg) {
+		logger.info(STMT_COUNT_AUTH_STATUS_EXT);
+		try {
+			Integer dias = jdbcTemplate.queryForObject(STMT_COUNT_AUTH_STATUS_EXT, Integer.class,
+					new Object[]{ fec_pago, idDeleg, idDeleg });
+			return (dias != null) ? dias : 0;
+		} catch (Exception ex) {
+			logger.error("Error al contar los registros de las suplencias externas: ", ex);
+			return 0;
+		}
+	}
+
+
+	@Override
 	public List<DatosSuplencia>
 	ConsultaDynamicSuplencias(String fechaPago, String tipo, String clave_empleado,
 														  Double importe_min, Double importe_max, String idDelegacion, String idCentroTrab, String claveServicio,

@@ -462,6 +462,40 @@ public String STMT_UPDATES_AUTH_STATUS_2ext = "MERGE INTO gys_autorizacion_suple
 											+ "		A.fec_autorizacion = CURRENT YEAR TO SECOND";
 	int updateAuthStatusSuplencias2Ext(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario);
 
+	public String STMT_COUNT_AUTH_STATUS_INT = "SELECT COUNT(*) as sup_reg_int_conf\r\n"
+			+ "  FROM gys_autorizacion_suplencias A\r\n"
+			+ "  INNER JOIN gys_suplencias_emp \r\n"
+			+ "    ON A.id_suplencia = S.id \r\n"
+			+ "  INNER JOIN m4t_centros_trab C \r\n"
+			+ "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+			+ "  INNER JOIN m4t_conv_ct V\r\n"
+			+ "  ON C.id_centro_trabajo = V.ct5\r\n"
+			+ "  WHERE fec_pago = ?\r\n"
+			+ "  	and id_tipo='SI'\r\n"
+			+ " 	 and C.id_area_generadora = ?\r\n"
+			+ "  	and C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+			+ "  	and C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+			+ "  AND estatus1 IN (0)\r\n";
+
+	Integer countAuthSuplenciasStatusInt(String fec_pago, String IdDeleg);
+
+	public String STMT_COUNT_AUTH_STATUS_EXT = "SELECT COUNT(*) as sup_reg_ext_conf\r\n"
+			+ "  FROM gys_autorizacion_suplencias A\r\n"
+			+ "  INNER JOIN gys_suplencias_ext \r\n"
+			+ "    ON A.id_suplencia = S.id \r\n"
+			+ "  INNER JOIN m4t_centros_trab C \r\n"
+			+ "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+			+ "  INNER JOIN m4t_conv_ct V\r\n"
+			+ "  ON C.id_centro_trabajo = V.ct5\r\n"
+			+ "  WHERE fec_pago = ?\r\n"
+			+ "  	and id_tipo='SE'\r\n"
+			+ " 	 and C.id_area_generadora = ?\r\n"
+			+ "  	and C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+			+ "  	and C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+			+ "  AND estatus1 IN (0)\r\n";
+
+	Integer countAuthSuplenciasStatusExt(String fec_pago, String IdDeleg);
+
 	List<DatosSuplencia> ConsultaDynamicSuplencias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
 			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, String emp_suplir, Integer estatus);
 

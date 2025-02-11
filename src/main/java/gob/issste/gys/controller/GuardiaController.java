@@ -731,6 +731,7 @@ public class GuardiaController {
 							break;
 
 						case "GE":
+//							int conteoGuardiasAutorizacion =
 							guardiaRepository.updateAuthStatusGuardias1Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 							break;
 					}
@@ -741,11 +742,24 @@ public class GuardiaController {
 					switch (tipo) {
 					
 						case "GI":
+							int contGuardsAuthInt = guardiaRepository.countAuthGuardiasStatusInt(strFecha, idDeleg);
+
+							if(contGuardsAuthInt > 1){
+								return ResponseHandler.generateResponse("Existen registros sin autorizar en guardias internas con esa Of. de representación", HttpStatus.INTERNAL_SERVER_ERROR, null);
+							}
+
 							guardiaRepository.updateAuthStatusGuardias2(tipo, strFecha, idDeleg, idDeleg, idUsuario);
+
 							break;
 	
 						case "GE":
+							int contGuardsAuthExt = guardiaRepository.countAuthGuardiasStatusExt(strFecha, idDeleg);
+							if(contGuardsAuthExt > 1){
+								return ResponseHandler.generateResponse("Existen registros sin autorizar en guardias externas con esa Of. de representación", HttpStatus.INTERNAL_SERVER_ERROR, null);
+							}
+
 							guardiaRepository.updateAuthStatusGuardias2Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
+
 							break;
 					}
 					break;
