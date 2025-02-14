@@ -362,7 +362,7 @@ public class PagaController {
 		}	
 	}
 
-	@Operation(summary = "Validar si una Fecha de control se encuantra en estatus de cerrada", description = "Validar si una Fecha de control se encuantra en estatus de cerrada", tags = { "Control de fechas de pago" })
+	@Operation(summary = "Validar si una Fecha de control se encuentra en estatus de cerrada", description = "Validar si una Fecha de control se encuentra en estatus de cerrada", tags = { "Control de fechas de pago" })
 	@PutMapping("/Paga/is_closed")
 	public ResponseEntity<Object> validatePagaIsClosed(@Parameter(description = "Fecha de control que se valida si estatus esta cerrado", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fecha) {
 
@@ -371,10 +371,10 @@ public class PagaController {
 
 		if (!pagaService.validaSigueAbierta(strQuincena)) {
 
-			return ResponseHandler.generateResponse("La Fecha de control se encuantra en estatus de cerrada u otro estatus posterior", HttpStatus.NOT_FOUND, true);
+			return ResponseHandler.generateResponse("La Fecha de control se encuentra en estatus de cerrada u otro estatus posterior", HttpStatus.NOT_FOUND, true);
 		} else {
 
-			return ResponseHandler.generateResponse("La Fecha de control no se encuantra en estatus de cerrada u otro estatus posterior", HttpStatus.OK, false);
+			return ResponseHandler.generateResponse("La Fecha de control no se encuentra en estatus de cerrada u otro estatus posterior", HttpStatus.OK, false);
 		}
 	}	
 

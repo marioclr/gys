@@ -5,10 +5,9 @@ import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
+import gob.issste.gys.model.Programatica;
 import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -731,7 +730,6 @@ public class GuardiaController {
 							break;
 
 						case "GE":
-//							int conteoGuardiasAutorizacion =
 							guardiaRepository.updateAuthStatusGuardias1Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 							break;
 					}
@@ -745,7 +743,7 @@ public class GuardiaController {
 							int contGuardsAuthInt = guardiaRepository.countAuthGuardiasStatusInt(strFecha, idDeleg);
 
 							if(contGuardsAuthInt > 1){
-								return ResponseHandler.generateResponse("Existen registros sin autorizar en guardias internas con esa Of. de representación", HttpStatus.INTERNAL_SERVER_ERROR, null);
+								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de guardias", HttpStatus.INTERNAL_SERVER_ERROR, null);
 							}
 
 							guardiaRepository.updateAuthStatusGuardias2(tipo, strFecha, idDeleg, idDeleg, idUsuario);
@@ -755,7 +753,7 @@ public class GuardiaController {
 						case "GE":
 							int contGuardsAuthExt = guardiaRepository.countAuthGuardiasStatusExt(strFecha, idDeleg);
 							if(contGuardsAuthExt > 1){
-								return ResponseHandler.generateResponse("Existen registros sin autorizar en guardias externas con esa Of. de representación", HttpStatus.INTERNAL_SERVER_ERROR, null);
+								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de guardias", HttpStatus.INTERNAL_SERVER_ERROR, null);
 							}
 
 							guardiaRepository.updateAuthStatusGuardias2Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
@@ -851,8 +849,6 @@ public class GuardiaController {
 			boolean regexResult = paramsValidatorService.validate(regexList,params);
 			boolean injection = paramsValidatorService.sqlInjectionObjectValidator(params);
 
-//			System.out.println(regexResult+" - "+ injection);
-
 			if(regexResult && !injection){
 				guardias = guardiaRepository.ConsultaDynamicGuardias(strQuincena, tipoGuardia, claveEmpleado, importe_min, importe_max,
 						idDelegacion, idCentroTrab, claveServicio, puesto, estatus);
@@ -860,7 +856,6 @@ public class GuardiaController {
 				if (guardias.isEmpty()) {
 //					return ResponseHandler.generateResponse("No se encontraron los registros de guardias del empleado en el Sistema", HttpStatus.NOT_FOUND, null);
 					return ResponseHandler.generateResponse(
-//							"No existe presupuesto registrado para realizar este tipo de movimiento",
 							"No se encontraron registros previos",
 							HttpStatus.NOT_FOUND, null);
 				}
@@ -879,6 +874,47 @@ public class GuardiaController {
 
 			return ResponseHandler.generateResponse("Error al consultar guardias bajo las condiciones indicadas.",
 					HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Busca regsitros de forma dinamica en la consulta de guardias",
+			description = "Método que extrae los registros de guardias internas",
+			tags = { "Consulta de guardias" })
+	@GetMapping("/guardias/consultaPaginada")
+	public ResponseEntity<Object> getAllGuardiasPage(
+			@Parameter(description = "Fecha de quincena para la consulta de guardias", required = false) @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date quincena,
+			@Parameter(description = "Tipo para obtener las guardias (GI-Internas o GE-Externas)", required = true) @RequestParam(required = true) String tipoGuardia,
+			@Parameter(description = "ID de empleado o RFC para obtener las guardias", required = false) @RequestParam(required = false) String claveEmpleado,
+			@Parameter(description = "Importe mínimo para obtener las guardias", required = false) @RequestParam(required = false) Double importe_min,
+			@Parameter(description = "Importe máximo para obtener las guardias", required = false) @RequestParam(required = false) Double importe_max,
+			@Parameter(description = "ID de la delegación para obtener las guardias", required = false) @RequestParam(required = false) String idDelegacion,
+			@Parameter(description = "ID del centro de trabajo para obtener las guardias", required = false) @RequestParam(required = false) String idCentroTrab,
+			@Parameter(description = "Clave del servicio para obtener las guardias", required = false) @RequestParam(required = false) String claveServicio,
+			@Parameter(description = "Clave del puesto para obtener las guardias", required = false) @RequestParam(required = false) String puesto,
+			@Parameter(description = "Estatus de las guardias", required = false) @RequestParam(required = false) Integer estatus,
+			@Parameter(description = "Paginacion de la consulta", required = false) @RequestParam(required = true) Integer page,
+			@Parameter(description = "Tamaño de la consulta", required = false) @RequestParam(required = false) Integer size
+	){
+		try {
+
+			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			String strQuincena = null;
+
+			if (quincena != null)
+				strQuincena = dateFormat.format(quincena);
+
+			Map<String, Object> dataAndSize = new HashMap<>();
+			List<DatosGuardia> guardiasList = new ArrayList<DatosGuardia>();
+			guardiasList = guardiaRepository.ConsultaDynamicGuardiasPage(strQuincena, tipoGuardia, claveEmpleado, importe_min, importe_max,
+					idDelegacion, idCentroTrab, claveServicio, puesto, estatus, page, size);
+
+			dataAndSize.put("guardias",guardiasList);
+			dataAndSize.put("size", guardiaRepository.ConsultaDynamicGuardiasCount(strQuincena, tipoGuardia, claveEmpleado, importe_min, importe_max,
+					idDelegacion, idCentroTrab, claveServicio, puesto, estatus));
+
+			return ResponseHandler.generateResponse("Se encontraron guardias al consultar bajo las condiciones indicadas", HttpStatus.OK, dataAndSize);
+		}catch (Exception e){
+			return ResponseHandler.generateResponse("No se encontraron registros previos" + e, HttpStatus.CONFLICT, null);
 		}
 	}
 
