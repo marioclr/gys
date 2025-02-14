@@ -26,15 +26,20 @@ public class EncryptionService {
     }
 
     public String decrypt(String encrypted, String secretKey) throws Exception {
-        byte[] keyBytes = secretKey.getBytes("UTF-8");
-        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, keySpec);
-        // Reemplaza los caracteres URL-safe de vuelta a los originales
-        String base64Encrypted = encrypted.replace('-', '+').replace('_', '/');
-        byte[] decoded = Base64.getDecoder().decode(base64Encrypted);
-        byte[] decrypted = cipher.doFinal(decoded);
-        return new String(decrypted, "UTF-8");
+        try {
+            byte[] keyBytes = secretKey.getBytes("UTF-8");
+            SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec);
+            // Reemplaza los caracteres URL-safe de vuelta a los originales
+            String base64Encrypted = encrypted.replace('-', '+').replace('_', '/');
+            byte[] decoded = Base64.getDecoder().decode(base64Encrypted);
+            byte[] decrypted = cipher.doFinal(decoded);
+            return new String(decrypted, "UTF-8");
+        }catch (Exception e){
+            return "Error al descifrar el valor: " + e.getMessage();
+        }
+
     }
 }
 
