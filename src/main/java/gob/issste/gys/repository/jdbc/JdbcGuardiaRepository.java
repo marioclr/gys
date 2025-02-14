@@ -1,6 +1,7 @@
 package gob.issste.gys.repository.jdbc;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 
 import gob.issste.gys.service.ParamsValidatorService;
@@ -643,6 +644,229 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 			return guardias;
 
 	}
+
+	@Override
+	public List<DatosGuardia> ConsultaDynamicGuardiasPage(
+			String fechaPago, String tipo, String clave_empleado, Double importe_min, Double importe_max,
+			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus, int page, int size) throws SQLException {
+
+		String QUERY_CONDITION = "";
+		String EMPLOYEE_FIELD = "";
+		String QUERY_TABLE_BASE = "";
+
+
+		if (tipo.equals(String.valueOf("GI"))) {
+			QUERY_TABLE_BASE = "gys_guardias_emp";
+			EMPLOYEE_FIELD = "id_empleado";
+
+		}else if(tipo.equals(String.valueOf("GE"))){
+			QUERY_TABLE_BASE = "gys_guardias_ext";
+			EMPLOYEE_FIELD = "rfc";
+		}else{
+			throw new SQLException("No existe ese tipo de guardia en el sistema");
+		}
+
+		if (fechaPago != null) {
+			QUERY_CONDITION += "And G.fec_paga = ?\r\n";
+		}
+
+		if (clave_empleado != null) {
+			if (tipo.equals(String.valueOf("GI"))) {
+				QUERY_CONDITION += "And id_empleado = ?\r\n";
+
+			} else {
+				QUERY_CONDITION += "And rfc = ?\r\n";
+			}
+		}
+
+		if (importe_min != null) {
+			QUERY_CONDITION += "And G.importe >= ?\r\n";
+		}
+
+		if (importe_max != null) {
+			QUERY_CONDITION += "And G.importe <= ?\r\n";
+		}
+
+		if (idDelegacion != null) {
+			QUERY_CONDITION += "And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n";
+		}
+
+		if (idCentroTrab != null) {
+			QUERY_CONDITION += "And C.id_centro_trabajo = ?\r\n";
+		}
+
+		if (claveServicio != null) {
+			QUERY_CONDITION += "And G.id_clave_servicio = ?\r\n";
+		}
+
+		if (puesto != null) {
+			QUERY_CONDITION += "And PU.id_puesto_plaza = ?\r\n";
+		}
+
+		if (estatus != null) {
+			QUERY_CONDITION += "  And G.estatus = ?\r\n";
+		}
+
+		final String DYNAMIC_QUERY = "Select G.id, " + EMPLOYEE_FIELD + " clave_empleado, G.id_centro_trabajo, n_centro_trabajo,\r\n"
+				+ "  G.id_clave_servicio, n_clave_servicio, G.id_puesto_plaza, n_puesto_plaza, '" + tipo + "' tipo_guardia,\r\n"
+				+ "  id_nivel, id_sub_nivel, id_tipo_jornada, horas, G.fec_inicio, G.fec_fin, G.folio, G.motivo, G.id_clave_movimiento, hora_inicio, hora_fin, G.coment, G.estatus,\r\n"
+				+ "  G.importe, PU.id_tipo_tabulador, G.fec_paga, C.id_zona, G.id_ordinal, NVL(riesgos,0) riesgos, G.id_usuario \r\n"
+				+ "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE\r\n"
+				+ "Where G.fec_paga = P.fec_pago And \r\n"
+				+ "  G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
+				+ "  G.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
+				+ "  PU.id_sociedad = '01' And PU.id_empresa = '01' And\r\n"
+				+ "  G.id_clave_servicio = SE.id_clave_servicio And\r\n"
+				+ "  SE.id_empresa='01'\r\n"
+				+ QUERY_CONDITION
+				+ "Order by G.fec_paga desc, G.fec_inicio\r\n"
+				+ "Skip ?\r\n"
+				+ "First ?";
+
+        return jdbcTemplate.query(DYNAMIC_QUERY, ps -> {
+
+			int cont = 0;
+
+			if (fechaPago != null) {
+				cont++;
+				ps.setString(cont, fechaPago);
+			}
+
+			if (clave_empleado != null) {
+				cont++;
+				ps.setString(cont, clave_empleado);
+			}
+
+			if (importe_min != null) {
+				cont++;
+				ps.setDouble(cont, importe_min);
+			}
+
+			if (importe_max != null) {
+				cont++;
+				ps.setDouble(cont, importe_max);
+			}
+
+			if (idDelegacion != null) {
+				cont++;
+				ps.setString(cont, idDelegacion);
+			}
+
+			if (idCentroTrab != null) {
+				cont++;
+				ps.setString(cont, idCentroTrab);
+			}
+
+			if (claveServicio != null) {
+				cont++;
+				ps.setString(cont, claveServicio);
+			}
+
+			if (puesto != null) {
+				cont++;
+				ps.setString(cont, puesto);
+			}
+
+			if (estatus != null) {
+				cont++;
+				ps.setInt(cont, estatus);
+			}
+
+			logger.info("Prepared statement: "+ DYNAMIC_QUERY);
+
+		}, BeanPropertyRowMapper.newInstance(DatosGuardia.class));
+
+	}
+
+	@Override
+	public Long ConsultaDynamicGuardiasCount(
+			String fechaPago, String tipo, String clave_empleado, Double importe_min, Double importe_max,
+			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus) throws SQLException {
+
+		String QUERY_CONDITION = "";
+		String EMPLOYEE_FIELD = "";
+		String QUERY_TABLE_BASE = "";
+
+		List<Object> params = new ArrayList<>();
+
+		if (tipo.equals(String.valueOf("GI"))) {
+			QUERY_TABLE_BASE = "gys_guardias_emp";
+			EMPLOYEE_FIELD = "id_empleado";
+
+		}else if(tipo.equals(String.valueOf("GE"))){
+			QUERY_TABLE_BASE = "gys_guardias_ext";
+			EMPLOYEE_FIELD = "rfc";
+		}else{
+			throw new SQLException("No existe ese tipo de guardia en el sistema");
+		}
+
+		if (fechaPago != null) {
+			QUERY_CONDITION += "And G.fec_paga = ?\r\n";
+			params.add(fechaPago);
+		}
+
+		if (clave_empleado != null) {
+			if (tipo.equals(String.valueOf("GI"))) {
+				QUERY_CONDITION += "And id_empleado = ?\r\n";
+
+			} else {
+				QUERY_CONDITION += "And rfc = ?\r\n";
+			}
+			params.add(clave_empleado);
+		}
+
+		if (importe_min != null) {
+			QUERY_CONDITION += "And G.importe >= ?\r\n";
+			params.add(importe_min);
+		}
+
+		if (importe_max != null) {
+			QUERY_CONDITION += "And G.importe <= ?\r\n";
+			params.add(importe_max);
+		}
+
+		if (idDelegacion != null) {
+			QUERY_CONDITION += "And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n";
+			params.add(idDelegacion);
+		}
+
+		if (idCentroTrab != null) {
+			QUERY_CONDITION += "And C.id_centro_trabajo = ?\r\n";
+			params.add(idCentroTrab);
+		}
+
+		if (claveServicio != null) {
+			QUERY_CONDITION += "And G.id_clave_servicio = ?\r\n";
+			params.add(claveServicio);
+		}
+
+		if (puesto != null) {
+			QUERY_CONDITION += "And PU.id_puesto_plaza = ?\r\n";
+			params.add(puesto);
+		}
+
+		if (estatus != null) {
+			QUERY_CONDITION += "  And G.estatus = ?\r\n";
+			params.add(estatus);
+		}
+
+		final String DYNAMIC_QUERY = "Select Count(*)\r\n"
+				+ "From " + QUERY_TABLE_BASE + " G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE\r\n"
+				+ "Where G.fec_paga = P.fec_pago And \r\n"
+				+ "  G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
+				+ "  G.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
+				+ "  PU.id_sociedad = '01' And PU.id_empresa = '01' And\r\n"
+				+ "  G.id_clave_servicio = SE.id_clave_servicio And\r\n"
+				+ "  SE.id_empresa='01'\r\n"
+				+ QUERY_CONDITION
+				+ "Order by G.fec_paga desc, G.fec_inicio";
+
+//		return jdbcTemplate.queryForObject(DYNAMIC_QUERY, Long.class,
+//				fechaPago, clave_empleado, importe_min, importe_max, idDelegacion, idCentroTrab, claveServicio, puesto, estatus);
+		return jdbcTemplate.queryForObject(DYNAMIC_QUERY, params.toArray(), Long.class);
+	}
+
+
 
 	@Override
 	public List<DatosGuardia> ConsultaDynamicAuthGuardias(String fechaPago, String tipo, String idDelegacion,

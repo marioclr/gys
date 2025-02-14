@@ -360,7 +360,7 @@ public String STMT_UPDATES_AUTH_STATUS_1ext	= "MERGE INTO gys_autorizacion_guard
 
 	public String STMT_COUNT_AUTH_STATUS_INT = "SELECT COUNT(*) as gua_reg_int_conf\r\n"
 										 + "  FROM gys_autorizacion_guardias A\r\n"
-										 + "  INNER JOIN gys_guardias_emp \r\n"
+										 + "  INNER JOIN gys_guardias_emp S\r\n"
 										 + "    ON A.id_guardia = S.id \r\n"
 										 + "  INNER JOIN m4t_centros_trab C \r\n"
 										 + "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
@@ -377,7 +377,7 @@ public String STMT_UPDATES_AUTH_STATUS_1ext	= "MERGE INTO gys_autorizacion_guard
 
 	public String STMT_COUNT_AUTH_STATUS_EXT = "SELECT COUNT(*) as gua_reg_ext_conf\r\n"
 											+ "  FROM gys_autorizacion_guardias A\r\n"
-											+ "  INNER JOIN gys_guardias_ext \r\n"
+											+ "  INNER JOIN gys_guardias_ext S\r\n"
 											+ "    ON A.id_guardia = S.id \r\n"
 											+ "  INNER JOIN m4t_centros_trab C \r\n"
 											+ "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
@@ -463,6 +463,14 @@ public String STMT_UPDATES_AUTH_STATUS_2	= "MERGE INTO gys_autorizacion_guardias
 
 	List<DatosGuardia> ConsultaDynamicGuardias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
 			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus) throws SQLException;
+
+	List<DatosGuardia> ConsultaDynamicGuardiasPage(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
+											   String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus, int page, int size) throws SQLException;
+
+
+	Long ConsultaDynamicGuardiasCount(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
+									  String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus) throws SQLException;
+
 
 	List<DatosGuardia> ConsultaDynamicAuthGuardias(String fechaPago, String tipo, String idDelegacion, String idCentroTrab, Integer estatus);
 

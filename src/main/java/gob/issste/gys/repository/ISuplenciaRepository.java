@@ -464,7 +464,7 @@ public String STMT_UPDATES_AUTH_STATUS_2ext = "MERGE INTO gys_autorizacion_suple
 
 	public String STMT_COUNT_AUTH_STATUS_INT = "SELECT COUNT(*) as sup_reg_int_conf\r\n"
 			+ "  FROM gys_autorizacion_suplencias A\r\n"
-			+ "  INNER JOIN gys_suplencias_emp \r\n"
+			+ "  INNER JOIN gys_suplencias_emp S\r\n"
 			+ "    ON A.id_suplencia = S.id \r\n"
 			+ "  INNER JOIN m4t_centros_trab C \r\n"
 			+ "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
@@ -481,7 +481,7 @@ public String STMT_UPDATES_AUTH_STATUS_2ext = "MERGE INTO gys_autorizacion_suple
 
 	public String STMT_COUNT_AUTH_STATUS_EXT = "SELECT COUNT(*) as sup_reg_ext_conf\r\n"
 			+ "  FROM gys_autorizacion_suplencias A\r\n"
-			+ "  INNER JOIN gys_suplencias_ext \r\n"
+			+ "  INNER JOIN gys_suplencias_ext S\r\n"
 			+ "    ON A.id_suplencia = S.id \r\n"
 			+ "  INNER JOIN m4t_centros_trab C \r\n"
 			+ "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"

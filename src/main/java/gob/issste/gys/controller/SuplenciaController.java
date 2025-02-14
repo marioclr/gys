@@ -809,11 +809,24 @@ public class SuplenciaController {
 					switch (tipo) {
 					
 						case "SI":
-								suplenciaRepository.updateAuthStatusSuplencias2(tipo, strFecha,  idDeleg, idDeleg, idUsuario);
+							int contSupsAuthInt = suplenciaRepository.countAuthSuplenciasStatusInt(strFecha, idDeleg);
+
+							if(contSupsAuthInt > 1){
+								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de suplencias", HttpStatus.INTERNAL_SERVER_ERROR, null);
+							}
+
+							suplenciaRepository.updateAuthStatusSuplencias2(tipo, strFecha,  idDeleg, idDeleg, idUsuario);
 							break;
 	
 						case "SE":
-								suplenciaRepository.updateAuthStatusSuplencias2Ext(tipo, strFecha,  idDeleg, idDeleg, idUsuario);
+							int contSupsAuthExt = suplenciaRepository.countAuthSuplenciasStatusExt(strFecha, idDeleg);
+
+							if(contSupsAuthExt > 1){
+								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de suplencias", HttpStatus.INTERNAL_SERVER_ERROR, null);
+							}
+
+							suplenciaRepository.updateAuthStatusSuplencias2Ext(tipo, strFecha,  idDeleg, idDeleg, idUsuario);
+
 							break;
 
 						default:
