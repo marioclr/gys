@@ -85,7 +85,7 @@ public class SuplenciaController {
 			String strDate = dateFormat.format(quincena);
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(strDate, clave_empleado);
 			int riesgos = empleadoRepository.ConsultaRiesgosEmp(clave_empleado, strDate);
-
+//Primer metodo
 			importe = suplenciaService.CalculaImporteSuplencia( strDate, empleado.getClave_empleado(), dias, tipo, riesgos );
 			BigDecimal importe2 = new BigDecimal(importe).setScale(2, RoundingMode.HALF_UP);
 
@@ -465,6 +465,7 @@ public class SuplenciaController {
 
 			// Fin de las Validaciones presupuestales
 
+			//Segundo metodo
 			double importe = suplenciaService.CalculaImporteSuplencia(suplencia.getFec_paga(), 
 					empleado, suplencia.getDias(), suplencia.getTipo_suplencia(), riesgos);
 
@@ -685,7 +686,7 @@ public class SuplenciaController {
 					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			// Fin de las Validaciones presupuestales
-
+//Primer metodo
 			double importe = suplenciaService.CalculaImporteSuplencia(suplencia.getFec_paga(), 
 					suplencia.getEmpleado_suplir().getClave_empleado(), suplencia.getDias(), suplencia.getTipo_suplencia(), riesgos);
 

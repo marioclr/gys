@@ -29,6 +29,8 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 	@Autowired
 	ITabuladorRepository tabuladorRepository;
 
+	//Primer metodo
+
 	@Override
 	public double CalculaImporteSuplencia(String quincena, String clave_empleado, int dias, String tipo, int riesgos ) {
 
@@ -75,91 +77,84 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 
         	logger.info("Factor turno: " + factor.getFact_turno() + ", Factor jornada: " + factor.getFact_jornada() + ", Turno: " + turno);
 
-			switch(turno) {
-	    		case 11, 12:
-	    			if (dias == 5) {
-	    				importe = importe * dias * 1.4;
-	    			} else {
-	    				importe = importe * dias;
-	    			}
-	    			break;
-				case 13:
-					if (dias == 5) {
-						importe = importe * dias * 1.4 * 2;
-					} else {
-						importe = importe * dias * 2;
-					}
-					break;
-				case 21, 22, 23:
-					if (dias == 5) {
-	    				importe = importe * dias * 1.4 * 2;
-	    			} else {
-	    				importe = importe * dias * 2;
-	    			}
-					break;
-	    		case 31, 32:
-	    			if (dias >= 2) {
-	    				importe = importe * dias * 1.4 * 2;
-	    			} else {
-	    				importe = importe * dias * 2;
-	    			}
-	    			break;
-				case 41, 42:
-					if (dias >= 1) {
-						importe = importe * dias * 1.4 * 4;
-					} else {
-						importe = importe * dias * 4;
-					}
-					break;
-        	}
-
-/**
- *  Mecanica anterior
- */
-//        	switch(turno) {
+//			switch(turno) {
 //	    		case 11, 12:
-//	    			if (dias >= 5) {
+//	    			if (dias == 5) {
 //	    				importe = importe * dias * 1.4;
 //	    			} else {
 //	    				importe = importe * dias;
 //	    			}
 //	    			break;
-//	    		case 13:
-//	    			if (dias >= 5) {
+//				case 13:
+//					if (dias == 5) {
+//						importe = importe * dias * 1.4 * 2;
+//					} else {
+//						importe = importe * dias * 2;
+//					}
+//					break;
+//				case 21, 22, 23:
+//					if (dias == 5) {
 //	    				importe = importe * dias * 1.4 * 2;
 //	    			} else {
 //	    				importe = importe * dias * 2;
 //	    			}
-//	    			break;
-//	    		case 41, 42:
-//	    			if (dias >= 2) {
-//	    				importe = importe * dias * 1.4 * 4;
-//	    			} else {
-//	    				importe = importe * dias * 4;
-//	    			}
-//	    			break;
+//					break;
 //	    		case 31, 32:
-//	    			if (dias >= 4) {
+//	    			if (dias >= 2) {
 //	    				importe = importe * dias * 1.4 * 2;
 //	    			} else {
 //	    				importe = importe * dias * 2;
 //	    			}
 //	    			break;
-//	    		case 21:
-//	    			if (dias >= 3) {
-//	    				importe = importe * dias * 1.4 * 2;
-//	    			} else {
-//	    				importe = importe * dias * 2;
-//	    			}
-//	    			break;
-//	    		case 22:
-//	    			if (dias >= 3) {
-//	    				importe = importe * dias * 1.4 * 2;
-//	    			} else {
-//	    				importe = importe * dias * 2;
-//	    			}
-//	    			break;
+//				case 41, 42:
+//					if (dias >= 1) {
+//						importe = importe * dias * 1.4 * 4;
+//					} else {
+//						importe = importe * dias * 4;
+//					}
+//					break;
 //        	}
+
+/**
+ *  Mecanica anterior
+ */
+        	switch(turno) {
+	    		case 11, 12:
+	    			if (dias >= 5) {
+	    				importe = importe * dias * 1.4;
+	    			} else {
+	    				importe = importe * dias;
+	    			}
+	    			break;
+	    		case 13:
+	    			if (dias >= 5) {
+	    				importe = importe * dias * 1.4 * 2;
+	    			} else {
+	    				importe = importe * dias * 2;
+	    			}
+	    			break;
+	    		case 21, 22, 23:
+	    			if (dias >= 3) {
+	    				importe = importe * dias * 1.4 * 2;
+	    			} else {
+	    				importe = importe * dias * 2;
+	    			}
+	    			break;
+				case 31, 32:
+					if (dias >= 4) {
+						importe = importe * dias * 1.4 * 2;
+					} else {
+						importe = importe * dias * 2;
+					}
+					break;
+				case 41, 42:
+					if (dias >= 2) {
+						importe = importe * dias * 1.4 * 4;
+					} else {
+						importe = importe * dias * 4;
+					}
+					break;
+            }
         }
         return importe;
 	}
@@ -190,6 +185,7 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 				s.setRiesgos(0);
 			}
 			try {
+				//Primer metodo
 				s.setImporte(this.CalculaImporteSuplencia(fechaPago, s.getClave_empleado_suplir(), s.getDias(), tipo, s.getRiesgos()));
 			} catch(Exception ex) {
 				s.setImporte((double) 0);
@@ -219,6 +215,7 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 			suplenciaRepository.deleteSuplenciaExt(id);
 	}
 
+	//Segundo metodo
 	@Override
 	public double CalculaImporteSuplencia(String quincena, DatosEmpleado empleado, int dias, String tipo, int riesgos) {
 		//int riesgos = 0;
@@ -306,21 +303,14 @@ public class SuplenciaServiceImpl implements ISuplenciaService {
 	    				importe = importe * dias * 2;
 	    			}
 	    			break;
-	    		case 21:
+	    		case 21, 22, 23:
 	    			if (dias >= 3) {
 	    				importe = importe * dias * 1.4 * 2;
 	    			} else {
 	    				importe = importe * dias * 2;
 	    			}
 	    			break;
-	    		case 22:
-	    			if (dias >= 3) {
-	    				importe = importe * dias * 1.4 * 2;
-	    			} else {
-	    				importe = importe * dias * 2;
-	    			}
-	    			break;
-        	}
+            }
         }
         return importe;
 	}
