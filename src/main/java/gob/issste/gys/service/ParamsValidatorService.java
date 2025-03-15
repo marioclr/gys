@@ -43,6 +43,23 @@ public class ParamsValidatorService {
         return list.toArray().length != 0;
     }
 
+    //    public boolean sqlInjectionObjectValidator(List<String> inputData) {
+//        List<String> list = new ArrayList<>();
+//        for (String inputDataElement : inputData) {
+//            if (inputDataElement != null) {
+//                String[] words = inputDataElement.toUpperCase().split("\\s+");
+//                for (String word : words) {
+//                    for (String sqlInjection : SQL_INJECTIONS) {
+//                        if (word.equals(sqlInjection)) {
+//                            list.add(inputDataElement.toUpperCase());
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return !list.isEmpty();
+//    }
+
     public static boolean csvInjectionObjectValidator(List<String> inputData) {
         List<String> foundEvillist = new ArrayList<>();
         for (String inputDataElement : inputData) {
