@@ -30,11 +30,11 @@ public class LoginController {
     public ResponseEntity<Object> login(
             @RequestParam String data) {
         try {
-            String originalData = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
+            String originalData = encryptionService.decryptGCM(data, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
+//            String originalData = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
             ObjectMapper objectMapper = new ObjectMapper();
             Login login = objectMapper.readValue(originalData, Login.class);
             Usuario user = usuarioRepository.findByName(login.getClaveUser());
-
             if (Objects.isNull( user )){
                 return  ResponseHandler.generateResponse(
                         "Usuario no encontrado", HttpStatus.NOT_FOUND, null);
@@ -46,10 +46,10 @@ public class LoginController {
                     } else if(user.getIntentos() == 3){
                         usuarioRepository.updateActive(false, user.getIdUsuario());
                         return  ResponseHandler.generateResponse(
-                                "Usuario bloqueado, contacte a un administrador", HttpStatus.FORBIDDEN, null);
+                                "Usuario bloqueado, contacte a un administrador", HttpStatus.INTERNAL_SERVER_ERROR, null);
                     }
                     return  ResponseHandler.generateResponse(
-                            "Usuario y/o contraseña incorrectos", HttpStatus.FORBIDDEN, null);
+                            "Usuario y/o contraseña incorrectos", HttpStatus.INTERNAL_SERVER_ERROR, null);
                 } else {
                     user.setCentrosTrabajo(usuarioRepository.getCentTrabForUsu(user.getIdUsuario()));
                     user = usuarioRepository.getPermissionsForUser(user);
@@ -69,7 +69,8 @@ public class LoginController {
                     map.put("auth", token);
                     JSONObject jsonArray = new JSONObject(map);
                     String jsonString = jsonArray.toString();
-                    String encryptedUser = encryptionService.encrypt(jsonString, EncryptionService.BINDING_KEY);
+//                    String encryptedUser = encryptionService.encrypt(jsonString, EncryptionService.BINDING_KEY);
+                    String encryptedUser = encryptionService.encryptGCM(jsonString, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
                     usuarioRepository.updateAttemps(0, user.getIdUsuario());
                     return ResponseHandler.generateResponse("Autorizado", HttpStatus.OK, encryptedUser);
                 }

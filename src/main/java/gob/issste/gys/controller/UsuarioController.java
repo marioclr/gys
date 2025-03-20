@@ -162,8 +162,8 @@ public class UsuarioController {
     public ResponseEntity<Object> updateUsuario(
             @Parameter(description = "Usuario encriptado.", required = true)
             @PathVariable("user") String encryptedUser) throws Exception {
-
-        String originalData = encryptionService.decrypt(encryptedUser, EncryptionService.BINDING_KEY);
+//        String originalData = encryptionService.decrypt(encryptedUser, EncryptionService.BINDING_KEY);
+        String originalData = encryptionService.decryptGCM(encryptedUser, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
         ObjectMapper objectMapper = new ObjectMapper();
         Usuario usuario = objectMapper.readValue(originalData, Usuario.class);
         Usuario _usuario = usuarioRepository.findById(usuario.getIdUsuario());
@@ -245,7 +245,8 @@ public class UsuarioController {
             }
             JSONArray jsonArray = new JSONArray(usuarios);
             String jsonString = jsonArray.toString();
-            String encryptedUsers = encryptionService.encrypt(jsonString, EncryptionService.BINDING_KEY);
+//            String encryptedUsers = encryptionService.encrypt(jsonString, EncryptionService.BINDING_KEY);
+            String encryptedUsers = encryptionService.encryptGCM(jsonString, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
             return
                     ResponseHandler
                             .generateResponse("Obtiene todos los usuarios del Sistema de manera exitosa"
@@ -271,7 +272,8 @@ public class UsuarioController {
     ) {
 
         try {
-            String originalData = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
+//            String originalData = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
+            String originalData = encryptionService.decryptGCM(data, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
             int id = Integer.parseInt(originalData);
             Usuario usuario = usuarioRepository.findById(id);
 
@@ -290,7 +292,8 @@ public class UsuarioController {
                 usuario = usuarioRepository.getPermissionsForUser(usuario);
                 JSONObject jsonObject = new JSONObject(usuario);
                 String jsonString = jsonObject.toString();
-                String encryptedUser = encryptionService.encrypt(jsonString, EncryptionService.BINDING_KEY);
+//                String encryptedUser = encryptionService.encrypt(jsonString, EncryptionService.BINDING_KEY);
+                String encryptedUser = encryptionService.encryptGCM(jsonString, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
                 return ResponseHandler.generateResponse("Usuario encontrado", HttpStatus.OK, encryptedUser);
 
             } else {
@@ -312,7 +315,8 @@ public class UsuarioController {
             @Parameter(description = "El ID del usuario a eliminar", required = true)
             @PathVariable("id") String id) {
         try {
-            String originalData = encryptionService.decrypt(id, EncryptionService.BINDING_KEY);
+//            String originalData = encryptionService.decrypt(id, EncryptionService.BINDING_KEY);
+            String originalData = encryptionService.decryptGCM(id, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
             int idUsuario = Integer.parseInt(originalData);
 //			Usuario usuario = usuarioRepository.findById(id);
             int result = usuarioRepository.deleteById(idUsuario);
@@ -407,7 +411,8 @@ public class UsuarioController {
     ) {
 
         try {
-            String decryptedJson = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
+//            String decryptedJson = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
+            String decryptedJson = encryptionService.decryptGCM(data, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
             JSONObject jsonObject = new JSONObject(decryptedJson);
             final String encryptedPwd = securityService.getEncryptedPwd(jsonObject.getString("pwd"));
             final int result = usuarioRepository.updatePassword(encryptedPwd, jsonObject.getInt("id"));
@@ -430,7 +435,8 @@ public class UsuarioController {
             @PathVariable(required = true) String data
     ) throws SQLException {
         try {
-            String decryptedJson = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
+//            String decryptedJson = encryptionService.decrypt(data, EncryptionService.BINDING_KEY);
+            String decryptedJson = encryptionService.decryptGCM(data, EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
             JSONObject jsonObject = new JSONObject(decryptedJson);
             final int idUsuario = jsonObject.getInt("id");
             final boolean active = jsonObject.getBoolean("active");

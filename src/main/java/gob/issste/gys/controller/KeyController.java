@@ -2,7 +2,6 @@ package gob.issste.gys.controller;
 
 import gob.issste.gys.security.JWTAuthenticationConfig;
 import gob.issste.gys.service.EncryptionService;
-import gob.issste.gys.service.SecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,9 +15,8 @@ public class KeyController {
     @GetMapping("/gs3c73t")
     public String generateAESKey() {
         try {
-            return jwtAuthenticationConfig.getKeyJWTToken(SecurityService.GENERATED_KEY, "");
+            return jwtAuthenticationConfig.getKeyJWTToken(EncryptionService.BINDING_KEY, EncryptionService.BINDING_IV);
         } catch (Exception e) {
-            e.printStackTrace();
             return "Error al enviar la llave AES";
         }
     }

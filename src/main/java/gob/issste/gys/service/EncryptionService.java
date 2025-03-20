@@ -3,6 +3,7 @@ package gob.issste.gys.service;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
@@ -10,6 +11,42 @@ import java.util.Base64;
 public class EncryptionService {
     public static String BINDING_KEY = "";
     public static String BINDING_IV = "";
+    private static final String AES = "AES";
+    private static final String AES_GCM_NO_PADDING = "AES/GCM/NoPadding";
+    private static final int GCM_TAG_LENGTH = 16;
+
+    public String encryptGCM(String plainText, String key, String iv) throws Exception {
+        byte[] keyBytes = Base64.getUrlDecoder().decode(key);
+        byte[] ivBytes = Base64.getUrlDecoder().decode(iv);
+
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, AES);
+        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, ivBytes);
+
+        Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmParameterSpec);
+
+        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes());
+
+        return Base64.getUrlEncoder().encodeToString(encryptedBytes);
+    }
+
+    public String decryptGCM(String encryptedText, String key, String iv) throws Exception {
+        byte[] keyBytes = Base64.getUrlDecoder().decode(key);
+        byte[] ivBytes = Base64.getUrlDecoder().decode(iv);
+        byte[] encryptedBytes = Base64.getUrlDecoder().decode(encryptedText);
+
+        SecretKeySpec keySpec = new SecretKeySpec(keyBytes, AES);
+        GCMParameterSpec gcmParameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH * 8, ivBytes);
+
+        Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmParameterSpec);
+
+        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+
+        return new String(decryptedBytes);
+    }
+
+//----------------------------------Encriptación AES/ECB con Padding------------------------------------------------------
 
     public String encrypt(String plainText, String encodedKey) {
         try {
@@ -39,7 +76,6 @@ public class EncryptionService {
         }catch (Exception e){
             return "Error al descifrar el valor: " + e.getMessage();
         }
-
     }
 }
 
