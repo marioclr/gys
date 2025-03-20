@@ -3,6 +3,7 @@ package gob.issste.gys.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.model.*;
 import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,17 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
-import gob.issste.gys.model.DatosAdscripcion;
-import gob.issste.gys.model.DatosJornada;
-import gob.issste.gys.model.DatosMatrizPuestos;
-import gob.issste.gys.model.DatosNivel;
-import gob.issste.gys.model.DatosPuesto;
-import gob.issste.gys.model.DatosServicio;
-import gob.issste.gys.model.Delegacion;
-import gob.issste.gys.model.Horario;
-import gob.issste.gys.model.Incidencia;
-import gob.issste.gys.model.Paga;
-import gob.issste.gys.model.Usuario;
 import gob.issste.gys.repository.IDatosRepository;
 import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
@@ -205,6 +195,24 @@ public class DatosController {
 			return ResponseHandler.generateResponse("Se encontró el catálogo de delegaciones", HttpStatus.OK, delegaciones);
 		} catch (Exception e) {
 			return ResponseHandler.generateResponse("Error al consultar el catálogo de delegaciones", HttpStatus.INTERNAL_SERVER_ERROR, null);
+		}
+	}
+
+	@Operation(summary = "Obtener el catálogo de delegaciones", description = "Obtener el catálogo de delegaciones", tags = { "Datos" })
+	@GetMapping("/datos/delegPorFecha")
+	public ResponseEntity<Object> getDelegacionesPorFecha(
+			@Parameter(description = "Id de la fecha", required = false) @RequestParam(required = false) int idFecha
+	) {
+
+		try {
+			List<DelegacionPorFecha> delegaciones = new ArrayList<DelegacionPorFecha>();
+			delegaciones = datosRepository.getDatosDelegacionesPorFecha(idFecha);
+			if (delegaciones.isEmpty()) {
+				return ResponseHandler.generateResponse("No existen registros en el catálogo de delegaciones por fecha", HttpStatus.NOT_FOUND, null);
+			}
+			return ResponseHandler.generateResponse("Se encontró el catálogo de delegaciones por fecha", HttpStatus.OK, delegaciones);
+		} catch (Exception e) {
+			return ResponseHandler.generateResponse("Error al consultar el catálogo de delegaciones por fecha", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 

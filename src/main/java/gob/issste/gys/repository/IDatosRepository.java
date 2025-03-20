@@ -115,6 +115,14 @@ public interface IDatosRepository {
 	public String QUERY_GET_DELEGACIONES			= "Select * From m4t_delegaciones";
 	List<Delegacion> getDatosDelegaciones();
 
+	public String QUERY_GET_DELEGACIONES_FECHA			= "Select D.id_div_geografica, D.n_div_geografica, F.estatus\r\n"+
+														  "From m4t_delegaciones D, gys_DelegacionesPorFecha F\r\n"+
+														  "  Where D.id_div_geografica = F.iddelegacion\r\n"+
+														  "  And F.idFecha = ?";
+
+
+	List<DelegacionPorFecha> getDatosDelegacionesPorFecha(int idFecha);
+
 	public String QUERY_GET_HORARIOS				= "Select * From m4t_horarios";
 	List<Horario> getHorarios();
 

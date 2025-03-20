@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import gob.issste.gys.repository.GuardiaRepository;
+import gob.issste.gys.model.DelegacionPorFecha;
 import gob.issste.gys.repository.IDatosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -80,8 +79,8 @@ public class PagaController {
 				}
 				int idPaga = pagaRepository.save(paga);
 
-				for(Delegacion deleg:paga.getDelegaciones()) {
-					pagaRepository.saveDelegForFecha(idPaga, deleg.getId_div_geografica(), paga.getId_usuario());
+				for(DelegacionPorFecha deleg:paga.getDelegaciones()) {
+					pagaRepository.saveDelegForFecha(idPaga, deleg.getId_div_geografica(), deleg.getEstatus(), paga.getId_usuario());
 				}
 
 				platformTransactionManager.commit(status);
@@ -118,10 +117,10 @@ public class PagaController {
 
 			pagaRepository.update(_paga);
 
-			pagaRepository.removeDelegForFecha(id);
-			for(Delegacion deleg:paga.getDelegaciones()) {
-				pagaRepository.saveDelegForFecha(id, deleg.getId_div_geografica(), paga.getId_usuario());
-			}
+//			pagaRepository.removeDelegForFecha(id);
+//			for(DelegacionPorFecha deleg:paga.getDelegaciones()) {
+//				pagaRepository.saveDelegForFecha(id, deleg.getId_div_geografica(), 1,paga.getId_usuario());
+//			}
 
 			switch (paga.getEstatus()) {
 
@@ -236,7 +235,7 @@ public class PagaController {
 
 		if (paga != null) {
 
-			paga.setDelegaciones(pagaRepository.getDelegForFecha(id));
+			paga.setDelegacionesPorFecha(pagaRepository.getDelegForFecha(id));
 
 			return ResponseHandler.generateResponse("Se pudo obtener la información de fecha de control de pagos en el Sistema de manera exitosa", HttpStatus.OK, paga);
 		} else {
@@ -301,33 +300,24 @@ public class PagaController {
 		List<Paga> pagas;
 
 		try {
+			Usuario usuario = usuarioRepository.findById(idUsuario);
 
-			if (idUsuario != null) {
-				Usuario usuario = usuarioRepository.findById(idUsuario);
-				pagas = new ArrayList<>();
+            pagas = new ArrayList<>();
 
-				if (usuario != null) {
-					switch(usuario.getNivelVisibilidad().getIdNivelVisibilidad()) {
+            if (usuario != null) {
+                pagas = switch (usuario.getNivelVisibilidad().getIdNivelVisibilidad()) {
+                    case 1 -> pagaRepository.findActivePagas();
+                    case 2, 3 ->
+//							pagas = pagaRepository.findActivePagasByUser(usuario.getDelegacion().getId_div_geografica());
+                            pagaRepository.findActivePagasByDel(usuario.getDelegacion().getId_div_geografica());
+                    default -> pagas;
+                };
 
-						case 1:
-							pagas = pagaRepository.findActivePagas();
-							break;
+            } else {
+                return ResponseHandler.generateResponse("No se pudo obtener la información del usuario indicado para consultar las fechas de control de pagos de GyS activas en el Sistema", HttpStatus.NOT_FOUND, null);
+            }
 
-						case 2,3:
-							pagas = pagaRepository.findActivePagasByUser(idUsuario);
-							break;
-
-					}
-
-				} else {
-					return ResponseHandler.generateResponse("No se pudo obtener la información del usuario indicado para consultar las fechas de control de pagos de GyS activas en el Sistema", HttpStatus.NOT_FOUND, null);
-				}
-
-			} else {				
-				pagas = pagaRepository.findActivePagas();
-			}
-
-			if (pagas.isEmpty()) {
+            if (pagas.isEmpty()) {
 
 				return ResponseHandler.generateResponse("No existen fechas de control de pagos de GyS abiertas, en el Sistema", HttpStatus.NOT_FOUND, null);
 			}

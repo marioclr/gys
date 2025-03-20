@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import gob.issste.gys.model.Delegacion;
+import gob.issste.gys.model.DelegacionPorFecha;
 import gob.issste.gys.model.Paga;
 
 public interface IPagaRepository {
@@ -41,17 +42,24 @@ public interface IPagaRepository {
 	public String QUERY_GET_ACTIVE_PAGAS   = "SELECT * from gys_fechas_control WHERE estatus = 1";
 	List<Paga> findActivePagas();
 
-	public String QUERY_GET_ACTIVE_PAGAS_BY_USR = "Select *\r\n"
-											+ "From gys_fechas_control A, gys_DelegacionesPorFecha B\r\n"
-											+ "Where A.id = B.IdFecha\r\n"
-											+ "  And A.estatus = 1\r\n"
-											+ "  And (B.IdDelegacion = '00'\r\n"
-											+ "    Or B.IdDelegacion IN (\r\n"
-											+ "      Select iddelegacion From gys_Usuarios\r\n"
-											+ "      Where idusuario = ?\r\n"
-											+ "    )\r\n"
-											+ "  )";
-	List<Paga> findActivePagasByUser(int idUser);
+//	public String QUERY_GET_ACTIVE_PAGAS_BY_USR = "Select *\r\n"
+//											+ "From gys_fechas_control A, gys_DelegacionesPorFecha B\r\n"
+//											+ "Where A.id = B.IdFecha\r\n"
+//											+ "  And A.estatus = 1\r\n"
+//											+ "  And (B.IdDelegacion = '00'\r\n"
+//											+ "    Or B.IdDelegacion IN (\r\n"
+//											+ "      Select iddelegacion From gys_Usuarios\r\n"
+//											+ "      Where idusuario = ?\r\n"
+//											+ "    )\r\n"
+//											+ "  )";
+//List<Paga> findActivePagasByUser(String idDivGeo);
+	public String QUERY_GET_ACTIVE_PAGAS_BY_DEL = "Select *\r\n"
+			+ "From gys_fechas_control A, gys_DelegacionesPorFecha B\r\n"
+			+ "Where A.id = B.IdFecha\r\n"
+			+ "  And B.estatus = 1\r\n"
+			+ "  And B.IdDelegacion = ?";
+
+	List<Paga> findActivePagasByDel(String idDivGeo);
 
 	public String QUERY_GET_PAGAS_BY_STATUS = "SELECT * From gys_fechas_control\r\n"
 											+ "WHERE anio_ejercicio = ?\r\n"
@@ -128,17 +136,17 @@ public interface IPagaRepository {
 	 * Bloque de operaciones del Repositorio de Fechas de Control de pagos para gestionar la Visibilidad
 	 * de cada fecha de control, creada dentro del sistema.
 	 */
-    public String QUERY_ADD_DELEG_X_FECHA	= "Insert Into gys_DelegacionesPorFecha ( IdFecha, IdDelegacion, id_usuario ) Values ( ?, ?, ? )";
-    int saveDelegForFecha(int IdFecha, String IdDeleg, String id_usuario);
+    public String QUERY_ADD_DELEG_X_FECHA	= "Insert Into gys_DelegacionesPorFecha ( IdFecha, IdDelegacion, estatus, id_usuario ) Values ( ?, ?, ?, ? )";
+    int saveDelegForFecha(int IdFecha, String IdDeleg, int estatus, String id_usuario);
 
     public String QUERY_DEL_FOR_FECHA       = "Delete gys_DelegacionesPorFecha Where IdFecha=?";
     int removeDelegForFecha(int IdFecha);
 
-    public String QUERY_GET_DEL_FECHA		= "Select id_div_geografica, n_div_geografica\r\n"
+    public String QUERY_GET_DEL_FECHA		= "Select id_div_geografica, n_div_geografica, estatus\r\n"
 								    		+ "From gys_DelegacionesPorFecha F, m4t_delegaciones D\r\n"
 								    		+ "Where F.IdDelegacion = D.id_div_geografica\r\n"
 								    		+ "  And IdFecha = ?";
-    List<Delegacion> getDelegForFecha(int IdFecha);
+    List<DelegacionPorFecha> getDelegForFecha(int IdFecha);
 
     /*
      * Bloque de operaciones del Repositorio de Fechas de Control de pagos, para gestionar la fase de

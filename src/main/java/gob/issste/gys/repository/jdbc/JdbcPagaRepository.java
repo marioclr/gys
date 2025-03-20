@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import gob.issste.gys.model.DelegacionPorFecha;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,10 +120,16 @@ public class JdbcPagaRepository implements IPagaRepository {
 		return jdbcTemplate.query(QUERY_GET_ACTIVE_PAGAS, BeanPropertyRowMapper.newInstance(Paga.class));
 	}
 
+//	@Override
+//	public List<Paga> findActivePagasByUser(int idUser) {
+//		logger.info(QUERY_GET_ACTIVE_PAGAS_BY_USR);
+//		return jdbcTemplate.query(QUERY_GET_ACTIVE_PAGAS_BY_USR, BeanPropertyRowMapper.newInstance(Paga.class), idUser);
+//	}
+
 	@Override
-	public List<Paga> findActivePagasByUser(int idUser) {
-		logger.info(QUERY_GET_ACTIVE_PAGAS_BY_USR);
-		return jdbcTemplate.query(QUERY_GET_ACTIVE_PAGAS_BY_USR, BeanPropertyRowMapper.newInstance(Paga.class), idUser);
+	public List<Paga> findActivePagasByDel(String idDivGeo) {
+		logger.info(QUERY_GET_ACTIVE_PAGAS_BY_DEL);
+		return jdbcTemplate.query(QUERY_GET_ACTIVE_PAGAS_BY_DEL, BeanPropertyRowMapper.newInstance(Paga.class), idDivGeo);
 	}
 
 	@Override
@@ -204,9 +211,9 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
-	public int saveDelegForFecha(int IdFecha, String IdDeleg, String id_usuario) {
+	public int saveDelegForFecha(int IdFecha, String IdDeleg, int estatus, String id_usuario) {
 		logger.info(QUERY_ADD_DELEG_X_FECHA);
-		return jdbcTemplate.update(QUERY_ADD_DELEG_X_FECHA, IdFecha, IdDeleg, id_usuario);
+		return jdbcTemplate.update(QUERY_ADD_DELEG_X_FECHA, IdFecha, IdDeleg, estatus, id_usuario);
 	}
 
 	@Override
@@ -216,14 +223,11 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
-	public List<Delegacion> getDelegForFecha(int IdFecha) {
+	public List<DelegacionPorFecha> getDelegForFecha(int IdFecha) {
 		logger.info(QUERY_GET_DEL_FECHA);
 
-		List<Delegacion> delegacionList =
-				this.jdbcTemplate.query(QUERY_GET_DEL_FECHA,
-				BeanPropertyRowMapper.newInstance(Delegacion.class), IdFecha);
-
-		return delegacionList;
+        return this.jdbcTemplate.query(QUERY_GET_DEL_FECHA,
+        BeanPropertyRowMapper.newInstance(DelegacionPorFecha.class), IdFecha);
 	}
 
 	@Override
