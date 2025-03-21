@@ -123,8 +123,13 @@ public class PagaController {
 //			}
 
 			switch (paga.getEstatus()) {
+				case 1:
+					pagaRepository.changeEstatusForAllDelegByDate(id, 1);
+					break;
 
-				case 2: // Cambio a estatus de abierta a cerrada 
+				case 2: // Cambio a estatus de abierta a cerrada
+
+					pagaRepository.changeEstatusForAllDelegByDate(id, 2);
 
 					pagaRepository.BorraAuthGuardias(paga);
 					pagaRepository.AuthGuardiasInt(paga);
@@ -133,6 +138,7 @@ public class PagaController {
 					pagaRepository.BorraAuthSuplencias(paga);
 					pagaRepository.AuthSuplenciasInt(paga);
 					pagaRepository.AuthSuplenciasExt(paga);
+
 
 					break;
 
@@ -366,6 +372,42 @@ public class PagaController {
 
 			return ResponseHandler.generateResponse("La Fecha de control no se encuentra en estatus de cerrada u otro estatus posterior", HttpStatus.OK, false);
 		}
-	}	
+	}
+
+	@Operation(summary = "Cambia el estatus individual por delegacion",
+				description = "Cambia el estatus individual por delegacion",
+				tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/updateByDeleg")
+	public ResponseEntity<Object> changeDateEstatusByDeleg(
+			@RequestParam(required = true)
+			 int idFecha,
+			@RequestParam(required = true)
+			int estatus,
+			@RequestParam(required = true)
+			String idDeleg
+	) {
+		try {
+			int result = 0;
+			if(idDeleg != null){
+				result = pagaService.changeEstatusByDeleg(idFecha, idDeleg, estatus);
+				return ResponseHandler.generateResponse(
+						"Fecha actualizada con éxito"
+						,HttpStatus.OK
+						,result);
+			} else {
+				result = pagaService.changeEstatusForAllDelegByDate(idFecha, estatus);
+				return ResponseHandler.generateResponse(
+						"Fechas actualizadas con éxito"
+						,HttpStatus.OK
+						,result);
+			}
+
+		} catch (Exception e) {
+				return ResponseHandler.generateResponse(
+					"Error al actualizar la fecha"
+						,HttpStatus.INTERNAL_SERVER_ERROR
+						,e.getMessage());
+		}
+	}
 
 }

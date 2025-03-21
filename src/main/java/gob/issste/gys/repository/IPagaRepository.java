@@ -206,4 +206,16 @@ public interface IPagaRepository {
 											+ "Where fec_pago = ? And estatus >= 2";
 	public int verifica_paga_cerrada(String fecha);
 
+	public final String UPDATE_DATE_BY_DELEG = "Update gys_delegacionesporfecha\r\n" +
+												"Set estatus=?\r\n" +
+												"Where idfecha=?\r\n" +
+												"And iddelegacion=?";
+
+    int changeEstatusByIdDeleg(int idFecha, String idDeleg, int estatus);
+
+	public final String UPDATE_ESTATUS_FEC_DELEG = "Update gys_delegacionesporfecha \r\n"+
+													"Set estatus = ? \r\n"+
+													"Where idfecha= ?";
+
+	int changeEstatusForAllDelegByDate(int idFecha, int estatus);
 }

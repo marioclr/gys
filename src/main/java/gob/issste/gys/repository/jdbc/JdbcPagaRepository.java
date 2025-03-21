@@ -273,4 +273,17 @@ public class JdbcPagaRepository implements IPagaRepository {
 				fecha );
 	}
 
+	@Override
+	public int changeEstatusByIdDeleg(int idFecha, String idDeleg, int estatus) {
+		logger.info(UPDATE_DATE_BY_DELEG);
+		return jdbcTemplate.update(UPDATE_DATE_BY_DELEG, estatus, idFecha, idDeleg);
+	}
+
+	@Override
+	public int changeEstatusForAllDelegByDate(int idFecha, int estatus) {
+		logger.info(UPDATE_ESTATUS_FEC_DELEG);
+		return jdbcTemplate.update(UPDATE_ESTATUS_FEC_DELEG, estatus, idFecha);
+	}
+
+
 }

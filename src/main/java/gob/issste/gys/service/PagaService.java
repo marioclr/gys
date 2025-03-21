@@ -102,4 +102,11 @@ public class PagaService {
 			return true;
 	}
 
+    public int changeEstatusByDeleg(int idFecha, String idDeleg, int estatus) {
+		return pagaRepository.changeEstatusByIdDeleg(idFecha, idDeleg, estatus);
+    }
+
+	public int changeEstatusForAllDelegByDate(int idFecha, int estatus) {
+		return pagaRepository.changeEstatusForAllDelegByDate(idFecha, estatus);
+	}
 }

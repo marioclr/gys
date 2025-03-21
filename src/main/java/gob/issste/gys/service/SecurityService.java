@@ -31,10 +31,8 @@ public class SecurityService {
     public static final String PROD_SERVER_URL = "https://sigys.issste.gob.mx";// PRODUCCIÓN
     public static final String LOCAL_SERVER_URL = "http://localhost:4200"; // LOCAL
     public static final long TOKEN_EXPIRATION_TIME = 3_600_000; // 1 DE EXPIRACIÓN
-//    public static final long TOKEN_EXPIRATION_TIME = 120_000; //2 minutos
     public static final String HEADER_AUTHORIZATION_KEY = "Authorization";
     public static final String TOKEN_BEARER_PREFIX = "Bearer ";
-    public static String GENERATED_KEY = ""; //Llave AES
     public static String SUPER_SECRET_KEY = "";
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
     private Set<String> invalidatedTokens = new HashSet<>();
