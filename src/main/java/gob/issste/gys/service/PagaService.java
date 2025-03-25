@@ -102,6 +102,15 @@ public class PagaService {
 			return true;
 	}
 
+	public boolean validaSigueAbiertaDeleg(int idFecha, String idDeleg){
+//		int i = pagaRepository.verifica_paga_cerrada_deleg(fecha, idDeleg);
+
+		if (pagaRepository.verifica_paga_cerrada_deleg(idFecha, idDeleg) > 0)
+			return false;
+		else
+			return true;
+	}
+
     public int changeEstatusByDeleg(int idFecha, String idDeleg, int estatus) {
 		return pagaRepository.changeEstatusByIdDeleg(idFecha, idDeleg, estatus);
     }

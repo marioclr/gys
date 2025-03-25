@@ -10,6 +10,7 @@ import gob.issste.gys.model.DelegacionPorFecha;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -271,6 +272,19 @@ public class JdbcPagaRepository implements IPagaRepository {
 		logger.info(QUERY_VERIFY_PAGA_CERRADA);
 		return jdbcTemplate.queryForObject(QUERY_VERIFY_PAGA_CERRADA, Integer.class,
 				fecha );
+	}
+
+@Override
+	public int verifica_paga_cerrada_deleg(int idFecha, String idDeleg) {
+		try {
+			logger.info(QUERY_VERIFY_PAGA_CERRADA_DELEG);
+			Integer count = jdbcTemplate.queryForObject(QUERY_VERIFY_PAGA_CERRADA_DELEG, Integer.class, idFecha, idDeleg);
+			logger.info(count.toString());
+			return (count != null) ? count : 0; // Retorna 0 si count es nulo.
+		} catch (EmptyResultDataAccessException e) {
+			logger.warn("No se encontraron resultados para la consulta", e);
+			return 0; // Valor por defecto en caso de que no haya resultados.
+		}
 	}
 
 	@Override

@@ -206,6 +206,14 @@ public interface IPagaRepository {
 											+ "Where fec_pago = ? And estatus >= 2";
 	public int verifica_paga_cerrada(String fecha);
 
+	public String QUERY_VERIFY_PAGA_CERRADA_DELEG = "Select COUNT(*)\r\n"
+			                                     + "	From gys_fechas_control F, gys_DelegacionesPorFecha D\r\n"
+											     + "	Where F.id = D.idfecha \r\n"
+												 + "	And F.id = ?\r\n"
+												 + "	And D.estatus >= 2\r\n"
+												 + "	And D.iddelegacion = ?";
+	public int verifica_paga_cerrada_deleg(int idFecha, String idDeleg);
+
 	public final String UPDATE_DATE_BY_DELEG = "Update gys_delegacionesporfecha\r\n" +
 												"Set estatus=?\r\n" +
 												"Where idfecha=?\r\n" +

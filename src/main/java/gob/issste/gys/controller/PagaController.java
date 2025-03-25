@@ -1,6 +1,7 @@
 package gob.issste.gys.controller;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -372,6 +373,41 @@ public class PagaController {
 
 			return ResponseHandler.generateResponse("La Fecha de control no se encuentra en estatus de cerrada u otro estatus posterior", HttpStatus.OK, false);
 		}
+	}
+
+	@Operation(summary = "Validar si una Fecha de control se encuentra en estatus de cerrada", description = "Validar si una Fecha de control se encuentra en estatus de cerrada", tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/is_closed_del")
+	public ResponseEntity<Object> validatePagaIsClosed(
+			@Parameter(description = "ID Fecha de control que se valida si estatus esta cerrado", required = true)
+//			@RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fecha,
+			@RequestParam(required = true) int idFecha,
+			@Parameter(description = "Delegacion a la que se valida si esta abierta", required = true)
+			@RequestParam(required = true) String idDeleg) {
+
+//		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//		String strQuincena = dateFormat.format(fecha);
+
+		try {
+			boolean isClosed = pagaService.validaSigueAbiertaDeleg(idFecha, idDeleg);
+
+			return isClosed ?
+					ResponseHandler.generateResponse(
+					"La Fecha de control esta abierta",
+					HttpStatus.OK,
+					false //La fecha esta abierta
+			): ResponseHandler.generateResponse(
+					"La Fecha de control de la Of. de representación se encuentra en estatus de cerrada o posterior",
+					HttpStatus.NOT_FOUND,
+					true   //La fecha esta cerrada
+			);
+
+		}catch (Exception e){
+			return ResponseHandler.generateResponse(
+					"Ocurrio un error interno"
+					, HttpStatus.INTERNAL_SERVER_ERROR,
+					null);
+		}
+
 	}
 
 	@Operation(summary = "Cambia el estatus individual por delegacion",
