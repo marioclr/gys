@@ -956,6 +956,9 @@ public class SuplenciaController {
 			if(idDelegacion != null){
 				regexList.add("^[0-9]{2}$");
 			}
+			if(idCentroTrab != null){
+				regexList.add("^[0-9]{5}$");
+			}
 
 			boolean regexValidation = paramsValidatorService.validate(regexList, params);
 			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
