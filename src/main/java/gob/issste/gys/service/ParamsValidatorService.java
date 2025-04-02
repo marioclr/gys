@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 public class ParamsValidatorService {
 
+    private final String [] ADSC_CENTRALES = {"00", "09", "50", "60", "63"};
     Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
     private final String[] SQL_INJECTIONS = new String[] {
             ";", "--", "'", "/*", "*/", "@@", "@", "NULL", "TRUE", "FALSE", "NOT", "AND", "OR",
@@ -41,6 +42,15 @@ public class ParamsValidatorService {
                 }
         }
         return list.toArray().length != 0;
+    }
+
+    public boolean adscValidator(String param){
+        for (String value : ADSC_CENTRALES){
+            if(value.contains(param)){
+                return true;
+            }
+        }
+        return false;
     }
 
     //    public boolean sqlInjectionObjectValidator(List<String> inputData) {

@@ -73,11 +73,17 @@ public class DatosController {
 		try {
 			List<DatosAdscripcion> adscripciones = new ArrayList<DatosAdscripcion>();
 
+			boolean validation = paramsValidatorService.adscValidator(idDeleg);
 			adscripciones = datosRepository.getDatosAdscForDeleg(idDeleg);
+
+			if(validation){
+				return ResponseHandler.generateResponse("El usuario pertenece a áreas centrales, no hay centros de trabajo disponibles", HttpStatus.OK, adscripciones);
+			}
 
 			if (adscripciones.isEmpty()) {
 				return ResponseHandler.generateResponse("No existen registros en el catálogo de adscripciones", HttpStatus.NOT_FOUND, null);
 			}
+
 			return ResponseHandler.generateResponse("Se encontró el catálogo de adscripciones", HttpStatus.OK, adscripciones);
 		} catch (Exception e) {
 			return ResponseHandler.generateResponse("Error al obtener el catálogo de adscripciones", HttpStatus.INTERNAL_SERVER_ERROR, null);
