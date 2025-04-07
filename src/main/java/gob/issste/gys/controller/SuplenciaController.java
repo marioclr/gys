@@ -885,13 +885,22 @@ public class SuplenciaController {
 					regexList.add("^[A-ZÑ&]{3,4}([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[01]))?([A-Z\\d]{2}[A\\d])$");
 				}
 			}
-
-			if(idDelegacion != null){
-				regexList.add("^[0-9]{2}$");
-			}
 			if (emp_suplir != null){
 				regexList.add("^[0-9]{6}$");
 			}
+			if(idDelegacion != null){
+				regexList.add("^[0-9]{2}$");
+			}
+			if (idCentroTrab != null){
+				regexList.add("^[0-9]{5}$");
+			}
+			if(claveServicio != null){
+				regexList.add("^.{5}$");
+			}
+			if(puesto != null) {
+				regexList.add("^.{6,7}$");
+			}
+
 
 			boolean regexValidation = paramsValidatorService.validate(regexList, params);
 			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
@@ -908,7 +917,7 @@ public class SuplenciaController {
 				} else {
 					message = "Valor rechazado por la expresion regular";
 				}
-				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
+				return ResponseHandler.generateResponse(message, HttpStatus.INTERNAL_SERVER_ERROR, injectableValues);
 			} else {
 				guardias = suplenciaRepository.ConsultaDynamicSuplencias(strQuincena, tipoSuplencia, claveEmpleado, importe_min, importe_max,
 						idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir, estatus);
