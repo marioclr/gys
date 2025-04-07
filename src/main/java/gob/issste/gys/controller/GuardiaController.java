@@ -740,21 +740,21 @@ public class GuardiaController {
 					switch (tipo) {
 					
 						case "GI":
-							int contGuardsAuthInt = guardiaRepository.countAuthGuardiasStatusInt(strFecha, idDeleg);
-
-							if(contGuardsAuthInt > 1){
-								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de guardias", HttpStatus.INTERNAL_SERVER_ERROR, null);
-							}
+//							int contGuardsAuthInt = guardiaRepository.countAuthGuardiasStatusInt(strFecha, idDeleg);
+//
+//							if(contGuardsAuthInt > 1){
+//								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de guardias", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//							}
 
 							guardiaRepository.updateAuthStatusGuardias2(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 
 							break;
 	
 						case "GE":
-							int contGuardsAuthExt = guardiaRepository.countAuthGuardiasStatusExt(strFecha, idDeleg);
-							if(contGuardsAuthExt > 1){
-								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de guardias", HttpStatus.INTERNAL_SERVER_ERROR, null);
-							}
+//							int contGuardsAuthExt = guardiaRepository.countAuthGuardiasStatusExt(strFecha, idDeleg);
+//							if(contGuardsAuthExt > 1){
+//								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de guardias", HttpStatus.INTERNAL_SERVER_ERROR, null);
+//							}
 
 							guardiaRepository.updateAuthStatusGuardias2Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 
