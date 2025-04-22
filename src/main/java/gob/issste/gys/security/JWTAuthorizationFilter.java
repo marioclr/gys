@@ -1,16 +1,17 @@
 package gob.issste.gys.security;
 
+import gob.issste.gys.service.SecurityService;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,11 +20,13 @@ import static gob.issste.gys.service.SecurityService.*;
 
 @Component
 public class JWTAuthorizationFilter extends OncePerRequestFilter {
+
+    @Autowired
+    SecurityService securityService;
     private Claims setSigningKey(HttpServletRequest request) {
         String jwtToken = request.
-                getHeader(HEADER_AUTHORIZACION_KEY).
+                getHeader(HEADER_AUTHORIZATION_KEY).
                 replace(TOKEN_BEARER_PREFIX, "");
-
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey(SUPER_SECRET_KEY))
                 .build()
@@ -32,22 +35,20 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private void setAuthentication(Claims claims) {
-
         List<String> authorities = (List<String>) claims.get("authorities");
-
         UsernamePasswordAuthenticationToken auth =
                 new UsernamePasswordAuthenticationToken(claims.getSubject(), null,
                         authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
-
         SecurityContextHolder.getContext().setAuthentication(auth);
-
     }
 
     private boolean isJWTValid(HttpServletRequest request, HttpServletResponse res) {
-        String authenticationHeader = request.getHeader(HEADER_AUTHORIZACION_KEY);
-        if (authenticationHeader == null || !authenticationHeader.startsWith(TOKEN_BEARER_PREFIX))
+        String authenticationHeader = request.getHeader(HEADER_AUTHORIZATION_KEY);
+        if (authenticationHeader == null || !authenticationHeader.startsWith(TOKEN_BEARER_PREFIX)) {
             return false;
-        return true;
+        }
+        String jwtToken = authenticationHeader.replace(TOKEN_BEARER_PREFIX, "");
+        return securityService.isTokenValid(jwtToken);
     }
 
     @Override
@@ -67,8 +68,8 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
             return;
         }
     }

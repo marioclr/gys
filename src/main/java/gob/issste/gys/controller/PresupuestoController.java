@@ -202,10 +202,10 @@ public class PresupuestoController {
 			List<Presupuesto> presup = presupuestos.getPresupuestos();
 			List<String> coments = presupuestos.getComentarios();
 
-			for (int i = 0; i < presup.size(); i ++) {
-	            System.out.println("Presupuesto " + presup.get(i) + " is located at index " + i);
-	            System.out.println("Comentario " + coments.get(i) + " is located at index " + i);
-	        }
+//			for (int i = 0; i < presup.size(); i ++) {
+//	            System.out.println("Presupuesto " + presup.get(i) + " is located at index " + i);
+//	            System.out.println("Comentario " + coments.get(i) + " is located at index " + i);
+//	        }
 
 //			if( presupuesto.getCentroTrabajo() == null ) {
 //				if(presupuestoRepository.existe_presupuesto(presupuesto)>0) {
@@ -831,4 +831,41 @@ public class PresupuestoController {
 		}
 	}
 
+	@Operation(
+			summary = "Verifica si hay programatica antes de una distribución",
+			description = "Identificación de programatica para permitir una distribución por centro de trabajo",
+			tags = { "Programatica" })
+	@GetMapping("/valida/programatica")
+	public ResponseEntity<Object> getProgramaticaValidation(
+			@Parameter(
+			description = "Ur",
+					required = true)
+			@RequestParam(required = true) String ur,
+			@Parameter(
+					description = "Ct",
+					required = true)
+			@RequestParam(required = true) String ct,
+			@Parameter(
+					description = "Aux",
+					required = true)
+			@RequestParam(required = true) String aux,
+			@Parameter(
+					description = "Tipo",
+					required = true)
+			@RequestParam(required = true) String tipo
+	) {
+		try {
+			int validation
+					= presupuestoRepository.validProgramatica(ur,ct,aux,tipo);
+				return ResponseHandler
+						.generateResponse("El centro de trabajo existe en la formación programática",
+								HttpStatus.OK,
+								validation);
+		} catch (Exception e) {
+			return ResponseHandler
+					.generateResponse("El centro de trabajo no existe en la formación programática",
+							HttpStatus.NOT_FOUND,
+							0);
+		}
+    }
 }

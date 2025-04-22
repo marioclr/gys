@@ -85,7 +85,7 @@ public class SuplenciaController {
 			String strDate = dateFormat.format(quincena);
 			DatosEmpleado empleado = empleadoRepository.getDatosEmpleado(strDate, clave_empleado);
 			int riesgos = empleadoRepository.ConsultaRiesgosEmp(clave_empleado, strDate);
-
+//Primer metodo
 			importe = suplenciaService.CalculaImporteSuplencia( strDate, empleado.getClave_empleado(), dias, tipo, riesgos );
 			BigDecimal importe2 = new BigDecimal(importe).setScale(2, RoundingMode.HALF_UP);
 
@@ -465,6 +465,7 @@ public class SuplenciaController {
 
 			// Fin de las Validaciones presupuestales
 
+			//Segundo metodo
 			double importe = suplenciaService.CalculaImporteSuplencia(suplencia.getFec_paga(), 
 					empleado, suplencia.getDias(), suplencia.getTipo_suplencia(), riesgos);
 
@@ -477,7 +478,7 @@ public class SuplenciaController {
 				return ResponseHandler.generateResponse("No existe presupuesto suficiente para realizar este tipo de registro", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			return ResponseHandler.generateResponse("El registro de Suplencia ha sido guardado de manera exitosa, con ID = " + id, HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("Registro guardado correctamente", HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al agregar un nuevo registro de Suplencia al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -497,7 +498,7 @@ public class SuplenciaController {
 			return ResponseHandler.generateResponse("Los importes de las Suplencias se actualizaron de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al actualizar los importes de la suplencia", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -685,7 +686,7 @@ public class SuplenciaController {
 					return ResponseHandler.generateResponse("No se indicó el tipo de suplencia correctamente ('SI': Internas o 'SE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 			// Fin de las Validaciones presupuestales
-
+//Primer metodo
 			double importe = suplenciaService.CalculaImporteSuplencia(suplencia.getFec_paga(), 
 					suplencia.getEmpleado_suplir().getClave_empleado(), suplencia.getDias(), suplencia.getTipo_suplencia(), riesgos);
 
@@ -695,7 +696,7 @@ public class SuplenciaController {
 				return ResponseHandler.generateResponse("No existe presupuesto suficiente para realizar la actualización del registro", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			return ResponseHandler.generateResponse("El registro de guardia ha sido actualizado de manera exitosa", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("Modificacion de registro realizada", HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al actualizar un registro de suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -777,7 +778,8 @@ public class SuplenciaController {
 			@Parameter(description = "Fecha de control para validar las suplencias", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fec_pago,
 			@Parameter(description = "Estatus a actualizar de las suplencias (1 - Autorización, 3 - Confirmación)", required = true) @RequestParam(required = true) Integer estatus,
 			@Parameter(description = "Tipo de Suplencia para realizar la validación", required = true) @RequestParam(required = true) String tipo,
-			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario ) {
+			@Parameter(description = "ID del usaurio que realiza la actualización del estatus", required = true) @RequestParam(required = true) Integer idUsuario,
+			@Parameter(description = "Delegacion a la que pertenece el usuario que autoriza", required = true) @RequestParam(required = true) String idDeleg) {
 
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String strFecha = dateFormat.format(fec_pago);
@@ -791,11 +793,11 @@ public class SuplenciaController {
 					switch (tipo) {
 					
 						case "SI":
-								suplenciaRepository.updateAuthStatusSuplencias1(tipo, strFecha, idUsuario);
+								suplenciaRepository.updateAuthStatusSuplencias1(tipo, strFecha, idDeleg, idDeleg, idUsuario);
 							break;
 
 						case "SE":
-								suplenciaRepository.updateAuthStatusSuplencias1Ext(tipo, strFecha, idUsuario);
+								suplenciaRepository.updateAuthStatusSuplencias1Ext(tipo, strFecha, idDeleg, idDeleg,idUsuario);
 							break;
 
 						default:
@@ -808,11 +810,24 @@ public class SuplenciaController {
 					switch (tipo) {
 					
 						case "SI":
-								suplenciaRepository.updateAuthStatusSuplencias2(tipo, strFecha, idUsuario);
+							int contSupsAuthInt = suplenciaRepository.countAuthSuplenciasStatusInt(strFecha, idDeleg);
+
+							if(contSupsAuthInt > 1){
+								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de suplencias", HttpStatus.INTERNAL_SERVER_ERROR, null);
+							}
+
+							suplenciaRepository.updateAuthStatusSuplencias2(tipo, strFecha,  idDeleg, idDeleg, idUsuario);
 							break;
 	
 						case "SE":
-								suplenciaRepository.updateAuthStatusSuplencias2Ext(tipo, strFecha, idUsuario);
+							int contSupsAuthExt = suplenciaRepository.countAuthSuplenciasStatusExt(strFecha, idDeleg);
+
+							if(contSupsAuthExt > 1){
+								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de suplencias", HttpStatus.INTERNAL_SERVER_ERROR, null);
+							}
+
+							suplenciaRepository.updateAuthStatusSuplencias2Ext(tipo, strFecha,  idDeleg, idDeleg, idUsuario);
+
 							break;
 
 						default:
@@ -828,7 +843,7 @@ public class SuplenciaController {
 			return ResponseHandler.generateResponse("El estatus de la suplencia se actualizó de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
 		}
 	}
 
@@ -870,13 +885,22 @@ public class SuplenciaController {
 					regexList.add("^[A-ZÑ&]{3,4}([0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[01]))?([A-Z\\d]{2}[A\\d])$");
 				}
 			}
-
-			if(idDelegacion != null){
-				regexList.add("^[0-9]{2}$");
-			}
 			if (emp_suplir != null){
 				regexList.add("^[0-9]{6}$");
 			}
+			if(idDelegacion != null){
+				regexList.add("^[0-9]{2}$");
+			}
+			if (idCentroTrab != null){
+				regexList.add("^[0-9]{5}$");
+			}
+			if(claveServicio != null){
+				regexList.add("^.{5}$");
+			}
+			if(puesto != null) {
+				regexList.add("^.{6,7}$");
+			}
+
 
 			boolean regexValidation = paramsValidatorService.validate(regexList, params);
 			boolean injectableValues = paramsValidatorService.sqlInjectionObjectValidator(params);
@@ -893,7 +917,7 @@ public class SuplenciaController {
 				} else {
 					message = "Valor rechazado por la expresion regular";
 				}
-				return ResponseHandler.generateResponse(message, HttpStatus.NOT_ACCEPTABLE, null);
+				return ResponseHandler.generateResponse(message, HttpStatus.INTERNAL_SERVER_ERROR, injectableValues);
 			} else {
 				guardias = suplenciaRepository.ConsultaDynamicSuplencias(strQuincena, tipoSuplencia, claveEmpleado, importe_min, importe_max,
 						idDelegacion, idCentroTrab, claveServicio, puesto, emp_suplir, estatus);
@@ -940,6 +964,9 @@ public class SuplenciaController {
 			}
 			if(idDelegacion != null){
 				regexList.add("^[0-9]{2}$");
+			}
+			if(idCentroTrab != null){
+				regexList.add("^[0-9]{5}$");
 			}
 
 			boolean regexValidation = paramsValidatorService.validate(regexList, params);

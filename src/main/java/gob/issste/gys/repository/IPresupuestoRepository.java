@@ -151,4 +151,11 @@ public interface IPresupuestoRepository {
 													+ "  And id_centro_trabajo Is NULL";
 	public double suma_presupuestos(Integer anio_ejercicio, String idDelegacion);
 
+	public final String QUERY_VALID_PROGRAMATICA_BY_CT  = "SELECT 1 \r\n"
+														+ "FROM gys_programatica\r\n"
+														+ "WHERE ur = ? AND ct = ? AND aux = ? AND tipo = ?\r\n"
+														+ "LIMIT 1;";
+
+
+	public int validProgramatica(String ur, String ct, String aux, String tipo);
 }

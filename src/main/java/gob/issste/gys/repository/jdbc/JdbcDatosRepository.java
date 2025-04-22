@@ -3,6 +3,7 @@ package gob.issste.gys.repository.jdbc;
 import java.util.ArrayList;
 import java.util.List;
 
+import gob.issste.gys.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,17 +13,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
-import gob.issste.gys.model.DatosAdscripcion;
-import gob.issste.gys.model.DatosGuardia;
-import gob.issste.gys.model.DatosJornada;
-import gob.issste.gys.model.DatosMatrizPuestos;
-import gob.issste.gys.model.DatosNivel;
-import gob.issste.gys.model.DatosPuesto;
-import gob.issste.gys.model.DatosServicio;
-import gob.issste.gys.model.Delegacion;
-import gob.issste.gys.model.Horario;
-import gob.issste.gys.model.Incidencia;
-import gob.issste.gys.model.Paga;
 import gob.issste.gys.repository.IDatosRepository;
 
 @Repository
@@ -147,6 +137,13 @@ public class JdbcDatosRepository implements IDatosRepository {
 
 		logger.info(QUERY_GET_DELEGACIONES);
 		return jdbcTemplate.query(QUERY_GET_DELEGACIONES, BeanPropertyRowMapper.newInstance(Delegacion.class));
+
+	}
+
+	@Override
+	public List<DelegacionPorFecha> getDatosDelegacionesPorFecha(int idFecha) {
+		logger.info(QUERY_GET_DELEGACIONES_FECHA);
+		return jdbcTemplate.query(QUERY_GET_DELEGACIONES_FECHA, BeanPropertyRowMapper.newInstance(DelegacionPorFecha.class), idFecha);
 
 	}
 
@@ -453,5 +450,13 @@ public class JdbcDatosRepository implements IDatosRepository {
 			return null;
 		}
 	}
+
+	@Override
+
+	public int validaGuardiasConfirmadas(String fec_pago){
+		logger.info(VALIDA_GUARDIAS_CONFIRMADAS);
+		return jdbcTemplate.queryForObject(VALIDA_GUARDIAS_CONFIRMADAS, Integer.class, fec_pago,fec_pago,fec_pago,fec_pago);
+	}
+
 
 }

@@ -1,11 +1,14 @@
 package gob.issste.gys.controller;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import gob.issste.gys.model.DelegacionPorFecha;
+import gob.issste.gys.repository.IDatosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -13,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +37,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
 //@CrossOrigin(origins = "*")
-@CrossOrigin(origins = {"https://sigysdev.issste.gob.mx:8443, https://sigys.issste.gob.mx:8443, http://localhost:4200"})
 @RestController
 @RequestMapping("/api")
 public class PagaController {
@@ -46,6 +47,8 @@ public class PagaController {
 	PagaService pagaService;
 	@Autowired
 	UsuarioRepository usuarioRepository;
+	@Autowired
+	IDatosRepository datosRepository;
 	@Autowired
 	private PlatformTransactionManager platformTransactionManager;
 
@@ -77,8 +80,8 @@ public class PagaController {
 				}
 				int idPaga = pagaRepository.save(paga);
 
-				for(Delegacion deleg:paga.getDelegaciones()) {
-					pagaRepository.saveDelegForFecha(idPaga, deleg.getId_div_geografica(), paga.getId_usuario());
+				for(DelegacionPorFecha deleg:paga.getDelegaciones()) {
+					pagaRepository.saveDelegForFecha(idPaga, deleg.getId_div_geografica(), deleg.getEstatus(), paga.getId_usuario());
 				}
 
 				platformTransactionManager.commit(status);
@@ -90,7 +93,7 @@ public class PagaController {
 			}
 		} catch (Exception e) {
 			platformTransactionManager.rollback(status);
-			return ResponseHandler.generateResponse("Error al agregar un nuevo usuario al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al agregar un nueva fecha al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
 
 		}
 	}
@@ -115,14 +118,19 @@ public class PagaController {
 
 			pagaRepository.update(_paga);
 
-			pagaRepository.removeDelegForFecha(id);
-			for(Delegacion deleg:paga.getDelegaciones()) {
-				pagaRepository.saveDelegForFecha(id, deleg.getId_div_geografica(), paga.getId_usuario());
-			}
+//			pagaRepository.removeDelegForFecha(id);
+//			for(DelegacionPorFecha deleg:paga.getDelegaciones()) {
+//				pagaRepository.saveDelegForFecha(id, deleg.getId_div_geografica(), 1,paga.getId_usuario());
+//			}
 
 			switch (paga.getEstatus()) {
+				case 1:
+					pagaRepository.changeEstatusForAllDelegByDate(id, 1);
+					break;
 
-				case 2: // Cambio a estatus de abierta a cerrada 
+				case 2: // Cambio a estatus de abierta a cerrada
+
+					pagaRepository.changeEstatusForAllDelegByDate(id, 2);
 
 					pagaRepository.BorraAuthGuardias(paga);
 					pagaRepository.AuthGuardiasInt(paga);
@@ -132,8 +140,21 @@ public class PagaController {
 					pagaRepository.AuthSuplenciasInt(paga);
 					pagaRepository.AuthSuplenciasExt(paga);
 
+
 					break;
 
+//				case 3:
+//					int existenGuardiasConfirmadas = datosRepository.validaGuardiasConfirmadas(paga.getFec_pago());
+//					if(existenGuardiasConfirmadas != 0){
+//						return ResponseHandler.generateResponse(
+//								"No se puede actualizar la fecha a la siguiente fase debido a que aun hay registros sin confirmar",
+//								HttpStatus.NOT_FOUND,
+//								null
+//						);
+//
+//					}
+//					break;
+//
 			}
 			return ResponseHandler.generateResponse(
 //					"La fecha de control de pagos de GyS ha sido modificado de manera exitosa",
@@ -221,7 +242,7 @@ public class PagaController {
 
 		if (paga != null) {
 
-			paga.setDelegaciones(pagaRepository.getDelegForFecha(id));
+			paga.setDelegacionesPorFecha(pagaRepository.getDelegForFecha(id));
 
 			return ResponseHandler.generateResponse("Se pudo obtener la información de fecha de control de pagos en el Sistema de manera exitosa", HttpStatus.OK, paga);
 		} else {
@@ -286,35 +307,26 @@ public class PagaController {
 		List<Paga> pagas;
 
 		try {
+			Usuario usuario = usuarioRepository.findById(idUsuario);
 
-			if (idUsuario != null) {
-				Usuario usuario = usuarioRepository.findById(idUsuario);
-				pagas = new ArrayList<>();
+            pagas = new ArrayList<>();
 
-				if (usuario != null) {
-					switch(usuario.getNivelVisibilidad().getIdNivelVisibilidad()) {
+            if (usuario != null) {
+                pagas = switch (usuario.getNivelVisibilidad().getIdNivelVisibilidad()) {
+                    case 1 -> pagaRepository.findActivePagas();
+                    case 2, 3 ->
+//							pagas = pagaRepository.findActivePagasByUser(usuario.getDelegacion().getId_div_geografica());
+                            pagaRepository.findActivePagasByDel(usuario.getDelegacion().getId_div_geografica());
+                    default -> pagas;
+                };
 
-						case 1:
-							pagas = pagaRepository.findActivePagas();
-							break;
+            } else {
+                return ResponseHandler.generateResponse("No se pudo obtener la información del usuario indicado para consultar las fechas de control de pagos de GyS activas en el Sistema", HttpStatus.NOT_FOUND, null);
+            }
 
-						case 2,3:
-							pagas = pagaRepository.findActivePagasByUser(idUsuario);
-							break;
+            if (pagas.isEmpty()) {
 
-					}
-
-				} else {
-					return ResponseHandler.generateResponse("No se pudo obtener la información del usuario indicado para consultar las fechas de control de pagos de GyS activas en el Sistema", HttpStatus.NOT_FOUND, null);
-				}
-
-			} else {				
-				pagas = pagaRepository.findActivePagas();
-			}
-
-			if (pagas.isEmpty()) {
-
-				return ResponseHandler.generateResponse("No exixten fechas de control de pagos de GyS abiertas, en el Sistema", HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse("No existen fechas de control de pagos de GyS abiertas, en el Sistema", HttpStatus.NOT_FOUND, null);
 			}
 
 			return ResponseHandler.generateResponse("Se obtuvo la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.OK, pagas);
@@ -347,7 +359,7 @@ public class PagaController {
 		}	
 	}
 
-	@Operation(summary = "Validar si una Fecha de control se encuantra en estatus de cerrada", description = "Validar si una Fecha de control se encuantra en estatus de cerrada", tags = { "Control de fechas de pago" })
+	@Operation(summary = "Validar si una Fecha de control se encuentra en estatus de cerrada", description = "Validar si una Fecha de control se encuentra en estatus de cerrada", tags = { "Control de fechas de pago" })
 	@PutMapping("/Paga/is_closed")
 	public ResponseEntity<Object> validatePagaIsClosed(@Parameter(description = "Fecha de control que se valida si estatus esta cerrado", required = true) @RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fecha) {
 
@@ -356,11 +368,82 @@ public class PagaController {
 
 		if (!pagaService.validaSigueAbierta(strQuincena)) {
 
-			return ResponseHandler.generateResponse("La Fecha de control se encuantra en estatus de cerrada u otro estatus posterior", HttpStatus.NOT_FOUND, true);
+			return ResponseHandler.generateResponse("La Fecha de control se encuentra en estatus de cerrada u otro estatus posterior", HttpStatus.NOT_FOUND, true);
 		} else {
 
-			return ResponseHandler.generateResponse("La Fecha de control no se encuantra en estatus de cerrada u otro estatus posterior", HttpStatus.OK, false);
+			return ResponseHandler.generateResponse("La Fecha de control no se encuentra en estatus de cerrada u otro estatus posterior", HttpStatus.OK, false);
 		}
-	}	
+	}
+
+	@Operation(summary = "Validar si una Fecha de control se encuentra en estatus de cerrada", description = "Validar si una Fecha de control se encuentra en estatus de cerrada", tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/is_closed_del")
+	public ResponseEntity<Object> validatePagaIsClosed(
+			@Parameter(description = "ID Fecha de control que se valida si estatus esta cerrado", required = true)
+//			@RequestParam(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fecha,
+			@RequestParam(required = true) int idFecha,
+			@Parameter(description = "Delegacion a la que se valida si esta abierta", required = true)
+			@RequestParam(required = true) String idDeleg) {
+
+//		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//		String strQuincena = dateFormat.format(fecha);
+
+		try {
+			boolean isClosed = pagaService.validaSigueAbiertaDeleg(idFecha, idDeleg);
+
+			return isClosed ?
+					ResponseHandler.generateResponse(
+					"La Fecha de control esta abierta",
+					HttpStatus.OK,
+					false //La fecha esta abierta
+			): ResponseHandler.generateResponse(
+					"La Fecha de control de la Of. de representación se encuentra en estatus de cerrada o posterior",
+					HttpStatus.NOT_FOUND,
+					true   //La fecha esta cerrada
+			);
+
+		}catch (Exception e){
+			return ResponseHandler.generateResponse(
+					"Ocurrio un error interno"
+					, HttpStatus.INTERNAL_SERVER_ERROR,
+					null);
+		}
+
+	}
+
+	@Operation(summary = "Cambia el estatus individual por delegacion",
+				description = "Cambia el estatus individual por delegacion",
+				tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/updateByDeleg")
+	public ResponseEntity<Object> changeDateEstatusByDeleg(
+			@RequestParam(required = true)
+			 int idFecha,
+			@RequestParam(required = true)
+			int estatus,
+			@RequestParam(required = true)
+			String idDeleg
+	) {
+		try {
+			int result = 0;
+			if(idDeleg != null){
+				result = pagaService.changeEstatusByDeleg(idFecha, idDeleg, estatus);
+				return ResponseHandler.generateResponse(
+						"Fecha actualizada con éxito"
+						,HttpStatus.OK
+						,result);
+			} else {
+				result = pagaService.changeEstatusForAllDelegByDate(idFecha, estatus);
+				return ResponseHandler.generateResponse(
+						"Fechas actualizadas con éxito"
+						,HttpStatus.OK
+						,result);
+			}
+
+		} catch (Exception e) {
+				return ResponseHandler.generateResponse(
+					"Error al actualizar la fecha"
+						,HttpStatus.INTERNAL_SERVER_ERROR
+						,e.getMessage());
+		}
+	}
 
 }

@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 public class ParamsValidatorService {
 
+    private final String [] ADSC_CENTRALES = {"00", "09", "50", "60", "63"};
     Logger logger = LoggerFactory.getLogger(JdbcTemplateDemo01Application.class);
     private final String[] SQL_INJECTIONS = new String[] {
             ";", "--", "'", "/*", "*/", "@@", "@", "NULL", "TRUE", "FALSE", "NOT", "AND", "OR",
@@ -42,6 +43,32 @@ public class ParamsValidatorService {
         }
         return list.toArray().length != 0;
     }
+
+    public boolean adscValidator(String param){
+        for (String value : ADSC_CENTRALES){
+            if(value.contains(param)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //    public boolean sqlInjectionObjectValidator(List<String> inputData) {
+//        List<String> list = new ArrayList<>();
+//        for (String inputDataElement : inputData) {
+//            if (inputDataElement != null) {
+//                String[] words = inputDataElement.toUpperCase().split("\\s+");
+//                for (String word : words) {
+//                    for (String sqlInjection : SQL_INJECTIONS) {
+//                        if (word.equals(sqlInjection)) {
+//                            list.add(inputDataElement.toUpperCase());
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return !list.isEmpty();
+//    }
 
     public static boolean csvInjectionObjectValidator(List<String> inputData) {
         List<String> foundEvillist = new ArrayList<>();

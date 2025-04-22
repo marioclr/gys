@@ -115,6 +115,14 @@ public interface IDatosRepository {
 	public String QUERY_GET_DELEGACIONES			= "Select * From m4t_delegaciones";
 	List<Delegacion> getDatosDelegaciones();
 
+	public String QUERY_GET_DELEGACIONES_FECHA			= "Select D.id_div_geografica, D.n_div_geografica, F.estatus\r\n"+
+														  "From m4t_delegaciones D, gys_DelegacionesPorFecha F\r\n"+
+														  "  Where D.id_div_geografica = F.iddelegacion\r\n"+
+														  "  And F.idFecha = ?";
+
+
+	List<DelegacionPorFecha> getDatosDelegacionesPorFecha(int idFecha);
+
 	public String QUERY_GET_HORARIOS				= "Select * From m4t_horarios";
 	List<Horario> getHorarios();
 
@@ -178,5 +186,27 @@ public interface IDatosRepository {
 
 	public String QUERY_GET_R		= "Select Distinct r From gys_programatica Where tipo = ? And ur = ? And ct = ? And aux = ?";
 	List<String> getR(String tipo,String ur, String ct, String aux);
+
+	public String VALIDA_GUARDIAS_CONFIRMADAS 	= "SELECT (TOT_GUA.total_gua + TOT_SUP.total_sup) - (A.gua_conf + B.sup_conf) AS total_confirmaciones\r\n"
+			+ "FROM (\r\n"
+			+ "	SELECT COUNT(*) as gua_conf\r\n"
+			+ "		FROM gys_autorizacion_guardias\r\n"
+			+ "		WHERE fec_pago = ?\r\n"
+			+ "		AND estatus2 NOT IN (3, 4)"
+			+ ") A, (\r\n"
+			+ "	SELECT COUNT(*) as sup_conf\r\n"
+			+ "		FROM gys_autorizacion_suplencias\r\n"
+			+ "		WHERE fec_pago = ?\r\n"
+			+ "		AND estatus2 NOT IN (3, 4)\r\n"
+			+ ") B, (\r\n"
+			+ "	SELECT COUNT(*) as total_gua\r\n"
+			+ "		FROM gys_autorizacion_guardias\r\n"
+			+ "		WHERE fec_pago = ?\r\n"
+			+ ")TOT_GUA, (\r\n"
+			+ "	SELECT COUNT(*) as total_sup\r\n"
+			+ "		FROM gys_autorizacion_suplencias\r\n"
+			+ "		WHERE fec_pago = ?\r\n"
+			+ ")TOT_SUP";
+	int validaGuardiasConfirmadas(String fec_pago);
 
 }

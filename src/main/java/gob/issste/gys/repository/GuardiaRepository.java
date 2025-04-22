@@ -290,44 +290,187 @@ public interface GuardiaRepository {
 												+ "Where id_guardia = ? And id_tipo = ?";
 	int updateAuthStatusGuardia2(int status, int id, String tipo, String comentarios, int idUsuario);
 
-	public String STMT_UPDATES_AUTH_STATUS_1	= "Merge Into gys_autorizacion_guardias A\r\n"
-												+ "Using gys_guardias_emp S\r\n"
-												+ "  ON  A.id_guardia = S.id\r\n"
-												+ "  And A.estatus1 = 0 And id_tipo = ?\r\n"
-												+ "  And S.fec_paga = ?\r\n"
+//	public String STMT_UPDATES_AUTH_STATUS_1	= "Merge Into gys_autorizacion_guardias A\r\n"
+//												+ "Using gys_guardias_emp S\r\n"
+//												+ "  ON  A.id_guardia = S.id\r\n"
+//												+ "  And A.estatus1 = 0 And id_tipo = ?\r\n"
+//												+ "  And S.fec_paga = ?\r\n"
+//												+ "  And S.id_centro_trabajo in (select id_centro_trabajo from m4t_centros_trab where id_div_geografica = ? )\r\n"
+//												+ "WHEN MATCHED THEN\r\n"
+//												+ "    UPDATE SET estatus1 = 1, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND";
+	public String STMT_UPDATES_AUTH_STATUS_1	= "MERGE INTO gys_autorizacion_guardias AS A\r\n"
+												+ "USING (\r\n"
+												+ "		SELECT S.id, S.id_centro_trabajo, C.id_area_generadora, A.estatus1, A.id_tipo, S.fec_paga\r\n"
+												+ "		FROM gys_guardias_emp S\r\n"
+												+ "		INNER JOIN m4t_centros_trab C\r\n"
+												+ "			ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+												+ "    	INNER JOIN m4t_conv_ct V\r\n"
+												+ "        ON C.id_centro_trabajo = V.ct5\r\n"
+												+ "    	INNER JOIN gys_autorizacion_guardias A\r\n"
+												+ "        ON A.id_guardia = S.id\r\n"
+												+ "		WHERE A.estatus1 = 0\r\n"
+												+ "			AND A.id_tipo = ? \r\n"
+												+ " 		AND S.fec_paga = ?\r\n"
+												+ " 		AND C.id_area_generadora = ? \r\n"
+												+ "        	AND C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+												+ "        	AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+												+ ") AS Source\r\n"
+												+ "ON A.id_guardia = Source.id\r\n"
+												+ "AND A.id_tipo = 'GI'\r\n"
 												+ "WHEN MATCHED THEN\r\n"
-												+ "    UPDATE SET estatus1 = 1, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND";
-	int updateAuthStatusGuardias1(String tipo, String fec_pago, int idUsuario);
+												+ " UPDATE SET\r\n"
+												+ "		A.estatus1 = 1,\r\n"
+												+ "		A.id_usuario1 = ?,\r\n"
+												+ "		A.fec_validacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusGuardias1(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario);
 
-	public String STMT_UPDATES_AUTH_STATUS_1ext	= "Merge Into gys_autorizacion_guardias A\r\n"
-												+ "Using gys_guardias_ext S\r\n"
-												+ "  ON  A.id_guardia = S.id\r\n"
-												+ "  And A.estatus1 = 0 And id_tipo = ?\r\n"
-												+ "  And S.fec_paga = ?\r\n"
-												+ "WHEN MATCHED THEN\r\n"
-												+ "    UPDATE SET estatus1 = 1, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND";
-	int updateAuthStatusGuardias1Ext(String tipo, String fec_pago, int idUsuario);
+//	public String STMT_UPDATES_AUTH_STATUS_1ext	= "Merge Into gys_autorizacion_guardias A\r\n"
+//												+ "Using gys_guardias_ext S\r\n"
+//												+ "  ON  A.id_guardia = S.id\r\n"
+//												+ "  And A.estatus1 = 0 And id_tipo = ?\r\n"
+//												+ "  And S.fec_paga = ?\r\n"
+//												+ "  And S.id_centro_trabajo in (select id_centro_trabajo from m4t_centros_trab where id_div_geografica = ? )\r\n"
+//												+ "WHEN MATCHED THEN\r\n"
+//												+ "    UPDATE SET estatus1 = 1, id_usuario1 = ?, fec_validacion = CURRENT YEAR TO SECOND";
+public String STMT_UPDATES_AUTH_STATUS_1ext	= "MERGE INTO gys_autorizacion_guardias AS A\r\n"
+											+ "USING (\r\n"
+											+ "		SELECT S.id, S.id_centro_trabajo, C.id_area_generadora, A.estatus1, A.id_tipo, S.fec_paga\r\n"
+											+ "		FROM gys_guardias_ext S\r\n"
+											+ "		INNER JOIN m4t_centros_trab C\r\n"
+											+ "			ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+											+ "    	INNER JOIN m4t_conv_ct V\r\n"
+											+ "        ON C.id_centro_trabajo = V.ct5\r\n"
+											+ "    	INNER JOIN gys_autorizacion_guardias A\r\n"
+											+ "        ON A.id_guardia = S.id\r\n"
+											+ "		WHERE A.estatus1 = 0\r\n"
+											+ "			AND A.id_tipo = ? \r\n"
+											+ " 		AND S.fec_paga = ?\r\n"
+											+ " 		AND C.id_area_generadora = ? \r\n"
+											+ "        	AND C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+											+ "        	AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+											+ ") AS Source\r\n"
+											+ "ON A.id_guardia = Source.id\r\n"
+											+ "AND A.id_tipo = 'GE'\r\n"
+											+ "WHEN MATCHED THEN\r\n"
+											+ " UPDATE SET\r\n"
+											+ "		A.estatus1 = 1,\r\n"
+											+ "		A.id_usuario1 = ?,\r\n"
+											+ "		A.fec_validacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusGuardias1Ext(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario);
 
-	public String STMT_UPDATES_AUTH_STATUS_2	= "Merge Into gys_autorizacion_guardias A\r\n"
-												+ "Using gys_guardias_emp S\r\n"
-												+ "  ON  A.id_guardia = S.id\r\n"
-												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"
-												+ "  And id_tipo = ? And S.fec_paga = ?\r\n"
-												+ "WHEN MATCHED THEN\r\n"
-												+ "    UPDATE SET estatus2 = 3, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND";
-	int updateAuthStatusGuardias2(String tipo, String fec_pago, int idUsuario);
+	public String STMT_COUNT_AUTH_STATUS_INT = "SELECT COUNT(*) as gua_reg_int_conf\r\n"
+										 + "  FROM gys_autorizacion_guardias A\r\n"
+										 + "  INNER JOIN gys_guardias_emp S\r\n"
+										 + "    ON A.id_guardia = S.id \r\n"
+										 + "  INNER JOIN m4t_centros_trab C \r\n"
+										 + "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+										 + "  INNER JOIN m4t_conv_ct V\r\n"
+										 + "  ON C.id_centro_trabajo = V.ct5\r\n"
+										 + "  WHERE fec_pago = ?\r\n"
+										 + "  	and id_tipo='GI'\r\n"
+										 + " 	 and C.id_area_generadora = ?\r\n"
+										 + "  	and C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+										 + "  	and C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+										 + "  AND estatus1 IN (0)\r\n";
 
-	public String STMT_UPDATES_AUTH_STATUS_2ext	= "Merge Into gys_autorizacion_guardias A\r\n"
-												+ "Using gys_guardias_ext S\r\n"
-												+ "  ON  A.id_guardia = S.id\r\n"
-												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"
-												+ "  And id_tipo = ? And S.fec_paga = ?\r\n"
+	Integer countAuthGuardiasStatusInt(String fec_pago, String IdDeleg);
+
+	public String STMT_COUNT_AUTH_STATUS_EXT = "SELECT COUNT(*) as gua_reg_ext_conf\r\n"
+											+ "  FROM gys_autorizacion_guardias A\r\n"
+											+ "  INNER JOIN gys_guardias_ext S\r\n"
+											+ "    ON A.id_guardia = S.id \r\n"
+											+ "  INNER JOIN m4t_centros_trab C \r\n"
+											+ "  ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+											+ "  INNER JOIN m4t_conv_ct V\r\n"
+											+ "  ON C.id_centro_trabajo = V.ct5\r\n"
+											+ "  WHERE fec_pago = ?\r\n"
+											+ "  	and id_tipo='GE'\r\n"
+											+ " 	 and C.id_area_generadora = ?\r\n"
+											+ "  	and C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+											+ "  	and C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+											+ "  AND estatus1 IN (0)\r\n";
+
+	Integer countAuthGuardiasStatusExt(String fec_pago, String IdDeleg);
+	//	public String STMT_UPDATES_AUTH_STATUS_2	= "Merge Into gys_autorizacion_guardias A\r\n"
+//												+ "Using gys_guardias_emp S\r\n"
+//												+ "  ON  A.id_guardia = S.id\r\n"
+//												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"
+//												+ "  And id_tipo = ? And S.fec_paga = ?\r\n"
+//												+ "  And S.id_centro_trabajo in (select id_centro_trabajo from m4t_centros_trab where id_div_geografica = ? )\r\n"
+//												+ "WHEN MATCHED THEN\r\n"
+//												+ "    UPDATE SET estatus2 = 3, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND";
+public String STMT_UPDATES_AUTH_STATUS_2	= "MERGE INTO gys_autorizacion_guardias AS A\r\n"
+											+ "USING (\r\n"
+											+ "		SELECT S.id, S.id_centro_trabajo, C.id_area_generadora, A.estatus1, A.id_tipo, S.fec_paga\r\n"
+											+ "		FROM gys_guardias_emp S\r\n"
+											+ "		INNER JOIN m4t_centros_trab C\r\n"
+											+ "			ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+											+ "    INNER JOIN m4t_conv_ct V\r\n"
+											+ "        ON C.id_centro_trabajo = V.ct5\r\n"
+											+ "    	INNER JOIN gys_autorizacion_guardias A\r\n"
+											+ "        ON A.id_guardia = S.id\r\n"
+											+ "		WHERE A.estatus1 = 1\r\n"
+											+ "			AND A.estatus2 = 0\r\n"
+											+ "			AND A.id_tipo = ? \r\n"
+											+ " 		AND S.fec_paga = ?\r\n"
+											+ " 		AND C.id_area_generadora = ? \r\n"
+											+ "        	AND C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+											+ "        	AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+											+ ") AS Source\r\n"
+											+ "ON A.id_guardia = Source.id\r\n"
+											+ "AND A.id_tipo = 'GI'\r\n"
+											+ "WHEN MATCHED THEN\r\n"
+											+ " UPDATE SET\r\n"
+											+ "		A.estatus2 = 3,\r\n"
+											+ "		A.id_usuario2 = ?,\r\n"
+											+ "		A.fec_autorizacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusGuardias2(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario);
+
+//	public String STMT_UPDATES_AUTH_STATUS_2ext	= "Merge Into gys_autorizacion_guardias A\r\n"
+//												+ "Using gys_guardias_ext S\r\n"
+//												+ "  ON  A.id_guardia = S.id\r\n"
+//												+ "  And A.estatus1 = 1 And A.estatus2 = 0\r\n"
+//												+ "  And id_tipo = ? And S.fec_paga = ?\r\n"
+//												+ "  And S.id_centro_trabajo in (select id_centro_trabajo from m4t_centros_trab where id_div_geografica = ? )\r\n"
+//												+ "WHEN MATCHED THEN\r\n"
+//												+ "    UPDATE SET estatus2 = 3, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND";
+	public String STMT_UPDATES_AUTH_STATUS_2ext	= "MERGE INTO gys_autorizacion_guardias AS A\r\n"
+												+ "USING (\r\n"
+												+ "		SELECT S.id, S.id_centro_trabajo, C.id_area_generadora, A.estatus1, A.id_tipo, S.fec_paga\r\n"
+												+ "		FROM gys_guardias_ext S\r\n"
+												+ "		INNER JOIN m4t_centros_trab C\r\n"
+												+ "			ON C.id_centro_trabajo = S.id_centro_trabajo\r\n"
+												+ "    INNER JOIN m4t_conv_ct V\r\n"
+												+ "        ON C.id_centro_trabajo = V.ct5\r\n"
+												+ "    	INNER JOIN gys_autorizacion_guardias A\r\n"
+												+ "        ON A.id_guardia = S.id\r\n"
+												+ "		WHERE A.estatus1 = 1\r\n"
+												+ "			AND A.estatus2 = 0 \r\n"
+												+ "			AND A.id_tipo = ? \r\n"
+												+ " 		AND S.fec_paga = ?\r\n"
+												+ " 		AND C.id_area_generadora = ? \r\n"
+												+ "        	AND C.id_tipo_ct IN (SELECT DISTINCT id_tipo_ct FROM m4t_gys_matriz_puestos)\r\n"
+												+ "        	AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+												+ ") AS Source\r\n"
+												+ "ON A.id_guardia = Source.id\r\n"
+												+ "AND A.id_tipo = 'GE'\r\n"
 												+ "WHEN MATCHED THEN\r\n"
-												+ "    UPDATE SET estatus2 = 3, id_usuario2 = ?, fec_autorizacion = CURRENT YEAR TO SECOND";
-	int updateAuthStatusGuardias2Ext(String tipo, String fec_pago, int idUsuario);
+												+ " UPDATE SET\r\n"
+												+ "		A.estatus2 = 3,\r\n"
+												+ "		A.id_usuario2 = ?,\r\n"
+												+ "		A.fec_autorizacion = CURRENT YEAR TO SECOND";
+	int updateAuthStatusGuardias2Ext(String tipo, String fec_pago, String idDeleg, String idDeleg1, int idUsuario);
 
 	List<DatosGuardia> ConsultaDynamicGuardias(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
 			String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus) throws SQLException;
+
+	List<DatosGuardia> ConsultaDynamicGuardiasPage(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
+											   String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus, int page, int size) throws SQLException;
+
+
+	Long ConsultaDynamicGuardiasCount(String fechaPago, String tipo, String clave_empleado, Double importe_inicio, Double importe_fin,
+									  String idDelegacion, String idCentroTrab, String claveServicio, String puesto, Integer estatus) throws SQLException;
+
 
 	List<DatosGuardia> ConsultaDynamicAuthGuardias(String fechaPago, String tipo, String idDelegacion, String idCentroTrab, Integer estatus);
 
