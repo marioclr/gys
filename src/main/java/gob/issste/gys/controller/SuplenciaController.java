@@ -478,7 +478,7 @@ public class SuplenciaController {
 				return ResponseHandler.generateResponse("No existe presupuesto suficiente para realizar este tipo de registro", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			return ResponseHandler.generateResponse("El registro de Suplencia ha sido guardado de manera exitosa, con ID = " + id, HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("Registro guardado correctamente", HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al agregar un nuevo registro de Suplencia al Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
@@ -498,7 +498,7 @@ public class SuplenciaController {
 			return ResponseHandler.generateResponse("Los importes de las Suplencias se actualizaron de manera exitósa", HttpStatus.OK, null);
 		} catch (Exception e) {
 
-			return ResponseHandler.generateResponse("Error al Actualizar los importes de la Suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
+			return ResponseHandler.generateResponse("Error al actualizar los importes de la suplencia", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
 
@@ -696,7 +696,7 @@ public class SuplenciaController {
 				return ResponseHandler.generateResponse("No existe presupuesto suficiente para realizar la actualización del registro", HttpStatus.INTERNAL_SERVER_ERROR, null);
 			}
 
-			return ResponseHandler.generateResponse("El registro de guardia ha sido actualizado de manera exitosa", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse("Modificacion de registro realizada", HttpStatus.OK, null);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al actualizar un registro de suplencia en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);
