@@ -46,7 +46,7 @@ public class JdbcAdminRepository implements IAdminRepository {
 	public List<LayoutSpep> consultaLayoutSPEP_X_Rep(Integer anio, Integer mes, Integer tipoPaga, Integer id_ordinal, String id_rep) {
 		logger.info(QUERY_CONSULTA_LAYOUT_SPEP_REP);
 
-		List<LayoutSpep> layout = jdbcTemplate.query(QUERY_CONSULTA_LAYOUT_SPEP_REP, BeanPropertyRowMapper.newInstance(LayoutSpep.class), anio, mes, tipoPaga, id_ordinal, id_rep );
+		List<LayoutSpep> layout = jdbcTemplate.query(QUERY_CONSULTA_LAYOUT_SPEP_REP, BeanPropertyRowMapper.newInstance(LayoutSpep.class), id_rep, id_rep, anio, mes, tipoPaga, id_ordinal, id_rep );
 		return layout;
 	}
 
