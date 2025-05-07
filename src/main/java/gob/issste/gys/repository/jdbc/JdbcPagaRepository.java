@@ -238,9 +238,21 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
+	public int AuthGuardiasIntForDeleg(String idDeleg, int idFecha) {
+		logger.info(STMT_INSERT_GUARD_INT_AUT_X_DEL);
+		return jdbcTemplate.update(STMT_INSERT_GUARD_INT_AUT_X_DEL, idDeleg, idFecha);
+	}
+
+	@Override
 	public int AuthGuardiasExt(Paga paga) {
 		logger.info(STMT_INSERT_GUARD_EXT_AUT);
 		return jdbcTemplate.update(STMT_INSERT_GUARD_EXT_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int AuthGuardiasExtForDeleg(String idDeleg, int idFecha) {
+		logger.info(STMT_INSERT_GUARD_EXT_AUT_X_DEL);
+		return jdbcTemplate.update(STMT_INSERT_GUARD_EXT_AUT_X_DEL,  idDeleg, idFecha);
 	}
 
 	@Override
@@ -250,9 +262,21 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
+	public int AuthSuplenciasIntForDeleg(String idDeleg, int idFecha) {
+		logger.info(STMT_INSERT_SUPLE_INT_AUT_X_DEL);
+		return jdbcTemplate.update(STMT_INSERT_SUPLE_INT_AUT_X_DEL, idDeleg, idFecha);
+	}
+
+	@Override
 	public int AuthSuplenciasExt(Paga paga) {
 		logger.info(STMT_INSERT_SUPLE_EXT_AUT);
 		return jdbcTemplate.update(STMT_INSERT_SUPLE_EXT_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int AuthSuplenciasExtForDeleg(String idDeleg, int idFecha) {
+		logger.info(STMT_INSERT_SUPLE_EXT_AUT_X_DEL);
+		return jdbcTemplate.update(STMT_INSERT_SUPLE_EXT_AUT_X_DEL,  idDeleg, idFecha);
 	}
 
 	@Override
@@ -262,9 +286,61 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
+	public int BorraAuthGuardiasIntXDeleg(int idFecha, String idDeleg) {
+		logger.info(STMT_DELETE_GUARDIAS_INT_AUT_X_DELEG);
+
+		int filasAfectadas = jdbcTemplate.update(STMT_DELETE_GUARDIAS_INT_AUT_X_DELEG, idFecha, idDeleg);
+		if (filasAfectadas == 0){
+			logger.info("No se encontraron filas para borrar.");
+		}else{
+			logger.info(filasAfectadas + " filas borradas.");
+		}
+		return filasAfectadas;
+	}
+
+	@Override
+	public int BorraAuthGuardiasExtXDeleg(int idFecha, String idDeleg) {
+		logger.info(STMT_DELETE_GUARDIAS_EXT_AUT_X_DELEG);
+		int filasAfectadas = jdbcTemplate.update(STMT_DELETE_GUARDIAS_EXT_AUT_X_DELEG, idFecha, idDeleg);
+
+		if (filasAfectadas == 0){
+			logger.info("No se encontraron filas para borrar.");
+		}else{
+			logger.info(filasAfectadas + " filas borradas.");
+		}
+		return filasAfectadas;
+	}
+
+	@Override
 	public int BorraAuthSuplencias(Paga paga) {
 		logger.info(STMT_DELETE_SUPLENCIAS_AUT);
 		return jdbcTemplate.update(STMT_DELETE_SUPLENCIAS_AUT, paga.getFec_pago());
+	}
+
+	@Override
+	public int borraAuthSuplenciasIntXDeleg(int idFecha, String idDeleg) {
+		logger.info(STMT_DELETE_SUPLENCIAS_INT_AUT_X_DELEG);
+		int filasAfectadas = jdbcTemplate.update(STMT_DELETE_SUPLENCIAS_INT_AUT_X_DELEG, idFecha, idDeleg);
+
+		if (filasAfectadas == 0){
+			logger.info("No se encontraron filas para borrar.");
+		}else{
+			logger.info(filasAfectadas + " filas borradas.");
+		}
+		return filasAfectadas;
+	}
+
+	@Override
+	public int borraAuthSuplenciasExtXDeleg(int idFecha, String idDeleg) {
+		logger.info(STMT_DELETE_SUPLENCIAS_EXT_AUT_X_DELEG);
+		int filasAfectadas = jdbcTemplate.update(STMT_DELETE_SUPLENCIAS_EXT_AUT_X_DELEG, idFecha, idDeleg);
+
+		if (filasAfectadas == 0){
+			logger.info("No se encontraron filas para borrar.");
+		}else{
+			logger.info(filasAfectadas + " filas borradas.");
+		}
+		return filasAfectadas;
 	}
 
 	@Override

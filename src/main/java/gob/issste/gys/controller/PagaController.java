@@ -118,44 +118,24 @@ public class PagaController {
 
 			pagaRepository.update(_paga);
 
-//			pagaRepository.removeDelegForFecha(id);
-//			for(DelegacionPorFecha deleg:paga.getDelegaciones()) {
-//				pagaRepository.saveDelegForFecha(id, deleg.getId_div_geografica(), 1,paga.getId_usuario());
-//			}
 
-			switch (paga.getEstatus()) {
-				case 1:
-					pagaRepository.changeEstatusForAllDelegByDate(id, 1);
-					break;
+			//Se actualiza el estatus de las delegaciones por fecha
 
-				case 2: // Cambio a estatus de abierta a cerrada
+			pagaRepository.changeEstatusForAllDelegByDate(id, paga.getEstatus());
 
-					pagaRepository.changeEstatusForAllDelegByDate(id, 2);
+			if(paga.getEstatus() == 2 ){
+				pagaRepository.changeEstatusForAllDelegByDate(id, 2);
 
-					pagaRepository.BorraAuthGuardias(paga);
-					pagaRepository.AuthGuardiasInt(paga);
-					pagaRepository.AuthGuardiasExt(paga);
+				pagaRepository.BorraAuthGuardias(paga);
+				pagaRepository.AuthGuardiasInt(paga);
+				pagaRepository.AuthGuardiasExt(paga);
 
-					pagaRepository.BorraAuthSuplencias(paga);
-					pagaRepository.AuthSuplenciasInt(paga);
-					pagaRepository.AuthSuplenciasExt(paga);
-
-
-					break;
-
-//				case 3:
-//					int existenGuardiasConfirmadas = datosRepository.validaGuardiasConfirmadas(paga.getFec_pago());
-//					if(existenGuardiasConfirmadas != 0){
-//						return ResponseHandler.generateResponse(
-//								"No se puede actualizar la fecha a la siguiente fase debido a que aun hay registros sin confirmar",
-//								HttpStatus.NOT_FOUND,
-//								null
-//						);
-//
-//					}
-//					break;
-//
+				pagaRepository.BorraAuthSuplencias(paga);
+				pagaRepository.AuthSuplenciasInt(paga);
+				pagaRepository.AuthSuplenciasExt(paga);
 			}
+
+
 			return ResponseHandler.generateResponse(
 //					"La fecha de control de pagos de GyS ha sido modificado de manera exitosa",
 					"La fecha control ha sido modificada correctamente",
@@ -425,7 +405,30 @@ public class PagaController {
 		try {
 			int result = 0;
 			if(idDeleg != null){
+
 				result = pagaService.changeEstatusByDeleg(idFecha, idDeleg, estatus);
+
+				if(estatus == 2){
+					//Proceso para validar por representacion
+					//Borran los registros de la representacion en gys_autorizacion_guardias
+					pagaRepository.BorraAuthGuardiasIntXDeleg(idFecha,idDeleg);
+					pagaRepository.BorraAuthGuardiasExtXDeleg(idFecha,idDeleg);
+
+					//Registros de guardias internas y externas
+					pagaRepository.AuthGuardiasIntForDeleg(idDeleg, idFecha);
+					pagaRepository.AuthGuardiasExtForDeleg(idDeleg, idFecha);
+
+					//Borran los registros de la representacion en gys_autorizacion_suplencias
+					pagaRepository.borraAuthSuplenciasIntXDeleg(idFecha,idDeleg);
+					pagaRepository.borraAuthSuplenciasExtXDeleg(idFecha,idDeleg);
+
+					//Registros de suplencias internas y externas
+					pagaRepository.AuthSuplenciasIntForDeleg(idDeleg, idFecha);
+					pagaRepository.AuthSuplenciasExtForDeleg(idDeleg, idFecha);
+
+				}
+
+
 				return ResponseHandler.generateResponse(
 						"Fecha actualizada con éxito"
 						,HttpStatus.OK
