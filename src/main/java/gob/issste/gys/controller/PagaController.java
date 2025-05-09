@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import gob.issste.gys.model.DelegacionPorFecha;
+import gob.issste.gys.model.*;
 import gob.issste.gys.repository.IDatosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,9 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import gob.issste.gys.model.Delegacion;
-import gob.issste.gys.model.Paga;
-import gob.issste.gys.model.Usuario;
 import gob.issste.gys.repository.IPagaRepository;
 import gob.issste.gys.repository.UsuarioRepository;
 import gob.issste.gys.response.ResponseHandler;
@@ -322,17 +319,30 @@ public class PagaController {
 			@Parameter(description = "Parámetro para indicar el Año del ejercicio de las fechas de control de pagos", required = true) @RequestParam(required = true) Integer anio,
 			@Parameter(description = "Parámetro para indicar el Mes del ejercicio de las fechas de control de pagos", required = true) @RequestParam(required = true) Integer mes,
 			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1) de las fechas de control de pagos", required = true) @RequestParam(required = true) Integer tipoFechaControl,
-			@Parameter(description = "ID del Sstatus del que se desea obtener las fechas de control de pagos", required = true) @RequestParam(required = true) Integer status) {
+			@Parameter(description = "ID del Sstatus del que se desea obtener las fechas de control de pagos", required = true) @RequestParam(required = true) Integer status,
+			@Parameter(description = "ID Delegacion", required = false) @RequestParam(required = false) String idDeleg) {
 
 		try {
-			List<Paga> pagas = pagaRepository.findByStatus(anio, mes, tipoFechaControl, status);
+
+			List<Paga> pagas = new ArrayList<Paga>();
+
+			if(idDeleg.isEmpty()){
+				pagas = pagaRepository.findByStatus(anio, mes, tipoFechaControl, status);
+			}else{
+				pagas = pagaRepository.findByStatusByDeleg( status, idDeleg);
+			}
 
 			if (pagas.isEmpty()) {
-
-				return ResponseHandler.generateResponse("No existen fechas de control de pagos de GyS con las condiciones indicadas", HttpStatus.NOT_FOUND, null);
+					return ResponseHandler.generateResponse(
+							"No existen fechas de control de pagos de GyS con las condiciones indicadas",
+							HttpStatus.NOT_FOUND,
+							null
+					);
 			}
 
 			return ResponseHandler.generateResponse("Se obtuvo la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.OK, pagas);
+
+
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al obtener la información de fechas de control de pagos de GyS activas en el Sistema", HttpStatus.INTERNAL_SERVER_ERROR, null);

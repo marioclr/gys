@@ -817,11 +817,13 @@ public class GuardiaController {
 					params.add(claveEmpleado);
 					regexList.add(regexNumEmp);
 
-				} else if(tipoGuardia.equals(String.valueOf("GE"))){
-					params.add(claveEmpleado);
-					regexList.add(regexRfc);
-
-				}else{
+				}
+				else if(tipoGuardia.equals(String.valueOf("GE"))){
+//					params.add(claveEmpleado);
+//					regexList.add(regexRfc);
+//
+				}
+				else{
 					throw new SQLException("El numero de empleado es incorrecto");
 				}
 			}
