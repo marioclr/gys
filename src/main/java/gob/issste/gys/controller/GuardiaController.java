@@ -7,7 +7,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import gob.issste.gys.model.Programatica;
 import gob.issste.gys.service.ParamsValidatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -717,57 +716,73 @@ public class GuardiaController {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		String strFecha = dateFormat.format(fec_pago);
 
+//		boolean registrosGI = false;
+//		boolean registrosGE = false;
+//		boolean registrosSI = false;
+//		boolean registrosSE = false;
+//
+//		String mensaje = "";
+
 		try {
 
-			switch (estatus) {
+            switch (estatus) {
+				//VALIDADA
+                case 1 -> {
+                    switch (tipo) {
+                        case "GI" ->
+                                guardiaRepository.updateAuthStatusGuardias1(tipo, strFecha, idDeleg, idDeleg, idUsuario);
+                        case "GE" ->
+                                guardiaRepository.updateAuthStatusGuardias1Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
+                    }
+                }
+				//CONFIRMADA
+                case 3 -> {
+                    switch (tipo) {
+                        case "GI" ->
 
-				case 1:
+                                guardiaRepository.updateAuthStatusGuardias2(tipo, strFecha, idDeleg, idDeleg, idUsuario);
+                        case "GE" ->
 
-					switch (tipo) {
-					
-						case "GI":
-							guardiaRepository.updateAuthStatusGuardias1(tipo, strFecha, idDeleg, idDeleg, idUsuario);
-							break;
+                                guardiaRepository.updateAuthStatusGuardias2Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
+                    }
 
-						case "GE":
-							guardiaRepository.updateAuthStatusGuardias1Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
-							break;
-					}
-					break;
-
-				case 3:
-
-					switch (tipo) {
-					
-						case "GI":
-//							int contGuardsAuthInt = guardiaRepository.countAuthGuardiasStatusInt(strFecha, idDeleg);
+//					//SE EXTRAE EL ID DE LA FECHA
+//					int idFecha = pagaRepository.idFechaControl(strFecha);
+//					logger.info("=======>"+idFecha);
+//					logger.info("=======>"+idFecha+"========>"+idDeleg+"=====>"+strFecha);
+//					Integer validacionGI = guardiaRepository.validacionRegistroExistentesGI(idFecha,idDeleg);
+//					Integer validacionGE = guardiaRepository.validacionRegistroExistentesGE(idFecha,idDeleg);
+//					logger.info("GI====>"+validacionGI);
+//					logger.info("GE====>"+validacionGE);
 //
-//							if(contGuardsAuthInt > 1){
-//								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de guardias", HttpStatus.INTERNAL_SERVER_ERROR, null);
-//							}
+//					registrosGI = validacionGI == null || validacionGI > 0;
+//					registrosGE = validacionGE == null || validacionGE > 0 ;
+//
+//					String gi = !registrosGI ? "Guardias internas" : "";
+//					String ge = !registrosGE ? "Guardias externas" : "";
+//					String si = !registrosSI ? "Suplencias internas" : "";
+//					String se = !registrosSE ? "Suplencias externas" : "";
+//					mensaje = (registrosGI && registrosGE) ?
+//							"El estatus de las guardias se actualizó de manera exitósa" : "Faltan tipos por confirmar: " + gi +"," + ge;
+//
+//					logger.info("RESULTADO:"+(registrosGI && registrosGE));
+//
+//					//SI TODOS LOS TIPOS TIENEN SUS REGISTROS CONFIRMADOS
+//					if (registrosGI && registrosGE){
+//						pagaRepository.changeEstatusByIdDeleg(idFecha,idDeleg,3);
+//					}
 
-							guardiaRepository.updateAuthStatusGuardias2(tipo, strFecha, idDeleg, idDeleg, idUsuario);
+                }
+                default -> {
+                    return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
+                }
+            }
 
-							break;
-	
-						case "GE":
-//							int contGuardsAuthExt = guardiaRepository.countAuthGuardiasStatusExt(strFecha, idDeleg);
-//							if(contGuardsAuthExt > 1){
-//								return ResponseHandler.generateResponse("Para confirmar es necesario pasar la fase de autorización de guardias", HttpStatus.INTERNAL_SERVER_ERROR, null);
-//							}
-
-							guardiaRepository.updateAuthStatusGuardias2Ext(tipo, strFecha, idDeleg, idDeleg, idUsuario);
-
-							break;
-					}
-					break;
-
-				default:
-					return ResponseHandler.generateResponse("No se indicó el tipo de guardia correctamente ('GI': Internas o 'GE': Externas)", HttpStatus.INTERNAL_SERVER_ERROR, null);
-
-			}
-
-			return ResponseHandler.generateResponse("El estatus de las guardias se actualizó de manera exitósa", HttpStatus.OK, null);
+			return ResponseHandler.generateResponse(
+					"El estatus de las guardias se actualizó de manera exitósa",
+					HttpStatus.OK,
+					null
+			);
 		} catch (Exception e) {
 
 			return ResponseHandler.generateResponse("Error al actualizar el estatus en las guardias", HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());

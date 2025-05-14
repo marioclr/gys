@@ -117,11 +117,11 @@ public class PagaController {
 
 
 			//Se actualiza el estatus de las delegaciones por fecha
+			if (paga.getEstatus() < 2){
+				pagaRepository.changeEstatusForAllDelegByDate(id, paga.getEstatus());
 
-			pagaRepository.changeEstatusForAllDelegByDate(id, paga.getEstatus());
-
-			if(paga.getEstatus() == 2 ){
-				pagaRepository.changeEstatusForAllDelegByDate(id, 2);
+			}else if(paga.getEstatus() == 2 ){
+//				pagaRepository.changeEstatusForAllDelegByDate(id, 2);
 
 				pagaRepository.BorraAuthGuardias(paga);
 				pagaRepository.AuthGuardiasInt(paga);
@@ -130,11 +130,29 @@ public class PagaController {
 				pagaRepository.BorraAuthSuplencias(paga);
 				pagaRepository.AuthSuplenciasInt(paga);
 				pagaRepository.AuthSuplenciasExt(paga);
+
+				//ACTUALIZAR EN CASO DE QUE NO EXISTAN REGISTROS
+				List<String> representaciones = pagaRepository.listaDeRepresentacionesByFecha(id);
+
+				representaciones.forEach(delegacion -> {
+						//System.out.println("Delegación: " + delegacion);
+						if(pagaRepository.existenRegistrosGuardiasYSuplencias(id, delegacion)){
+							this.changeDateEstatusByDeleg(id, 2, delegacion);
+						}else{
+							this.changeDateEstatusByDeleg(id, 7, delegacion);
+						}
+					}
+				);
+
+			} else if (paga.getEstatus() >2) {
+				List<String> representaciones = pagaRepository.listaDeRepresentacionesByEstatus(id,paga.getEstatus()-1);
+				representaciones.forEach(delegacion -> {
+						this.changeDateEstatusByDeleg(id, paga.getEstatus(), delegacion);
+					}
+				);
 			}
 
-
 			return ResponseHandler.generateResponse(
-//					"La fecha de control de pagos de GyS ha sido modificado de manera exitosa",
 					"La fecha control ha sido modificada correctamente",
 					HttpStatus.OK,
 					null);

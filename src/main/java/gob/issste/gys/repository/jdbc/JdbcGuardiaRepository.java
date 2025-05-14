@@ -969,4 +969,18 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		return guardias;
 	}
 
+	//VALIDACION DE LA EXISTENCIA DE REGISTROS EN GUARDIAS
+
+	@Override
+	public Integer validacionRegistroExistentesGI(int idFecha, String idDeleg){
+		logger.info(VALIDACION_REGISTRO_EXISTENTES_GI);
+        return jdbcTemplate.queryForObject(VALIDACION_REGISTRO_EXISTENTES_GI, Integer.class, idFecha, idDeleg, idFecha, idDeleg);
+	}
+
+	@Override
+	public Integer validacionRegistroExistentesGE(int idFecha, String idDeleg){
+		logger.info(VALIDACION_REGISTRO_EXISTENTES_GE);
+        return jdbcTemplate.queryForObject(VALIDACION_REGISTRO_EXISTENTES_GE, Integer.class, idFecha, idDeleg, idFecha, idDeleg);
+	}
+
 }

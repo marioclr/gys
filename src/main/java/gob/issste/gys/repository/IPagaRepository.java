@@ -395,4 +395,82 @@ public interface IPagaRepository {
 													"Where idfecha= ?";
 
 	int changeEstatusForAllDelegByDate(int idFecha, int estatus);
+
+	public final String LISTA_REPRESENTACIONES_POR_FECHA = "SELECT iddelegacion FROM gys_delegacionesporfecha where idfecha = ?";
+
+	List<String> listaDeRepresentacionesByFecha(int idFecha);
+	public final String VALIDACION_REGISTROS_GUARDIAS_Y_SUPLENCIAS =
+			"SELECT (GI.total_g_internas + GE.total_g_externas + SI.total_s_internas + total_s_externas) total_registros\r\n"
+			+"    FROM(\r\n"
+			+"        SELECT count(*) total_g_internas\r\n"
+			+"            FROM gys_guardias_emp G\r\n"
+			+"            INNER JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"
+			+"            INNER JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha \r\n"
+			+"            INNER JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"
+			+"            INNER JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"
+			+"            INNER JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"
+			+"            INNER JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"
+			+"            WHERE PU.id_sociedad = '01'\r\n"
+			+"                AND PU.id_empresa = '01'\r\n"
+			+"                AND SE.id_empresa = '01'\r\n"
+			+"                AND DF.idfecha = ?\r\n"
+			+"                AND D.id_area_generadora = C.id_area_generadora\r\n"
+			+"                AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+			+"    )GI, (\r\n"
+			+"        SELECT count(*) total_g_externas\r\n"
+			+"            FROM gys_guardias_ext G\r\n"
+			+"            INNER JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"
+			+"            INNER JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha \r\n"
+			+"            INNER JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"
+			+"            INNER JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"
+			+"            INNER JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"
+			+"            INNER JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"
+			+"            WHERE PU.id_sociedad = '01'\r\n"
+			+"                AND PU.id_empresa = '01'\r\n"
+			+"                AND SE.id_empresa = '01'\r\n"
+			+"                AND DF.idfecha = ?\r\n"
+			+"                AND D.id_area_generadora = C.id_area_generadora\r\n"
+			+"                AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+			+"    )GE, (\r\n"
+			+"        SELECT count(*) total_s_internas\r\n"
+			+"            FROM gys_suplencias_emp G\r\n"
+			+"            INNER JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"
+			+"            INNER JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha \r\n"
+			+"            INNER JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"
+			+"            INNER JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"
+			+"            INNER JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"
+			+"            INNER JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"
+			+"            WHERE PU.id_sociedad = '01'\r\n"
+			+"                AND PU.id_empresa = '01'\r\n"
+			+"                AND SE.id_empresa = '01'\r\n"
+			+"                AND DF.idfecha = ?\r\n"
+			+"                AND D.id_area_generadora = C.id_area_generadora\r\n"
+			+"                AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+			+"    )SI,(\r\n"
+			+"        SELECT count(*) total_s_externas\r\n"
+			+"            FROM gys_suplencias_ext G\r\n"
+			+"            INNER JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"
+			+"            INNER JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha \r\n"
+			+"            INNER JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"
+			+"            INNER JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"
+			+"            INNER JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"
+			+"            INNER JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"
+			+"            WHERE PU.id_sociedad = '01'\r\n"
+			+"                AND PU.id_empresa = '01'\r\n"
+			+"                AND SE.id_empresa = '01'\r\n"
+			+"                AND DF.idfecha = ?\r\n"
+			+"                AND D.id_area_generadora = C.id_area_generadora\r\n"
+			+"                AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"
+			+"    )SE";
+	boolean existenRegistrosGuardiasYSuplencias(int idFecha, String idDeleg);
+
+	public final String LISTA_REPRESENTACIONES_POR_ESTATUS = "SELECT iddelegacion FROM gys_delegacionesporfecha \r\n" +
+			"WHERE idfecha = ?\r\n" +
+			"AND estatus = ?";
+
+	List<String> listaDeRepresentacionesByEstatus(int idFecha, int estatus);
+
+	public final String ID_FECHA_CONTROL = "SELECT id FROM gys_fechas_control WHERE fec_pago = ?";
+
+	int idFechaControl(String fec_pago);
 }

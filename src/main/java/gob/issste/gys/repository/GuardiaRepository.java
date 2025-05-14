@@ -474,4 +474,90 @@ public String STMT_UPDATES_AUTH_STATUS_2	= "MERGE INTO gys_autorizacion_guardias
 
 	List<DatosGuardia> ConsultaDynamicAuthGuardias(String fechaPago, String tipo, String idDelegacion, String idCentroTrab, Integer estatus);
 
+	public String VALIDACION_REGISTRO_EXISTENTES_GI = "SELECT CASE \r\n"+
+													"        WHEN EXISTS (\r\n"+
+													"            SELECT 1\r\n"+
+													"            FROM gys_guardias_emp G\r\n"+
+													"            INNER JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"+
+													"            INNER JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha \r\n"+
+													"            INNER JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"+
+													"            INNER JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"            INNER JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"            INNER JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"            INNER JOIN gys_autorizacion_guardias AG ON G.id = AG.id_guardia AND AG.id_tipo in ('GI')\r\n"+
+													"            WHERE PU.id_sociedad = '01'\r\n"+
+													"            AND PU.id_empresa = '01'\r\n"+
+													"            AND SE.id_empresa = '01'\r\n"+
+													"            AND DF.idfecha = ?\r\n"+
+//													"            AND AG.estatus2=3\r\n"+
+													"            AND D.id_area_generadora = C.id_area_generadora\r\n"+
+													"            AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"+
+													"        ) THEN (\r\n"+
+													"            SELECT COUNT(*)\r\n"+
+													"            FROM gys_guardias_emp G\r\n"+
+													"            INNER JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"+
+													"            INNER JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha \r\n"+
+													"            INNER JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"+
+													"            INNER JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"            INNER JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"            INNER JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"            INNER JOIN gys_autorizacion_guardias AG ON G.id = AG.id_guardia AND AG.id_tipo in ('GI')\r\n"+
+													"            WHERE PU.id_sociedad = '01'\r\n"+
+													"            AND PU.id_empresa = '01'\r\n"+
+													"            AND SE.id_empresa = '01'\r\n"+
+													"            AND DF.idfecha = ?\r\n"+
+													"            AND AG.estatus2=3\r\n"+
+													"            AND D.id_area_generadora = C.id_area_generadora\r\n"+
+													"            AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"+
+													"        )\r\n"+
+													"        ELSE NULL\r\n"+
+													"    END AS reg_ge_confirmados\r\n"+
+													"FROM systables\r\n"+
+													"WHERE tabid = 1\r\n";
+
+
+	Integer validacionRegistroExistentesGI(int idFecha, String idDeleg);
+
+	public String VALIDACION_REGISTRO_EXISTENTES_GE = "SELECT CASE \r\n"+
+													"        WHEN EXISTS (\r\n"+
+													"            SELECT 1\r\n"+
+													"            FROM gys_guardias_ext G\r\n"+
+													"            INNER JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"+
+													"            INNER JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha \r\n"+
+													"            INNER JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"+
+													"            INNER JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"            INNER JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"            INNER JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"            INNER JOIN gys_autorizacion_guardias AG ON G.id = AG.id_guardia AND AG.id_tipo in ('GE')\r\n"+
+													"            WHERE PU.id_sociedad = '01'\r\n"+
+													"            AND PU.id_empresa = '01'\r\n"+
+													"            AND SE.id_empresa = '01'\r\n"+
+													"            AND DF.idfecha = ?\r\n"+
+//													"            AND AG.estatus2=3\r\n"+
+													"            AND D.id_area_generadora = C.id_area_generadora\r\n"+
+													"            AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"+
+													"        ) THEN (\r\n"+
+													"            SELECT COUNT(*)\r\n"+
+													"            FROM gys_guardias_ext G\r\n"+
+													"            INNER JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"+
+													"            INNER JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha \r\n"+
+													"            INNER JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"+
+													"            INNER JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"            INNER JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"            INNER JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"            INNER JOIN gys_autorizacion_guardias AG ON G.id = AG.id_guardia AND AG.id_tipo in ('GE')\r\n"+
+													"            WHERE PU.id_sociedad = '01'\r\n"+
+													"            AND PU.id_empresa = '01'\r\n"+
+													"            AND SE.id_empresa = '01'\r\n"+
+													"            AND DF.idfecha = ?\r\n"+
+													"            AND AG.estatus2=3\r\n"+
+													"            AND D.id_area_generadora = C.id_area_generadora\r\n"+
+													"            AND C.id_area_generadora = (SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ?)\r\n"+
+													"        )\r\n"+
+													"        ELSE NULL\r\n"+
+													"    END AS reg_ge_confirmados\r\n"+
+													"FROM systables\r\n"+
+													"WHERE tabid = 1\r\n";
+	Integer validacionRegistroExistentesGE(int idFecha, String idDeleg);
+
 }

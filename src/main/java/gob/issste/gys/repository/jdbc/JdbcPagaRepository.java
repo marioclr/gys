@@ -1,12 +1,11 @@
 package gob.issste.gys.repository.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.Collections;
 import java.util.List;
 
 import gob.issste.gys.model.DelegacionPorFecha;
+import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +14,7 @@ import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -381,5 +381,64 @@ public class JdbcPagaRepository implements IPagaRepository {
 		return jdbcTemplate.update(UPDATE_ESTATUS_FEC_DELEG, estatus, idFecha);
 	}
 
+	//	Trae los registros de las representaciones por fecha
+	@Override
+	public List<String> listaDeRepresentacionesByFecha(int idFecha) {
+		try {
+			logger.info(LISTA_REPRESENTACIONES_POR_FECHA);
+
+			// Utiliza un RowMapper para mapear los resultados a una lista de String
+			return jdbcTemplate.query(LISTA_REPRESENTACIONES_POR_FECHA, new RowMapper<String>() {
+				@Override
+				public String mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
+					return rs.getString("iddelegacion");
+				}
+			}, idFecha);
+
+		} catch (NullPointerException e) {
+			logger.error("Error: ", e);
+			return Collections.emptyList(); // Devuelve una lista vacía en caso de error
+		}
+	}
+
+	//Consulta si existe por lo menos un registro en los 4 tipos: GI, GE, SI, SE
+	@Override
+	public boolean existenRegistrosGuardiasYSuplencias(int idFecha, String idDeleg) {
+		try {
+			logger.info(VALIDACION_REGISTROS_GUARDIAS_Y_SUPLENCIAS);
+			Integer count = jdbcTemplate.queryForObject(VALIDACION_REGISTROS_GUARDIAS_Y_SUPLENCIAS, Integer.class, idFecha, idDeleg, idFecha, idDeleg, idFecha, idDeleg, idFecha, idDeleg);
+			return count != null && count > 0;
+
+		}catch (NullPointerException e){
+			return false;
+		}
+	}
+
+	//	Trae los registros de las representaciones por fecha
+	@Override
+	public List<String> listaDeRepresentacionesByEstatus(int idFecha, int estatus) {
+		try {
+			logger.info(LISTA_REPRESENTACIONES_POR_ESTATUS);
+
+			// Utiliza un RowMapper para mapear los resultados a una lista de String
+			return jdbcTemplate.query(LISTA_REPRESENTACIONES_POR_ESTATUS, new RowMapper<String>() {
+				@Override
+				public String mapRow(@NotNull ResultSet rs, int rowNum) throws SQLException {
+					return rs.getString("iddelegacion");
+				}
+			}, idFecha, estatus);
+
+		} catch (NullPointerException e) {
+			logger.error("Error: ", e);
+			return Collections.emptyList(); // Devuelve una lista vacía en caso de error
+		}
+	}
+
+	@Override
+	public int idFechaControl(String fec_pago){
+			logger.info(ID_FECHA_CONTROL);
+			Integer result = jdbcTemplate.queryForObject(ID_FECHA_CONTROL, Integer.class, fec_pago);
+			return result != null ? result : 0;
+	}
 
 }

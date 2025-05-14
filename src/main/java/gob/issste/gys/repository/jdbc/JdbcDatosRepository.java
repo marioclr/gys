@@ -451,12 +451,4 @@ public class JdbcDatosRepository implements IDatosRepository {
 		}
 	}
 
-	@Override
-
-	public int validaGuardiasConfirmadas(String fec_pago){
-		logger.info(VALIDA_GUARDIAS_CONFIRMADAS);
-		return jdbcTemplate.queryForObject(VALIDA_GUARDIAS_CONFIRMADAS, Integer.class, fec_pago,fec_pago,fec_pago,fec_pago);
-	}
-
-
 }
