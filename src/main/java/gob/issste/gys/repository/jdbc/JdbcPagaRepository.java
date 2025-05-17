@@ -20,7 +20,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import gob.issste.gys.JdbcTemplateDemo01Application;
-import gob.issste.gys.model.Delegacion;
 import gob.issste.gys.model.Paga;
 import gob.issste.gys.repository.IPagaRepository;
 
@@ -244,9 +243,9 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
-	public int AuthGuardiasIntForDeleg(String idDeleg, int idFecha) {
+	public int AuthGuardiasIntForDeleg(int idFecha, String idDeleg ) {
 		logger.info(STMT_INSERT_GUARD_INT_AUT_X_DEL);
-		return jdbcTemplate.update(STMT_INSERT_GUARD_INT_AUT_X_DEL, idDeleg, idFecha);
+		return jdbcTemplate.update(STMT_INSERT_GUARD_INT_AUT_X_DEL, idFecha, idDeleg);
 	}
 
 	@Override
@@ -256,9 +255,9 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
-	public int AuthGuardiasExtForDeleg(String idDeleg, int idFecha) {
+	public int AuthGuardiasExtForDeleg(int idFecha, String idDeleg) {
 		logger.info(STMT_INSERT_GUARD_EXT_AUT_X_DEL);
-		return jdbcTemplate.update(STMT_INSERT_GUARD_EXT_AUT_X_DEL,  idDeleg, idFecha);
+		return jdbcTemplate.update(STMT_INSERT_GUARD_EXT_AUT_X_DEL, idFecha, idDeleg);
 	}
 
 	@Override
@@ -268,9 +267,9 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
-	public int AuthSuplenciasIntForDeleg(String idDeleg, int idFecha) {
+	public void AuthSuplenciasIntForDeleg(int idFecha, String idDeleg) {
 		logger.info(STMT_INSERT_SUPLE_INT_AUT_X_DEL);
-		return jdbcTemplate.update(STMT_INSERT_SUPLE_INT_AUT_X_DEL, idDeleg, idFecha);
+		jdbcTemplate.update(STMT_INSERT_SUPLE_INT_AUT_X_DEL, idFecha,idDeleg);
 	}
 
 	@Override
@@ -280,9 +279,9 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
-	public int AuthSuplenciasExtForDeleg(String idDeleg, int idFecha) {
+	public void AuthSuplenciasExtForDeleg(int idFecha, String idDeleg) {
 		logger.info(STMT_INSERT_SUPLE_EXT_AUT_X_DEL);
-		return jdbcTemplate.update(STMT_INSERT_SUPLE_EXT_AUT_X_DEL,  idDeleg, idFecha);
+		jdbcTemplate.update(STMT_INSERT_SUPLE_EXT_AUT_X_DEL, idDeleg, idFecha);
 	}
 
 	@Override

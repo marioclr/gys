@@ -982,7 +982,7 @@ public class GuardiaController {
 				guardias = guardiaRepository.ConsultaDynamicAuthGuardias(strQuincena, tipoGuardia,idDelegacion, idCentroTrab, estatus);
 
 				if (guardias.isEmpty()) {
-					message = "No se encontraron los registros de suplencias del empleado en el Sistema";
+					message = "No se encontraron los registros de guardias del empleado en el Sistema";
 					return ResponseHandler.generateResponse(message, HttpStatus.NOT_FOUND, null);
 				}
 

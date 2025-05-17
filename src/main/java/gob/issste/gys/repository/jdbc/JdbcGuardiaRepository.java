@@ -20,6 +20,10 @@ import gob.issste.gys.JdbcTemplateDemo01Application;
 import gob.issste.gys.model.DatosGuardia;
 import gob.issste.gys.repository.GuardiaRepository;
 
+import static jakarta.xml.bind.DatatypeConverter.parseString;
+import static java.lang.Integer.parseInt;
+import static java.lang.String.*;
+
 @Repository
 public class JdbcGuardiaRepository implements GuardiaRepository {
 
@@ -520,11 +524,11 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		String QUERY_TABLE_BASE = "";
 
 
-		if (tipo.equals(String.valueOf("GI"))) {
+		if (tipo.equals(valueOf("GI"))) {
 			QUERY_TABLE_BASE = "gys_guardias_emp";
 			EMPLOYEE_FIELD = "id_empleado";
 
-		}else if(tipo.equals(String.valueOf("GE"))){
+		}else if(tipo.equals(valueOf("GE"))){
 			QUERY_TABLE_BASE = "gys_guardias_ext";
 			EMPLOYEE_FIELD = "rfc";
 		}else{
@@ -536,10 +540,10 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		}
 
 		if (clave_empleado != null) {
-			if (tipo.equals(String.valueOf("GI"))) {
+			if (tipo.equals(valueOf("GI"))) {
 				QUERY_CONDITION += "And id_empleado = ?\r\n";
 
-			} else if(tipo.equals(String.valueOf("GE"))){
+			} else if(tipo.equals(valueOf("GE"))){
 				QUERY_CONDITION += "And rfc = ?\r\n";
 			}else{
 				throw new SQLException("El numero de empleado es incorrecto");
@@ -655,11 +659,11 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		String QUERY_TABLE_BASE = "";
 
 
-		if (tipo.equals(String.valueOf("GI"))) {
+		if (tipo.equals(valueOf("GI"))) {
 			QUERY_TABLE_BASE = "gys_guardias_emp";
 			EMPLOYEE_FIELD = "id_empleado";
 
-		}else if(tipo.equals(String.valueOf("GE"))){
+		}else if(tipo.equals(valueOf("GE"))){
 			QUERY_TABLE_BASE = "gys_guardias_ext";
 			EMPLOYEE_FIELD = "rfc";
 		}else{
@@ -671,7 +675,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		}
 
 		if (clave_empleado != null) {
-			if (tipo.equals(String.valueOf("GI"))) {
+			if (tipo.equals(valueOf("GI"))) {
 				QUERY_CONDITION += "And id_empleado = ?\r\n";
 
 			} else {
@@ -789,11 +793,11 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 
 		List<Object> params = new ArrayList<>();
 
-		if (tipo.equals(String.valueOf("GI"))) {
+		if (tipo.equals(valueOf("GI"))) {
 			QUERY_TABLE_BASE = "gys_guardias_emp";
 			EMPLOYEE_FIELD = "id_empleado";
 
-		}else if(tipo.equals(String.valueOf("GE"))){
+		}else if(tipo.equals(valueOf("GE"))){
 			QUERY_TABLE_BASE = "gys_guardias_ext";
 			EMPLOYEE_FIELD = "rfc";
 		}else{
@@ -806,7 +810,7 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		}
 
 		if (clave_empleado != null) {
-			if (tipo.equals(String.valueOf("GI"))) {
+			if (tipo.equals(valueOf("GI"))) {
 				QUERY_CONDITION += "And id_empleado = ?\r\n";
 
 			} else {
@@ -900,19 +904,17 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 		}
 
 		if (estatus != null) {
-
 			switch (estatus) {
+//				case 0:
+//					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+//					break;
 
-				case 0:
-					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
-					break;
-
-				case 1, 2:
-					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+				case 0, 1, 2:
+					QUERY_CONDITION += "  And A.estatus1 in (0, 1, 2)\r\n";
 					break;
 
 				case 3, 4:
-					QUERY_CONDITION += "  And A.estatus2 = ?\r\n";
+					QUERY_CONDITION += " And (A.estatus1 in (0, 1, 2) Or A.estatus2 in (3, 4))\r\n";
 					break;
 
 			}
@@ -958,12 +960,12 @@ public class JdbcGuardiaRepository implements GuardiaRepository {
 				ps.setString(cont, idCentroTrab);
 			}
 
-			if (estatus != null) {
-				cont++;
-				ps.setInt(cont, estatus);
-			}
+//			if (estatus != null) {
+//				cont++;
+//				ps.setInt(cont, estatus);
+//			}
 
-			logger.info("Prepared statement: "+ DYNAMIC_QUERY);
+			logger.info("Prepared statement Auth Guardias: "+ DYNAMIC_QUERY);
 		}, BeanPropertyRowMapper.newInstance(DatosGuardia.class));
 
 		return guardias;

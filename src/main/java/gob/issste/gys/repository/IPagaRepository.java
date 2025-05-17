@@ -3,7 +3,6 @@ package gob.issste.gys.repository;
 import java.sql.SQLException;
 import java.util.List;
 
-import gob.issste.gys.model.Delegacion;
 import gob.issste.gys.model.DelegacionPorFecha;
 import gob.issste.gys.model.Paga;
 
@@ -170,24 +169,56 @@ public interface IPagaRepository {
 											+ "Where fec_paga = ?";
 	int AuthGuardiasInt(Paga paga);
 
-	public String STMT_INSERT_GUARD_INT_AUT_X_DEL	= "Insert Into gys_autorizacion_guardias\r\n"
-													+ "(id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
-													+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
-													+ "	Select G.id, G.fec_paga, 'GI' id_tipo, 0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, 0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
-													+ "		From gys_guardias_emp G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE, m4t_delegaciones D, gys_delegacionesporfecha DF\r\n"
-													+ "	Where G.fec_paga = P.fec_pago And \r\n"
-													+ "		P.id = DF.idfecha And \r\n"
-													+ "		DF.iddelegacion = D.id_div_geografica And \r\n"
-													+ "		G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
-													+ "		G.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
-													+ "		PU.id_sociedad = '01' And PU.id_empresa = '01' And \r\n"
-													+ "		G.id_clave_servicio = SE.id_clave_servicio And \r\n"
-													+ "		SE.id_empresa='01' And \r\n"
-													+ "		D.id_area_generadora = C.id_area_generadora And \r\n"
-													+ "		C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? ) And\r\n"
-													+ "		DF.idfecha = ? \r\n"
-													+ "Order by G.fec_paga desc, G.fec_inicio";
-	int AuthGuardiasIntForDeleg( String idDeleg, int idFecha);
+//	public String STMT_INSERT_GUARD_INT_AUT_X_DEL	= "Insert Into gys_autorizacion_guardias\r\n"
+//													+ "(id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
+//													+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
+//													+ "	Select G.id, G.fec_paga, 'GI' id_tipo, 0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, 0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
+//													+ "		From gys_guardias_emp G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE, m4t_delegaciones D, gys_delegacionesporfecha DF\r\n"
+//													+ "	Where G.fec_paga = P.fec_pago And \r\n"
+//													+ "		P.id = DF.idfecha And \r\n"
+//													+ "		DF.iddelegacion = D.id_div_geografica And \r\n"
+//													+ "		G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
+//													+ "		G.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
+//													+ "		PU.id_sociedad = '01' And PU.id_empresa = '01' And \r\n"
+//													+ "		G.id_clave_servicio = SE.id_clave_servicio And \r\n"
+//													+ "		SE.id_empresa='01' And \r\n"
+//													+ "		D.id_area_generadora = C.id_area_generadora And \r\n"
+//													+ "		C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? ) And\r\n"
+//													+ "		DF.idfecha = ? \r\n"
+//													+ "Order by G.fec_paga desc, G.fec_inicio";
+
+	public String STMT_INSERT_GUARD_INT_AUT_X_DEL	= "MERGE INTO gys_autorizacion_guardias A\r\n"+
+													"USING (\r\n"+
+													"   SELECT G.id, G.fec_paga, 'GI' AS id_tipo,\r\n"+
+													"           0 AS estatus1, '' AS comentarios1, '' AS id_usuario1, '' AS fec_validacion,\r\n"+
+													"           0 AS estatus2, '' AS comentarios2, '' AS id_usuario2, '' AS fec_autorizacion\r\n"+
+													"    FROM gys_guardias_emp G\r\n"+
+													"    JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"+
+													"    JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha\r\n"+
+													"    JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"+
+													"    JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"    JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"    JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"    WHERE G.fec_paga = P.fec_pago\r\n"+
+													"        And P.id = DF.idfecha\r\n"+
+													"        And DF.iddelegacion = D.id_div_geografica\r\n"+
+													"        And G.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"        And G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"        And G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"        And PU.id_sociedad = '01'\r\n"+
+													"        AND PU.id_empresa = '01'\r\n"+
+													"        AND SE.id_empresa = '01'\r\n"+
+													"        AND DF.idFecha = ? \r\n"+
+													"        AND D.id_area_generadora = C.id_area_generadora\r\n"+
+													"        AND C.id_area_generadora = ( SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ? )\r\n"+
+													") GI\r\n"+
+													"ON A.id_guardia = GI.id\r\n"+
+													"AND A.fec_pago=GI.fec_paga\r\n"+
+													"AND A.id_tipo=GI.id_tipo\r\n"+
+													"WHEN NOT MATCHED THEN\r\n"+
+													"  INSERT (id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion, estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"+
+													"  VALUES (GI.id, GI.fec_paga, 'GI', 0, '', '', '', 0, '', '', '');\r\n";
+	int AuthGuardiasIntForDeleg(int idFecha, String idDeleg );
 
 	public String STMT_INSERT_GUARD_EXT_AUT	= "Insert Into gys_autorizacion_guardias\r\n"
 											+ "(id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
@@ -199,24 +230,55 @@ public interface IPagaRepository {
 											+ "Where fec_paga = ?";
 	int AuthGuardiasExt(Paga paga);
 
-	public String STMT_INSERT_GUARD_EXT_AUT_X_DEL	= "Insert Into gys_autorizacion_guardias\r\n"
-													+ "(id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
-													+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
-													+ "	Select G.id, G.fec_paga, 'GE' id_tipo, 0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, 0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
-													+ "		From gys_guardias_ext G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE, m4t_delegaciones D, gys_delegacionesporfecha DF\r\n"
-													+ "	Where G.fec_paga = P.fec_pago And \r\n"
-													+ "		P.id = DF.idfecha And \r\n"
-													+ "		DF.iddelegacion = D.id_div_geografica And \r\n"
-													+ "		G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
-													+ "		G.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
-													+ "		PU.id_sociedad = '01' And PU.id_empresa = '01' And \r\n"
-													+ "		G.id_clave_servicio = SE.id_clave_servicio And \r\n"
-													+ "		SE.id_empresa='01' And \r\n"
-													+ "		D.id_area_generadora = C.id_area_generadora And \r\n"
-													+ "		C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
-													+ "		And DF.idfecha = ? \r\n"
-													+ "Order by G.fec_paga desc, G.fec_inicio";
-	int AuthGuardiasExtForDeleg(String idDeleg, int idFecha);
+//	public String STMT_INSERT_GUARD_EXT_AUT_X_DEL	= "Insert Into gys_autorizacion_guardias\r\n"
+//													+ "(id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
+//													+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
+//													+ "	Select G.id, G.fec_paga, 'GE' id_tipo, 0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, 0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
+//													+ "		From gys_guardias_ext G, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE, m4t_delegaciones D, gys_delegacionesporfecha DF\r\n"
+//													+ "	Where G.fec_paga = P.fec_pago And \r\n"
+//													+ "		P.id = DF.idfecha And \r\n"
+//													+ "		DF.iddelegacion = D.id_div_geografica And \r\n"
+//													+ "		G.id_centro_trabajo = C.id_centro_trabajo And \r\n"
+//													+ "		G.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
+//													+ "		PU.id_sociedad = '01' And PU.id_empresa = '01' And \r\n"
+//													+ "		G.id_clave_servicio = SE.id_clave_servicio And \r\n"
+//													+ "		SE.id_empresa='01' And \r\n"
+//													+ "		D.id_area_generadora = C.id_area_generadora And \r\n"
+//													+ "		C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
+//													+ "		And DF.idfecha = ? \r\n"
+//													+ "Order by G.fec_paga desc, G.fec_inicio";
+	public String STMT_INSERT_GUARD_EXT_AUT_X_DEL = "MERGE INTO gys_autorizacion_guardias A\r\n"+
+													"USING (\r\n"+
+													"   SELECT G.id, G.fec_paga, 'GE' AS id_tipo,\r\n"+
+													"           0 AS estatus1, '' AS comentarios1, '' AS id_usuario1, '' AS fec_validacion,\r\n"+
+													"           0 AS estatus2, '' AS comentarios2, '' AS id_usuario2, '' AS fec_autorizacion\r\n"+
+													"    FROM gys_guardias_ext G\r\n"+
+													"    JOIN gys_fechas_control P ON G.fec_paga = P.fec_pago\r\n"+
+													"    JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha\r\n"+
+													"    JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"+
+													"    JOIN m4t_centros_trab C ON G.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"    JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"    JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"    WHERE G.fec_paga = P.fec_pago\r\n"+
+													"        And P.id = DF.idfecha\r\n"+
+													"        And DF.iddelegacion = D.id_div_geografica\r\n"+
+													"        And G.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"        And G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"        And G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"        And PU.id_sociedad = '01'\r\n"+
+													"        AND PU.id_empresa = '01'\r\n"+
+													"        AND SE.id_empresa = '01'\r\n"+
+													"        AND DF.idFecha = ? \r\n"+
+													"        AND D.id_area_generadora = C.id_area_generadora\r\n"+
+													"        AND C.id_area_generadora = ( SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ? )\r\n"+
+													") GE\r\n"+
+													"ON A.id_guardia = GE.id\r\n"+
+													"AND A.fec_pago=GE.fec_paga\r\n"+
+													"AND A.id_tipo=GE.id_tipo\r\n"+
+													"WHEN NOT MATCHED THEN\r\n"+
+													"  INSERT (id_guardia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion, estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"+
+													"  VALUES (GE.id, GE.fec_paga, 'GE', 0, '', '', '', 0, '', '', '');\r\n";
+	int AuthGuardiasExtForDeleg(int idFecha, String idDeleg);
 
 
 	public String STMT_INSERT_SUPLE_INT_AUT = "Insert Into gys_autorizacion_suplencias\r\n"
@@ -229,24 +291,56 @@ public interface IPagaRepository {
 											+ "Where fec_paga = ?";
 	int AuthSuplenciasInt(Paga paga);
 
-	public String STMT_INSERT_SUPLE_INT_AUT_X_DEL	= "Insert Into gys_autorizacion_suplencias\r\n"
-													+ "(id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
-													+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
-													+ "	Select S.id, S.fec_paga, 'SI' id_tipo, 0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, 0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
-													+ "		From gys_suplencias_emp S, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE, m4t_delegaciones D, gys_delegacionesporfecha DF\r\n"
-													+ "	Where S.fec_paga = P.fec_pago And \r\n"
-													+ "		P.id = DF.idfecha And\r\n"
-													+ "		DF.iddelegacion = D.id_div_geografica And\r\n"
-													+ "		S.id_centro_trabajo = C.id_centro_trabajo And \r\n"
-													+ "		S.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
-													+ "		PU.id_sociedad = '01' And PU.id_empresa = '01' And \r\n"
-													+ "		S.id_clave_servicio = SE.id_clave_servicio And \r\n"
-													+ "		SE.id_empresa='01' And \r\n"
-													+ "		D.id_area_generadora = C.id_area_generadora And \r\n"
-													+ "		C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
-													+ "		And DF.idfecha = ? \r\n"
-													+ "Order by S.fec_paga desc, S.fec_inicio";
-	int AuthSuplenciasIntForDeleg(String idDeleg, int idFecha);
+//	public String STMT_INSERT_SUPLE_INT_AUT_X_DEL	= "Insert Into gys_autorizacion_suplencias\r\n"
+//													+ "(id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
+//													+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
+//													+ "	Select S.id, S.fec_paga, 'SI' id_tipo, 0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, 0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
+//													+ "		From gys_suplencias_emp S, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE, m4t_delegaciones D, gys_delegacionesporfecha DF\r\n"
+//													+ "	Where S.fec_paga = P.fec_pago And \r\n"
+//													+ "		P.id = DF.idfecha And\r\n"
+//													+ "		DF.iddelegacion = D.id_div_geografica And\r\n"
+//													+ "		S.id_centro_trabajo = C.id_centro_trabajo And \r\n"
+//													+ "		S.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
+//													+ "		PU.id_sociedad = '01' And PU.id_empresa = '01' And \r\n"
+//													+ "		S.id_clave_servicio = SE.id_clave_servicio And \r\n"
+//													+ "		SE.id_empresa='01' And \r\n"
+//													+ "		D.id_area_generadora = C.id_area_generadora And \r\n"
+//													+ "		C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
+//													+ "		And DF.idfecha = ? \r\n"
+//													+ "Order by S.fec_paga desc, S.fec_inicio";
+
+	public String STMT_INSERT_SUPLE_INT_AUT_X_DEL	= "MERGE INTO gys_autorizacion_suplencias A\r\n"+
+													"USING (\r\n"+
+													"   SELECT S.id, S.fec_paga, 'SI' AS id_tipo,\r\n"+
+													"           0 AS estatus1, '' AS comentarios1, '' AS id_usuario1, '' AS fec_validacion,\r\n"+
+													"           0 AS estatus2, '' AS comentarios2, '' AS id_usuario2, '' AS fec_autorizacion\r\n"+
+													"    FROM gys_suplencias_emp S\r\n"+
+													"    JOIN gys_fechas_control P ON S.fec_paga = P.fec_pago\r\n"+
+													"    JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha\r\n"+
+													"    JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"+
+													"    JOIN m4t_centros_trab C ON S.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"    JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"    JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"    WHERE S.fec_paga = P.fec_pago\r\n"+
+													"        And P.id = DF.idfecha\r\n"+
+													"        And DF.iddelegacion = D.id_div_geografica\r\n"+
+													"        And S.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"        And S.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"        And S.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"        And PU.id_sociedad = '01'\r\n"+
+													"        AND PU.id_empresa = '01'\r\n"+
+													"        AND SE.id_empresa = '01'\r\n"+
+													"        AND DF.idFecha = ? \r\n"+
+													"        AND D.id_area_generadora = C.id_area_generadora\r\n"+
+													"        AND C.id_area_generadora = ( SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ? )\r\n"+
+													") SI\r\n"+
+													"ON A.id_suplencia = SI.id\r\n"+
+													"AND A.fec_pago=SI.fec_paga\r\n"+
+													"AND A.id_tipo=SI.id_tipo\r\n"+
+													"WHEN NOT MATCHED THEN\r\n"+
+													"  INSERT (id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion, estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"+
+													"  VALUES (SI.id, SI.fec_paga, 'SI', 0, '', '', '', 0, '', '', '');\r\n";
+	void AuthSuplenciasIntForDeleg(int idFecha, String idDeleg);
 
 	public String STMT_INSERT_SUPLE_EXT_AUT = "Insert Into gys_autorizacion_suplencias\r\n"
 											+ "(id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
@@ -258,24 +352,56 @@ public interface IPagaRepository {
 											+ "Where fec_paga = ?";
 	int AuthSuplenciasExt(Paga paga);
 
-	public String STMT_INSERT_SUPLE_EXT_AUT_X_DEL	= "Insert Into gys_autorizacion_suplencias\r\n"
-													+ "(id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
-													+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
-													+ "	Select S.id, S.fec_paga, 'SE' id_tipo, 0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, 0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
-													+ "		From gys_suplencias_ext S, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE, m4t_delegaciones D,  gys_delegacionesporfecha DF\r\n"
-													+ "	Where S.fec_paga = P.fec_pago And \r\n"
-													+ "		P.id = DF.idfecha And\r\n"
-													+ "		DF.iddelegacion = D.id_div_geografica And\r\n"
-													+ "		S.id_centro_trabajo = C.id_centro_trabajo And \r\n"
-													+ "		S.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
-													+ "		PU.id_sociedad = '01' And PU.id_empresa = '01' And \r\n"
-													+ "		S.id_clave_servicio = SE.id_clave_servicio And \r\n"
-													+ "		SE.id_empresa='01' And \r\n"
-													+ "		D.id_area_generadora = C.id_area_generadora And \r\n"
-													+ "		C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
-													+ "		And DF.idfecha = ? \r\n"
-													+ "Order by S.fec_paga desc, S.fec_inicio";
-	int AuthSuplenciasExtForDeleg(String idDeleg, int idFecha);
+//	public String STMT_INSERT_SUPLE_EXT_AUT_X_DEL	= "Insert Into gys_autorizacion_suplencias\r\n"
+//													+ "(id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion,\r\n"
+//													+ "estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"
+//													+ "	Select S.id, S.fec_paga, 'SE' id_tipo, 0 estatus1, '' comentarios1, '' id_usuario1, '' fec_validacion, 0 estatus2, '' comentarios2, '' id_usuario2, '' fec_autorizacion\r\n"
+//													+ "		From gys_suplencias_ext S, gys_fechas_control P, m4t_centros_trab C, m4t_puestos_plaza PU, m4t_clave_servicio SE, m4t_delegaciones D,  gys_delegacionesporfecha DF\r\n"
+//													+ "	Where S.fec_paga = P.fec_pago And \r\n"
+//													+ "		P.id = DF.idfecha And\r\n"
+//													+ "		DF.iddelegacion = D.id_div_geografica And\r\n"
+//													+ "		S.id_centro_trabajo = C.id_centro_trabajo And \r\n"
+//													+ "		S.id_puesto_plaza = PU.id_puesto_plaza And \r\n"
+//													+ "		PU.id_sociedad = '01' And PU.id_empresa = '01' And \r\n"
+//													+ "		S.id_clave_servicio = SE.id_clave_servicio And \r\n"
+//													+ "		SE.id_empresa='01' And \r\n"
+//													+ "		D.id_area_generadora = C.id_area_generadora And \r\n"
+//													+ "		C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
+//													+ "		And DF.idfecha = ? \r\n"
+//													+ "Order by S.fec_paga desc, S.fec_inicio";
+
+	public String STMT_INSERT_SUPLE_EXT_AUT_X_DEL = "MERGE INTO gys_autorizacion_suplencias A\r\n"+
+													"USING (\r\n"+
+													"   SELECT S.id, S.fec_paga, 'SE' AS id_tipo,\r\n"+
+													"           0 AS estatus1, '' AS comentarios1, '' AS id_usuario1, '' AS fec_validacion,\r\n"+
+													"           0 AS estatus2, '' AS comentarios2, '' AS id_usuario2, '' AS fec_autorizacion\r\n"+
+													"    FROM gys_suplencias_ext S\r\n"+
+													"    JOIN gys_fechas_control P ON S.fec_paga = P.fec_pago\r\n"+
+													"    JOIN gys_delegacionesporfecha DF ON P.id = DF.idfecha\r\n"+
+													"    JOIN m4t_delegaciones D ON DF.iddelegacion = D.id_div_geografica\r\n"+
+													"    JOIN m4t_centros_trab C ON S.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"    JOIN m4t_puestos_plaza PU ON G.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"    JOIN m4t_clave_servicio SE ON G.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"    WHERE S.fec_paga = P.fec_pago\r\n"+
+													"        And P.id = DF.idfecha\r\n"+
+													"        And DF.iddelegacion = D.id_div_geografica\r\n"+
+													"        And S.id_centro_trabajo = C.id_centro_trabajo\r\n"+
+													"        And S.id_puesto_plaza = PU.id_puesto_plaza\r\n"+
+													"        And S.id_clave_servicio = SE.id_clave_servicio\r\n"+
+													"        And PU.id_sociedad = '01'\r\n"+
+													"        AND PU.id_empresa = '01'\r\n"+
+													"        AND SE.id_empresa = '01'\r\n"+
+													"        AND DF.idFecha = ? \r\n"+
+													"        AND D.id_area_generadora = C.id_area_generadora\r\n"+
+													"        AND C.id_area_generadora = ( SELECT id_area_generadora FROM m4t_delegaciones WHERE id_div_geografica = ? )\r\n"+
+													") SE\r\n"+
+													"ON A.id_suplencia = SE.id\r\n"+
+													"AND A.fec_pago=SE.fec_paga\r\n"+
+													"AND A.id_tipo=SE.id_tipo\r\n"+
+													"WHEN NOT MATCHED THEN\r\n"+
+													"  INSERT (id_suplencia, fec_pago, id_tipo, estatus1, comentarios1, id_usuario1, fec_validacion, estatus2, comentarios2, id_usuario2, fec_autorizacion)\r\n"+
+													"  VALUES (SE.id, SE.fec_paga, 'SE', 0, '', '', '', 0, '', '', '');\r\n";
+	void AuthSuplenciasExtForDeleg(int idFecha, String idDeleg);
 
 	public String STMT_DELETE_GUARDIAS_AUT	= "Delete From gys_autorizacion_guardias\r\n"
 											+ "Where fec_pago = ?";
