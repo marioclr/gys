@@ -1,7 +1,6 @@
 package gob.issste.gys.controller;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -123,21 +122,21 @@ public class PagaController {
 			}else if(paga.getEstatus() == 2 ){
 //				pagaRepository.changeEstatusForAllDelegByDate(id, 2);
 
-				pagaRepository.BorraAuthGuardias(paga);
-				pagaRepository.AuthGuardiasInt(paga);
-				pagaRepository.AuthGuardiasExt(paga);
-
-				pagaRepository.BorraAuthSuplencias(paga);
-				pagaRepository.AuthSuplenciasInt(paga);
-				pagaRepository.AuthSuplenciasExt(paga);
+//				pagaRepository.BorraAuthGuardias(paga);
+//				pagaRepository.AuthGuardiasInt(paga);
+//				pagaRepository.AuthGuardiasExt(paga);
+//
+//				pagaRepository.BorraAuthSuplencias(paga);
+//				pagaRepository.AuthSuplenciasInt(paga);
+//				pagaRepository.AuthSuplenciasExt(paga);
 
 				//ACTUALIZAR EN CASO DE QUE NO EXISTAN REGISTROS
 				List<String> representaciones = pagaRepository.listaDeRepresentacionesByFecha(id);
 
 				representaciones.forEach(delegacion -> {
-						//System.out.println("Delegación: " + delegacion);
 						if(pagaRepository.existenRegistrosGuardiasYSuplencias(id, delegacion)){
 							this.changeDateEstatusByDeleg(id, 2, delegacion);
+							this.validacionRegistrosByFechaAndRep(id,delegacion);
 						}else{
 							this.changeDateEstatusByDeleg(id, 7, delegacion);
 						}
@@ -462,22 +461,25 @@ public class PagaController {
 				result = pagaService.changeEstatusByDeleg(idFecha, idDeleg, estatus);
 
 				if(estatus == 2){
-					//Proceso para validar por representacion
-					//Borran los registros de la representacion en gys_autorizacion_guardias
-					pagaRepository.BorraAuthGuardiasIntXDeleg(idFecha,idDeleg);
-					pagaRepository.BorraAuthGuardiasExtXDeleg(idFecha,idDeleg);
+//					//Proceso para validar por representacion
+//					//Borran los registros de la representacion en gys_autorizacion_guardias
+//
+//					pagaRepository.BorraAuthGuardiasIntXDeleg(idFecha,idDeleg);
+//					pagaRepository.BorraAuthGuardiasExtXDeleg(idFecha,idDeleg);
+//
+//					//Registros de guardias internas y externas
+//					pagaRepository.AuthGuardiasIntForDeleg(idFecha, idDeleg);
+//					pagaRepository.AuthGuardiasExtForDeleg(idFecha, idDeleg);
+//
+//					//Borran los registros de la representacion en gys_autorizacion_suplencias
+//					pagaRepository.borraAuthSuplenciasIntXDeleg(idFecha,idDeleg);
+//					pagaRepository.borraAuthSuplenciasExtXDeleg(idFecha,idDeleg);
+//
+//					//Registros de suplencias internas y externas
+//					pagaRepository.AuthSuplenciasIntForDeleg(idDeleg, idFecha);
+//					pagaRepository.AuthSuplenciasExtForDeleg(idDeleg, idFecha);
 
-					//Registros de guardias internas y externas
-					pagaRepository.AuthGuardiasIntForDeleg(idDeleg, idFecha);
-					pagaRepository.AuthGuardiasExtForDeleg(idDeleg, idFecha);
-
-					//Borran los registros de la representacion en gys_autorizacion_suplencias
-					pagaRepository.borraAuthSuplenciasIntXDeleg(idFecha,idDeleg);
-					pagaRepository.borraAuthSuplenciasExtXDeleg(idFecha,idDeleg);
-
-					//Registros de suplencias internas y externas
-					pagaRepository.AuthSuplenciasIntForDeleg(idDeleg, idFecha);
-					pagaRepository.AuthSuplenciasExtForDeleg(idDeleg, idFecha);
+					this.validacionRegistrosByFechaAndRep(idFecha, idDeleg);
 
 				}
 
@@ -501,5 +503,26 @@ public class PagaController {
 						,e.getMessage());
 		}
 	}
+
+	@Operation(summary = "Pasa los datos a la tabla de autorizacion",
+			description = "Cambia el estatus individual por delegacion",
+			tags = { "Control de fechas de pago" })
+	@PutMapping("/Paga/validarRegistros")
+	public void validacionRegistrosByFechaAndRep(
+			@RequestParam(required = true) int idFecha,
+			@RequestParam(required = true) String idDeleg
+	) {
+		try {
+			if (idDeleg != null) {
+				pagaRepository.AuthGuardiasIntForDeleg(idFecha, idDeleg);
+				pagaRepository.AuthGuardiasExtForDeleg(idFecha, idDeleg);
+				pagaRepository.AuthSuplenciasIntForDeleg(idFecha, idDeleg);
+				pagaRepository.AuthSuplenciasExtForDeleg(idFecha, idDeleg);
+			} else {
+			}
+		} catch (Exception e) {
+		}
+	}
+
 
 }
