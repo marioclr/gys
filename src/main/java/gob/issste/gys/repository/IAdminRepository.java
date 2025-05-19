@@ -183,6 +183,114 @@ public interface IAdminRepository {
 
 	int calcula_isr_non(Integer anio, Integer mes);
 
+	public String STMT_CALCULA_ISR_NON_BY_DELEG
+			= "Insert Into gys_externos_isr2 ( anio_ejercicio, mes_ejercicio, id_tipo_paga, id_ordinal,\r\n"
+			+"rfc, id_delegacion, casos, percepciones, isr, id_clave_servicio, id_centro_trabajo, fec_min, fec_max )\r\n"
+			+"Select anio_ejercicio, mes_ejercicio, id_tipo_paga,\r\n"
+			+"(Select NVL(MAX(id_ordinal),0) + 1 From gys_externos_isr2 Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = 4) id_ordinal,\r\n"
+			+"rfc, id_delegacion, SUM(casos) casos, SUM(importe) percep, _get_ispt_( SUM(importe) * 2 ) / 2 isr,\r\n"
+			+"MAX(id_clave_servicio) id_clave_servicio, MAX(id_centro_trabajo) id_centro_trabajo, MIN(fec_min) fec_min,  MAX(fec_max) fec_max\r\n"
+			+"From (\r\n"
+			+"  Select\r\n"
+			+"    anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, D.id_div_geografica id_delegacion, COUNT(*) casos, SUM(importe) importe,\r\n"
+			+"    MAX(id_clave_servicio) id_clave_servicio, MAX(C.id_centro_trabajo) id_centro_trabajo, MIN(F.fec_pago) fec_min,  MAX(F.fec_pago) fec_max\r\n"
+			+"  From gys_guardias_ext G, gys_fechas_control F, m4t_centros_trab C, m4t_delegaciones D, m4t_area_generadora A, gys_delegacionesporfecha DF\r\n"
+			+"  Where G.fec_paga = F.fec_pago\r\n"
+			+"    And F.id = DF.idfecha\r\n"
+			+"    AND DF.iddelegacion = D.id_div_geografica\r\n"
+			+"    And G.id_centro_trabajo=C.id_centro_trabajo\r\n"
+			+"    And C.id_area_generadora = A.id_area_generadora\r\n"
+			+"    And A.id_area_generadora=D.id_area_generadora\r\n"
+			+"    And anio_ejercicio = ?\r\n"
+			+"    And mes_ejercicio = ?\r\n"
+			+"    And id_tipo_paga = 4\r\n"
+			+"    And DF.estatus = 3\r\n"
+			+"    And G.id IN (Select id_guardia From gys_autorizacion_guardias Where estatus2=3)\r\n"
+			+"    And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
+			+"    Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, D.id_div_geografica\r\n"
+			+"  UNION ALL\r\n"
+			+"  Select\r\n"
+			+"    anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, D.id_div_geografica id_delegacion, COUNT(*) casos, SUM(importe) importe,\r\n"
+			+"    MAX(id_clave_servicio) id_clave_servicio, MAX(C.id_centro_trabajo) id_centro_trabajo, MIN(F.fec_pago) fec_min,  MAX(F.fec_pago) fec_max\r\n"
+			+"  From gys_suplencias_ext S, gys_fechas_control F, m4t_centros_trab C, m4t_delegaciones D, m4t_area_generadora A, gys_delegacionesporfecha DF\r\n"
+			+"  Where S.fec_paga = F.fec_pago\r\n"
+			+"  	And F.id = DF.idfecha\r\n"
+			+"    AND DF.iddelegacion = D.id_div_geografica\r\n"
+			+"    And S.id_centro_trabajo=C.id_centro_trabajo\r\n"
+			+"    And C.id_area_generadora = A.id_area_generadora\r\n"
+			+"    And A.id_area_generadora=D.id_area_generadora\r\n"
+			+"    And anio_ejercicio = ?\r\n"
+			+"    And mes_ejercicio = ?\r\n"
+			+"    And id_tipo_paga = 4\r\n"
+			+"    And DF.estatus = 3\r\n"
+			+"    And S.id IN (Select id_suplencia From gys_autorizacion_suplencias Where estatus2=3)\r\n"
+			+"    And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
+			+"  Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, D.id_div_geografica\r\n"
+			+") Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, id_delegacion";
+
+	int calcula_isr_non_by_deleg(Integer anio, Integer mes, String idDeleg);
+
+
+	public String STMT_CALCULA_ISR_PAR_BY_DELEG	= "Insert Into gys_externos_isr2 ( anio_ejercicio, mes_ejercicio, id_tipo_paga, id_ordinal,\r\n"
+		  + "rfc, id_delegacion, casos, percepciones, isr, id_clave_servicio, id_centro_trabajo, fec_min, fec_max )\r\n"
+		  + "Select \r\n"
+		  + "  A.anio_ejercicio, A.mes_ejercicio, A.id_tipo_paga, \r\n"
+		  + "  (Select NVL(MAX(id_ordinal),0) + 1 From gys_externos_isr2 Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = 1) id_ordinal,\r\n"
+		  + "  A.rfc, A.id_delegacion, SUM(A.casos) casos, SUM(A.percep) percep, SUM(_get_ispt_(percep + NVL(percepciones, 0)) - NVL(N.isr, 0)) isr, \r\n"
+		  + "  MAX(A.id_clave_servicio) id_clave_servicio, MAX(A.id_centro_trabajo) id_centro_trabajo, MIN(fec_min) fec_min,  MAX(fec_max) fec_max\r\n"
+		  + "From (\r\n"
+		  + "  Select anio_ejercicio, mes_ejercicio, id_tipo_paga,\r\n"
+		  + "    rfc, id_delegacion, SUM(casos) casos, SUM(importe) percep, _get_ispt_( SUM(importe) * 2 ) / 2 isr,\r\n"
+		  + "    MAX(id_clave_servicio) id_clave_servicio, MAX(id_centro_trabajo) id_centro_trabajo, MIN(fec_min) fec_min,  MAX(fec_max) fec_max\r\n"
+		  + "  From (\r\n"
+		  + "    Select\r\n"
+		  + "      anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, D.id_div_geografica id_delegacion, COUNT(*) casos, SUM(importe) importe,\r\n"
+		  + "      MAX(id_clave_servicio) id_clave_servicio, MAX(C.id_centro_trabajo) id_centro_trabajo, MIN(F.fec_pago) fec_min,  MAX(F.fec_pago) fec_max\r\n"
+		  + "    From gys_guardias_ext G, gys_fechas_control F, m4t_centros_trab C, m4t_delegaciones D, m4t_area_generadora A, gys_delegacionesporfecha DF\r\n"
+		  + "    Where G.fec_paga = F.fec_pago\r\n"
+	    	+ "  	And F.id = DF.idfecha\r\n"
+		  + "      And G.id_centro_trabajo=C.id_centro_trabajo\r\n"
+		  + "      And C.id_area_generadora = A.id_area_generadora\r\n"
+		  + "      And A.id_area_generadora=D.id_area_generadora\r\n"
+		  + "      And anio_ejercicio = ?\r\n"
+		  + "      And mes_ejercicio = ?\r\n"
+		  + "      And id_tipo_paga = 1\r\n"
+		  + "      And F.estatus = 3\r\n"
+		  + "      And G.id IN (Select id_guardia From gys_autorizacion_guardias Where estatus2=3)\r\n"
+		  + "      And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
+		  + "    Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, D.id_div_geografica\r\n"
+		  + "    UNION ALL\r\n"
+		  + "    Select\r\n"
+		  + "      anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, D.id_div_geografica id_delegacion, COUNT(*) casos, SUM(importe) importe,\r\n"
+		  + "      MAX(id_clave_servicio) id_clave_servicio, MAX(C.id_centro_trabajo) id_centro_trabajo, MIN(F.fec_pago) fec_min,  MAX(F.fec_pago) fec_max\r\n"
+		  + "    From gys_suplencias_ext S, gys_fechas_control F, m4t_centros_trab C, m4t_delegaciones D, m4t_area_generadora A, gys_delegacionesporfecha DF\r\n"
+		  + "    Where S.fec_paga = F.fec_pago\r\n"
+			+"  	And F.id = DF.idfecha\r\n"
+		  + "      And S.id_centro_trabajo=C.id_centro_trabajo\r\n"
+		  + "      And C.id_area_generadora = A.id_area_generadora\r\n"
+		  + "      And A.id_area_generadora=D.id_area_generadora\r\n"
+		  + "      And anio_ejercicio = ?\r\n"
+		  + "      And mes_ejercicio = ?\r\n"
+		  + "      And id_tipo_paga = 1\r\n"
+		  + "      And F.estatus = 3\r\n"
+		  + "      And S.id IN (Select id_suplencia From gys_autorizacion_suplencias Where estatus2=3)\r\n"
+		  + "      And C.id_area_generadora = ( Select id_area_generadora From m4t_delegaciones Where id_div_geografica = ? )\r\n"
+		  + "    Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, D.id_div_geografica\r\n"
+		  + "  ) Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, id_delegacion\r\n"
+		  + ") A Left Outer Join (\r\n"
+		  + "  Select anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, id_delegacion, SUM(percepciones) percepciones, SUM(isr) isr\r\n"
+		  + "  From gys_externos_isr2\r\n"
+		  + "  Group By anio_ejercicio, mes_ejercicio, id_tipo_paga, rfc, id_delegacion\r\n"
+		  + ") N\r\n"
+		  + "  ON A.anio_ejercicio=N.anio_ejercicio\r\n"
+		  + "    And A.mes_ejercicio=N.mes_ejercicio\r\n"
+		  + "    And A.rfc=N.rfc\r\n"
+		  + "    And A.id_delegacion=N.id_delegacion\r\n"
+		  + "    And N.id_tipo_paga=4\r\n"
+		  + "Group By A.anio_ejercicio, A.mes_ejercicio, A.id_tipo_paga, A.rfc, A.id_delegacion";
+	int calcula_isr_par_by_deleg(Integer anio, Integer mes, String idDeleg);
+
+
 	public String STMT_CALCULA_ISR_PAR			= "Insert Into gys_externos_isr2 ( anio_ejercicio, mes_ejercicio, id_tipo_paga, id_ordinal,\r\n"
 												+ "rfc, id_delegacion, casos, percepciones, isr, id_clave_servicio, id_centro_trabajo, fec_min, fec_max )\r\n"
 												+ "Select \r\n"
@@ -345,6 +453,18 @@ public interface IAdminRepository {
 
 	List<CifrasDeImpuestos> consultaCifrasDeImpuestos(Integer anio, Integer mes, Integer tipoPaga);
 
+	public String QUERY_GET_CIFRAS_ISR_BY_IDDELEG = "Select id_tipo_paga, anio_ejercicio, mes_ejercicio, id_ordinal, SUM(casos) casos, SUM(percepciones) percepciones, SUM(isr) isr,\r\n"
+												+ "MIN(fec_min) fec_min, MAX(fec_max) fec_max\r\n"
+												+ "From gys_externos_isr2\r\n"
+												+ "Where anio_ejercicio = ?\r\n"
+												+ "	 And mes_ejercicio = ?\r\n"
+												+ "  And id_tipo_paga = ?\r\n"
+												+ "  And id_delegacion = ? \r\n"
+												+ "Group By id_tipo_paga, anio_ejercicio, mes_ejercicio, id_ordinal";
+
+
+	List<CifrasDeImpuestos> consultaCifrasDeImpuestosByIdDeleg(Integer anio, Integer mes, Integer tipoPaga, String idDeleg);
+
 	public String QUERY_GET_CIFRAS_ISR_REP		= "Select id_tipo_paga, anio_ejercicio, mes_ejercicio, id_ordinal, D.id_div_geografica id_representacion, n_div_geografica n_representacion,\r\n"
 												+ "  SUM(casos) casos, SUM(percepciones) percepciones, SUM(isr) isr,\r\n"
 												+ "  MIN(fec_min) fec_min, MAX(fec_max) fec_max\r\n"
@@ -374,6 +494,14 @@ public interface IAdminRepository {
 	public String STMT_ELIMINA_CALCULO_ISR  	= "Delete From gys_externos_isr2 Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?";
 
 	int elimina_cifras_impuesto(Integer anio, Integer mes, Integer tipoPaga);
+
+	public String STMT_ELIMINA_CALCULO_ISR_BY_DELEG  	= "Delete From gys_externos_isr2 " +
+														  "Where anio_ejercicio = ? " +
+														  "And mes_ejercicio = ? " +
+														  "And id_tipo_paga = ? " +
+														  "And id_delegacion = ?";
+
+	int elimina_cifras_impuesto_by_deleg(Integer anio, Integer mes, Integer tipoPaga, String idDeleg);
 
 	public String STMT_ELIMINA_CALCULO_ISR_X_REC = "Delete From gys_externos_isr2 Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?\r\n"
 												+ " And fec_min between ? And ?"

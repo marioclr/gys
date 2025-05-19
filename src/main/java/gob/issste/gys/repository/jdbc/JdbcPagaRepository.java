@@ -146,6 +146,13 @@ public class JdbcPagaRepository implements IPagaRepository {
 	}
 
 	@Override
+	public List<Paga> findByStatusByDelegCalc(int anio, int mes, int tipo, int status, String idDeleg) {
+		logger.info(QUERY_GET_PAGAS_BY_DELEG_CALC);
+		return jdbcTemplate.query(QUERY_GET_PAGAS_BY_DELEG_CALC,
+				BeanPropertyRowMapper.newInstance(Paga.class),anio, mes, tipo, status, idDeleg);
+	}
+
+	@Override
 	public int updateStatus(int status, int anio, int mes, int tipo) {
 		logger.info(STMT_UPDATE_STATUS);
 		return jdbcTemplate.update(STMT_UPDATE_STATUS,

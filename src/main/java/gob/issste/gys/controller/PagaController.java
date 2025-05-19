@@ -331,6 +331,31 @@ public class PagaController {
 		}	
 	}
 
+	@GetMapping("/Paga/closedByDelegCalc")
+	public ResponseEntity<Object> getPagasByDeleg(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio de las fechas de control de pagos", required = true)
+			@RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio de las fechas de control de pagos", required = true)
+			@RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1) de las fechas de control de pagos", required = true)
+			@RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "ID del Sstatus del que se desea obtener las fechas de control de pagos", required = true)
+			@RequestParam(required = true) Integer status,
+			@Parameter(description = "ID Delegacion", required = false) @RequestParam(required = false) String idDeleg) {
+
+		List<Paga> pagas = new ArrayList<Paga>();
+		try {
+			pagas = pagaRepository.findByStatusByDelegCalc(anio, mes, tipoFechaControl, status, idDeleg);
+			return ResponseHandler.generateResponse("Fechas cerradas por la of. de representacion" + idDeleg,
+					HttpStatus.OK,
+					pagas);
+		}catch (Exception e) {
+			return ResponseHandler.generateResponse("Fechas cerradas por la of. de representacion " + idDeleg,
+					HttpStatus.INTERNAL_SERVER_ERROR,
+					null);
+		}
+	}
+
 	@Operation(summary = "Obtiene información de fechas de control de pagos de GyS, filtradas por su estatus, en el Sistema", description = "Obtiene información de fechas de control de pagos de GyS, filtradas por su estatus, en el Sistema", tags = { "Control de fechas de pago" })
 	@GetMapping("/Paga/byStatus")
 	public ResponseEntity<Object> getPagas(
@@ -344,7 +369,7 @@ public class PagaController {
 
 			List<Paga> pagas = new ArrayList<Paga>();
 
-			if(idDeleg.isEmpty()){
+			if(idDeleg == null){
 				pagas = pagaRepository.findByStatus(anio, mes, tipoFechaControl, status);
 			}else{
 				pagas = pagaRepository.findByStatusByDeleg( status, idDeleg);

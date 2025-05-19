@@ -47,9 +47,17 @@ public class AdminController {
 	@Operation(summary = "Realiza el proceso de cálculo de impuestos a guardias y suplencias", description = "Realiza el proceso de cálculo de impuestos a guardias y suplencias", tags = { "Admin" })
 	@PostMapping("/calculo_isr")
 	public ResponseEntity<Object> calculoISR(
-			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
-			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
-			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl ) {
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true)
+			@RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true)
+			@RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true)
+			@RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para indicar id de fecha control por delegacion", required = false)
+			@RequestParam(required = false) Integer idFechaByDeleg,
+			@Parameter(description = "Parámetro para indicar la of. de representacion", required = false)
+			@RequestParam(required = false) String idDeleg
+	) {
 
 		List<CifrasDeImpuestos> cifras;
 
@@ -58,28 +66,41 @@ public class AdminController {
 //		}
 		try {
 
-			adminRepository.elimina_cifras_impuesto(anio, mes, tipoFechaControl);
+			if(idDeleg == null) {
+				adminRepository.elimina_cifras_impuesto(anio, mes, tipoFechaControl);
 
-			if (tipoFechaControl == 4) {
-				adminRepository.calcula_isr_non(anio, mes);
+				if (tipoFechaControl == 4) {
+					adminRepository.calcula_isr_non(anio, mes);
+				} else {
+					adminRepository.calcula_isr_par(anio, mes);
+					//adminRepository.calcula_isr_guardia_par(anio, mes);
+					//adminRepository.calcula_isr_suplencia_par(anio, mes);
+				}
+
+				//Se cambia el estadus a las fechas a 4 (calculo ISR)
+
+				cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
+				pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
+				return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 			} else {
-				adminRepository.calcula_isr_par(anio, mes);
+				adminRepository.elimina_cifras_impuesto_by_deleg(anio, mes, tipoFechaControl, idDeleg);
 
-				//adminRepository.calcula_isr_guardia_par(anio, mes);
-				//adminRepository.calcula_isr_suplencia_par(anio, mes);
+				if (tipoFechaControl == 4) {
+					adminRepository.calcula_isr_non_by_deleg(anio, mes, idDeleg);
+				} else {
+					adminRepository.calcula_isr_par_by_deleg(anio, mes, idDeleg);
+				}
+
+				//Se cambia el estadus a las fechas a 4 (calculo ISR)
+				cifras = adminRepository.consultaCifrasDeImpuestosByIdDeleg(anio, mes, tipoFechaControl, idDeleg);
+				pagaRepository.changeEstatusByIdDeleg(idFechaByDeleg, idDeleg, 4);
+				return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 			}
 
-			//Se cambia el estadus a las fechas a 4 (calculo ISR)
 
-			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
-			pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
-
-			return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 		} catch (EmptyResultDataAccessException e) {
-			cifras = new ArrayList<CifrasDeImpuestos>();
 			return ResponseHandler.generateResponse("No se generó el calculo de impuesto con las condiciones especificadas", HttpStatus.NOT_FOUND, null);
 		} catch (Exception e) {
-
 			return ResponseHandler.generateResponse("Error al realizar el cálculo de impuesto", HttpStatus.INTERNAL_SERVER_ERROR, null);
 		}
 	}
@@ -200,16 +221,24 @@ public class AdminController {
 	@Operation(summary = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", description = "Consulta las cifras de cálculo de impuestos a guardias o suplencias", tags = { "Admin" })
 	@GetMapping("/cifras_isr")
 	public ResponseEntity<Object> getCifrasISR(
-			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer anio,
-			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true) @RequestParam(required = true) Integer mes,
-			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true) @RequestParam(required = true) Integer tipoFechaControl) {
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio para el cálculo de ISR", required = true)
+			@RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio para el cálculo de ISR", required = true)
+			@RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1)", required = true)
+			@RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "Parámetro para especificar delegacion)", required = false)
+			@RequestParam(required = false) String idDeleg
+	) {
 
 		List<CifrasDeImpuestos> cifras = new ArrayList<CifrasDeImpuestos>();
 
 		try {
-
-			cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
-
+			if(idDeleg == null) {
+				cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
+			} else {
+				cifras = adminRepository.consultaCifrasDeImpuestosByIdDeleg(anio, mes, tipoFechaControl, idDeleg);
+			}
 			if (cifras.isEmpty()) {
 				cifras = new ArrayList<CifrasDeImpuestos>();
 				return ResponseHandler.generateResponse("No existe cálculo de impuestos", HttpStatus.NOT_FOUND, cifras);

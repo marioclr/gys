@@ -75,6 +75,18 @@ public interface IPagaRepository {
 												+ "  And B.IdDelegacion = ?";
 	List<Paga> findByStatusByDeleg(int status, String idDeleg);
 
+	public String QUERY_GET_PAGAS_BY_DELEG_CALC = "Select A.id, A.fec_pago, A.descripcion, B.estatus, A.fec_inicio, A.fec_fin,\r\n"
+												+ "	 A.anio_ejercicio, A.mes_ejercicio, A.quincena, A.id_tipo_paga,\r\n"
+												+ "  A.idnivelvisibilidad, A.programas, A.id_usuario, A.fec_ult_actualizacion, B.iddelegacion\r\n"
+												+ "	 From gys_fechas_control A, gys_DelegacionesPorFecha B\r\n"
+												+ "	 Where A.id = B.IdFecha \r\n"
+												+ "	 And anio_ejercicio = ?\r\n"
+												+ "  And mes_ejercicio = ?\r\n"
+												+ "  And id_tipo_paga = ?\r\n"
+												+ "  And B.estatus = ? \r\n"
+												+ "  And B.iddelegacion = ?";
+	List<Paga> findByStatusByDelegCalc(int anio, int mes, int tipo, int status, String idDeleg);
+
 	public String STMT_UPDATE_STATUS 		= "UPDATE gys_fechas_control Set estatus = ?\r\n"
 			   								+ "Where estatus = 3 And anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = ?";
 	int updateStatus(int status, int anio, int mes, int tipo);

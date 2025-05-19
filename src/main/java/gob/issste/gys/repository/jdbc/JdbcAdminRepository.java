@@ -65,6 +65,18 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
+	public int calcula_isr_non_by_deleg(Integer anio, Integer mes, String idDeleg) {
+		logger.info(STMT_CALCULA_ISR_NON_BY_DELEG);
+		return jdbcTemplate.update(STMT_CALCULA_ISR_NON_BY_DELEG, anio, mes, anio, mes, idDeleg, anio, mes, idDeleg );
+	}
+
+	@Override
+	public int calcula_isr_par_by_deleg(Integer anio, Integer mes, String idDeleg) {
+		logger.info(STMT_CALCULA_ISR_PAR_BY_DELEG);
+		return jdbcTemplate.update(STMT_CALCULA_ISR_PAR_BY_DELEG, anio, mes, anio, mes, idDeleg, anio, mes, idDeleg );
+	}
+
+	@Override
 	public int calcula_isr_par(Integer anio, Integer mes) {
 		logger.info(STMT_CALCULA_ISR_PAR);
 
@@ -107,6 +119,14 @@ public class JdbcAdminRepository implements IAdminRepository {
 	}
 
 	@Override
+	public List<CifrasDeImpuestos> consultaCifrasDeImpuestosByIdDeleg
+			(Integer anio, Integer mes, Integer tipoPaga, String idDeleg) {
+		logger.info(QUERY_GET_CIFRAS_ISR_BY_IDDELEG);
+		return jdbcTemplate.query(QUERY_GET_CIFRAS_ISR_BY_IDDELEG, BeanPropertyRowMapper.newInstance(CifrasDeImpuestos.class),
+				new Object [] { anio, mes, tipoPaga, idDeleg } );
+	}
+
+	@Override
 	public List<CifrasDeImpuestosPorRepresentacion> consultaCifrasDeImpuestosPorRep(Integer anio, Integer mes, Integer tipoPaga) {
 		logger.info(QUERY_GET_CIFRAS_ISR_REP);
 
@@ -140,6 +160,13 @@ public class JdbcAdminRepository implements IAdminRepository {
 		logger.info(STMT_ELIMINA_CALCULO_ISR);
 
 		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR, anio, mes, tipoPaga );
+	}
+
+	@Override
+	public int elimina_cifras_impuesto_by_deleg(Integer anio, Integer mes, Integer tipoPaga, String idDeleg) {
+		logger.info(STMT_ELIMINA_CALCULO_ISR_BY_DELEG);
+
+		return jdbcTemplate.update(STMT_ELIMINA_CALCULO_ISR_BY_DELEG, anio, mes, tipoPaga, idDeleg );
 	}
 
 	@Override
