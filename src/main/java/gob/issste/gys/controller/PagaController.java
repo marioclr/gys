@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import gob.issste.gys.model.*;
 import gob.issste.gys.repository.IDatosRepository;
@@ -330,6 +331,37 @@ public class PagaController {
 		}	
 	}
 
+	@GetMapping("/Paga/delbyfec")
+	public ResponseEntity<Object> getPagasByValidadas(
+			@Parameter(description = "Parámetro para indicar el Año del ejercicio de las fechas de control de pagos", required = true)
+			@RequestParam(required = true) Integer anio,
+			@Parameter(description = "Parámetro para indicar el Mes del ejercicio de las fechas de control de pagos", required = true)
+			@RequestParam(required = true) Integer mes,
+			@Parameter(description = "Parámetro para indicar el Tipo de fecha de control (Diferente a fin de mes: 4 o Igual a fin de mes: 1) de las fechas de control de pagos", required = true)
+			@RequestParam(required = true) Integer tipoFechaControl,
+			@Parameter(description = "ID del Sstatus del que se desea obtener las fechas de control de pagos", required = true)
+			@RequestParam(required = true) Integer status,
+			@Parameter(description = "ID Delegacion", required = false) @RequestParam(required = false) String idDeleg) {
+
+		List<Map<String,Object>> fechas = new ArrayList<>();
+		try {
+//			pagas = pagaRepository.findByStatusByDelegCalc(anio, mes, tipoFechaControl, status, idDeleg);
+			if(idDeleg == null) {
+				fechas = pagaRepository.findAllPagasByDelegByFec(anio, mes, tipoFechaControl, status);
+			} else {
+				fechas = pagaRepository.findFecPagaByIdDeleg(anio, mes, tipoFechaControl, status, idDeleg);
+			}
+
+			return ResponseHandler.generateResponse("Fechas cerradas por la of. de representacion",
+					HttpStatus.OK,
+					fechas);
+		}catch (Exception e) {
+			return ResponseHandler.generateResponse("Error al encontrar las fechas cerradas por la of. de representacion",
+					HttpStatus.INTERNAL_SERVER_ERROR,
+					null);
+		}
+	}
+
 	@GetMapping("/Paga/closedByDelegCalc")
 	public ResponseEntity<Object> getPagasByDeleg(
 			@Parameter(description = "Parámetro para indicar el Año del ejercicio de las fechas de control de pagos", required = true)
@@ -345,11 +377,11 @@ public class PagaController {
 		List<Paga> pagas = new ArrayList<Paga>();
 		try {
 			pagas = pagaRepository.findByStatusByDelegCalc(anio, mes, tipoFechaControl, status, idDeleg);
-			return ResponseHandler.generateResponse("Fechas cerradas por la of. de representacion" + idDeleg,
+			return ResponseHandler.generateResponse("Fechas cerradas por la of. de representacion",
 					HttpStatus.OK,
 					pagas);
 		}catch (Exception e) {
-			return ResponseHandler.generateResponse("Fechas cerradas por la of. de representacion " + idDeleg,
+			return ResponseHandler.generateResponse("Erro al encontrar las fechas cerradas por la of. de representacion",
 					HttpStatus.INTERNAL_SERVER_ERROR,
 					null);
 		}

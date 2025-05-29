@@ -60,12 +60,7 @@ public class AdminController {
 	) {
 
 		List<CifrasDeImpuestos> cifras;
-
-//		if (! tipoConcepto.equals(String.valueOf("GE")) && ! tipoConcepto.equals(String.valueOf("SE"))) {
-//			return ResponseHandler.generateResponse("El tipo de concepto debe ser GE: Guardias externas o SE: Suplencias externas", HttpStatus.INTERNAL_SERVER_ERROR, null);
-//		}
 		try {
-
 			if(idDeleg == null) {
 				adminRepository.elimina_cifras_impuesto(anio, mes, tipoFechaControl);
 
@@ -81,7 +76,12 @@ public class AdminController {
 
 				cifras = adminRepository.consultaCifrasDeImpuestos(anio, mes, tipoFechaControl);
 				pagaRepository.updateStatus(4, anio, mes, tipoFechaControl);
-				return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
+				List<String> representaciones = pagaRepository.listaDeRepresentacionesByEstatus(idFechaByDeleg,3);
+				representaciones.forEach(delegacion -> {
+					pagaRepository.changeEstatusByIdDeleg(idFechaByDeleg, delegacion, 4);
+						}
+				);
+//				return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 			} else {
 				adminRepository.elimina_cifras_impuesto_by_deleg(anio, mes, tipoFechaControl, idDeleg);
 
@@ -94,9 +94,9 @@ public class AdminController {
 				//Se cambia el estadus a las fechas a 4 (calculo ISR)
 				cifras = adminRepository.consultaCifrasDeImpuestosByIdDeleg(anio, mes, tipoFechaControl, idDeleg);
 				pagaRepository.changeEstatusByIdDeleg(idFechaByDeleg, idDeleg, 4);
-				return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
+//				return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 			}
-
+			return ResponseHandler.generateResponse("El cálculo de impuesto se realizó correctamente", HttpStatus.OK, cifras);
 
 		} catch (EmptyResultDataAccessException e) {
 			return ResponseHandler.generateResponse("No se generó el calculo de impuesto con las condiciones especificadas", HttpStatus.NOT_FOUND, null);

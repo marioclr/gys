@@ -67,7 +67,7 @@ public class JdbcAdminRepository implements IAdminRepository {
 	@Override
 	public int calcula_isr_non_by_deleg(Integer anio, Integer mes, String idDeleg) {
 		logger.info(STMT_CALCULA_ISR_NON_BY_DELEG);
-		return jdbcTemplate.update(STMT_CALCULA_ISR_NON_BY_DELEG, anio, mes, anio, mes, idDeleg, anio, mes, idDeleg );
+		return jdbcTemplate.update(STMT_CALCULA_ISR_NON_BY_DELEG, anio, mes, idDeleg, anio, mes, idDeleg, anio, mes, idDeleg );
 	}
 
 	@Override

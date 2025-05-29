@@ -3,6 +3,7 @@ package gob.issste.gys.repository.jdbc;
 import java.sql.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import gob.issste.gys.model.DelegacionPorFecha;
 import jakarta.validation.constraints.NotNull;
@@ -445,6 +446,18 @@ public class JdbcPagaRepository implements IPagaRepository {
 			logger.info(ID_FECHA_CONTROL);
 			Integer result = jdbcTemplate.queryForObject(ID_FECHA_CONTROL, Integer.class, fec_pago);
 			return result != null ? result : 0;
+	}
+
+	@Override
+	public List<Map<String,Object>> findAllPagasByDelegByFec(Integer anio, Integer mes, Integer tipoFechaControl, Integer status) {
+		logger.info(LISTA_FEC_VALIDADAS_BY_DELEG);
+		return jdbcTemplate.queryForList(LISTA_FEC_VALIDADAS_BY_DELEG, anio, mes, tipoFechaControl, status);
+	}
+
+	@Override
+	public List<Map<String, Object>> findFecPagaByIdDeleg(Integer anio, Integer mes, Integer tipoFechaControl, Integer status, String idDeleg) {
+		logger.info(FEC_VALIDADA_BY_ID_DELEG);
+		return jdbcTemplate.queryForList(FEC_VALIDADA_BY_ID_DELEG, anio, mes, tipoFechaControl, status, idDeleg);
 	}
 
 }

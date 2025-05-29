@@ -5,6 +5,8 @@ public class CifrasDeImpuestos {
 	private String id_tipo_paga;
 	private int anio_ejercicio;
 	private int mes_ejercicio;
+	private String id_delegacion;
+	private String n_div_geografica;
 	private int id_ordinal;
 	private int casos;
 	private Double percepciones;
@@ -30,6 +32,23 @@ public class CifrasDeImpuestos {
 	public void setMes_ejercicio(int mes_ejercicio) {
 		this.mes_ejercicio = mes_ejercicio;
 	}
+
+	public String getId_delegacion() {
+		return id_delegacion;
+	}
+
+	public void setId_delegacion(String id_delegacion) {
+		this.id_delegacion = id_delegacion;
+	}
+
+	public String getN_div_geografica() {
+		return n_div_geografica;
+	}
+
+	public void setN_div_geografica(String n_div_geografica) {
+		this.n_div_geografica = n_div_geografica;
+	}
+
 	public int getId_ordinal() {
 		return id_ordinal;
 	}

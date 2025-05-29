@@ -187,7 +187,7 @@ public interface IAdminRepository {
 			= "Insert Into gys_externos_isr2 ( anio_ejercicio, mes_ejercicio, id_tipo_paga, id_ordinal,\r\n"
 			+"rfc, id_delegacion, casos, percepciones, isr, id_clave_servicio, id_centro_trabajo, fec_min, fec_max )\r\n"
 			+"Select anio_ejercicio, mes_ejercicio, id_tipo_paga,\r\n"
-			+"(Select NVL(MAX(id_ordinal),0) + 1 From gys_externos_isr2 Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = 4) id_ordinal,\r\n"
+			+"(Select NVL(MAX(id_ordinal),0) + 1 From gys_externos_isr2 Where anio_ejercicio = ? And mes_ejercicio = ? And id_tipo_paga = 4 And id_delegacion = ?) id_ordinal,\r\n"
 			+"rfc, id_delegacion, SUM(casos) casos, SUM(importe) percep, _get_ispt_( SUM(importe) * 2 ) / 2 isr,\r\n"
 			+"MAX(id_clave_servicio) id_clave_servicio, MAX(id_centro_trabajo) id_centro_trabajo, MIN(fec_min) fec_min,  MAX(fec_max) fec_max\r\n"
 			+"From (\r\n"
@@ -443,13 +443,25 @@ public interface IAdminRepository {
 
 	int re_calcula_isr_par(Integer anio, Integer mes, String fec_min, String fec_max);
 
-	public String QUERY_GET_CIFRAS_ISR			= "Select id_tipo_paga, anio_ejercicio, mes_ejercicio, id_ordinal, SUM(casos) casos, SUM(percepciones) percepciones, SUM(isr) isr,\r\n"
-												+ "MIN(fec_min) fec_min, MAX(fec_max) fec_max\r\n"
-												+ "From gys_externos_isr2\r\n"
-												+ "Where anio_ejercicio = ?\r\n"
-												+ "	 And mes_ejercicio = ?\r\n"
-												+ "  And id_tipo_paga = ?\r\n"
-												+ "Group By id_tipo_paga, anio_ejercicio, mes_ejercicio, id_ordinal";
+	public String QUERY_GET_CIFRAS_ISR			="Select GE.id_tipo_paga, GE.anio_ejercicio, GE.mes_ejercicio, GE.id_ordinal, SUM(GE.casos) casos, SUM(GE.percepciones) percepciones, SUM(GE.isr) isr,\r\n"
+			+ "MIN(fec_min) fec_min, MAX(fec_max) fec_max, GE.id_delegacion, D.n_div_geografica\r\n"
+			+ "From gys_externos_isr2 GE, m4t_centros_trab C, m4t_delegaciones D, m4t_area_generadora A\r\n"
+			+ "Where GE.id_centro_trabajo=C.id_centro_trabajo\r\n"
+			+ "And C.id_area_generadora = A.id_area_generadora\r\n"
+			+ "And A.id_area_generadora=D.id_area_generadora\r\n"
+			+ "And GE.anio_ejercicio = ?\r\n"
+			+ "And GE.mes_ejercicio = ?\r\n"
+			+ "And GE.id_tipo_paga = ?\r\n"
+			+ "Group By GE.id_tipo_paga, GE.anio_ejercicio, GE.mes_ejercicio, GE.id_ordinal, GE.id_delegacion, D.n_div_geografica\r\n"
+			+ "Order By GE.id_delegacion";
+
+//	public String QUERY_GET_CIFRAS_ISR			= "Select id_tipo_paga, anio_ejercicio, mes_ejercicio, id_ordinal, SUM(casos) casos, SUM(percepciones) percepciones, SUM(isr) isr,\r\n"
+//												+ "MIN(fec_min) fec_min, MAX(fec_max) fec_max\r\n"
+//												+ "From gys_externos_isr2\r\n"
+//												+ "Where anio_ejercicio = ?\r\n"
+//												+ "	 And mes_ejercicio = ?\r\n"
+//												+ "  And id_tipo_paga = ?\r\n"
+//												+ "Group By id_tipo_paga, anio_ejercicio, mes_ejercicio, id_ordinal";
 
 	List<CifrasDeImpuestos> consultaCifrasDeImpuestos(Integer anio, Integer mes, Integer tipoPaga);
 

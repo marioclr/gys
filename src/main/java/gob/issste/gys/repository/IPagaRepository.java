@@ -2,6 +2,7 @@ package gob.issste.gys.repository;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import gob.issste.gys.model.DelegacionPorFecha;
 import gob.issste.gys.model.Paga;
@@ -611,4 +612,30 @@ public interface IPagaRepository {
 	public final String ID_FECHA_CONTROL = "SELECT id FROM gys_fechas_control WHERE fec_pago = ?";
 
 	int idFechaControl(String fec_pago);
+
+	public final String LISTA_FEC_VALIDADAS_BY_DELEG = "Select A.id, A.fec_pago, A.descripcion, B.estatus, A.fec_inicio, \r\n"
+				+ "A.fec_fin, A.anio_ejercicio, A.mes_ejercicio, A.quincena, A.id_tipo_paga, \r\n"
+				+ "A.idnivelvisibilidad, A.programas, A.id_usuario, A.fec_ult_actualizacion, B.iddelegacion\r\n"
+				+ "From gys_fechas_control A, gys_DelegacionesPorFecha B\r\n"
+				+ "Where A.id = B.IdFecha\r\n"
+				+ "	And A.anio_ejercicio = ?\r\n"
+				+ "	And A.mes_ejercicio = ?\r\n"
+				+ "	And A.id_tipo_paga = ? \r\n"
+				+ "	And B.estatus = ?";
+
+	List<Map<String,Object>> findAllPagasByDelegByFec(Integer anio, Integer mes, Integer tipoFechaControl, Integer status);
+
+	public final String FEC_VALIDADA_BY_ID_DELEG = "Select A.id, A.fec_pago, A.descripcion, B.estatus, A.fec_inicio, \r\n"
+			+ "A.fec_fin, A.anio_ejercicio, A.mes_ejercicio, A.quincena, A.id_tipo_paga, \r\n"
+			+ "A.idnivelvisibilidad, A.programas, A.id_usuario, A.fec_ult_actualizacion, B.iddelegacion\r\n"
+			+ "From gys_fechas_control A, gys_DelegacionesPorFecha B\r\n"
+			+ "Where A.id = B.IdFecha\r\n"
+			+ "	And A.anio_ejercicio = ?\r\n"
+			+ "	And A.mes_ejercicio = ?\r\n"
+			+ "	And A.id_tipo_paga = ? \r\n"
+			+ "	And B.estatus = ?\r\n"
+			+ " And B.iddelegacion = ?";
+
+	List<Map<String,Object>> findFecPagaByIdDeleg(Integer anio, Integer mes, Integer tipoFechaControl, Integer status, String idDeleg);
+
 }
