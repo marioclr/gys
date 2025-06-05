@@ -786,14 +786,21 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 
 		if (estatus != null) {
 			switch (estatus) {
-				case 0:
-					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+//				case 0:
+//					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+//					break;
+//				case 1,2:
+//					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
+//					break;
+//				case 3,4:
+//					QUERY_CONDITION += "  And A.estatus2 = ?\r\n";
+//					break;
+				case 0, 1, 2:
+					QUERY_CONDITION += "  And A.estatus1 in (0, 1, 2)\r\n";
 					break;
-				case 1,2:
-					QUERY_CONDITION += "  And A.estatus1 = ?\r\n";
-					break;
-				case 3,4:
-					QUERY_CONDITION += "  And A.estatus2 = ?\r\n";
+
+				case 3, 4:
+					QUERY_CONDITION += " And (A.estatus1 in (0, 1, 2) Or A.estatus2 in (3, 4))\r\n";
 					break;
 			}
 		}
@@ -838,10 +845,10 @@ public class JdbcSuplenciaRepository implements ISuplenciaRepository {
 				ps.setString(count, idCentroTrab);
 			}
 
-			if (estatus != null) {
-				count ++;
-				ps.setString(count, estatus.toString());
-			}
+//			if (estatus != null) {
+//				count ++;
+//				ps.setString(count, estatus.toString());
+//			}
 
 			logger.info("Prepared statement: "+ DYNAMIC_QUERY);
 		}, BeanPropertyRowMapper.newInstance(DatosSuplencia.class));
