@@ -352,9 +352,15 @@ public class PagaController {
 				fechas = pagaRepository.findFecPagaByIdDeleg(anio, mes, tipoFechaControl, status, idDeleg);
 			}
 
-			return ResponseHandler.generateResponse("Fechas cerradas por la of. de representacion",
-					HttpStatus.OK,
-					fechas);
+			if(fechas.isEmpty()){
+				return ResponseHandler.generateResponse("No se encontraron fechas para calcular",
+						HttpStatus.NOT_FOUND,
+						fechas);
+			}else {
+				return ResponseHandler.generateResponse("Fechas cerradas por la of. de representacion",
+						HttpStatus.OK,
+						fechas);
+			}
 		}catch (Exception e) {
 			return ResponseHandler.generateResponse("Error al encontrar las fechas cerradas por la of. de representacion",
 					HttpStatus.INTERNAL_SERVER_ERROR,
